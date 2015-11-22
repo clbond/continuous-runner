@@ -1,0 +1,17 @@
+{
+  "name": "testrunner",
+  "version": "1.0.0",
+  "description": "TypeScript test runner with Visual Studio integration",
+  "main": "runner.js",
+  "scripts": {
+    "start": "./scripts/start.sh",
+    "single-run": "./scripts/single-run.sh"
+  },
+  "author": "Chris Bond",
+  "license": "BSD",
+  "dependencies": {
+    "lodash": "^3.10.1",
+    "node-netstat": "^1.1.0",
+    "winston": "^2.1.1"
+  }
+}
