@@ -1,0 +1,3 @@
+[submodule "trifleJS"]
+	path = trifleJS
+	url = https://github.com/sdesalas/trifleJS
