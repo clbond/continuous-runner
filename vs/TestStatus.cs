@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Contestual
+namespace TestRunner
 {
     public enum TestStatus
     {

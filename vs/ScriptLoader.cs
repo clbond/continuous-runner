@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Contestual
+namespace TestRunner
 {
     public class ScriptLoader : IScriptLoader
     {

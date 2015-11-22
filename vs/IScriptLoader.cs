@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Contestual
+namespace TestRunner
 {
     public interface IScriptLoader : IDisposable
     {
