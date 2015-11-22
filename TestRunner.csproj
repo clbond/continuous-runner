@@ -33,6 +33,10 @@
     <Reference Include="Autofac">
       <HintPath>packages\Autofac.3.5.2\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="CommandLine, Version=1.9.71.2, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
+      <HintPath>packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Jint, Version=2.6.0.0, Culture=neutral, PublicKeyToken=2e92ba9c8d81157f, processorArchitecture=MSIL">
       <HintPath>packages\Jint.2.7.1\lib\portable-net40+sl50+win+WindowsPhoneApp81+wp80\Jint.dll</HintPath>
       <Private>True</Private>
@@ -52,16 +56,28 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackgroundWatcher.cs" />
+    <Compile Include="IModuleReader.cs" />
+    <Compile Include="IResultWriter.cs" />
+    <Compile Include="IScriptParser.cs" />
+    <Compile Include="ITestQueue.cs" />
+    <Compile Include="ModuleDefinition.cs" />
+    <Compile Include="ModuleReader.cs" />
+    <Compile Include="ResultWriter.cs" />
+    <Compile Include="ScriptFinder.cs" />
+    <Compile Include="ScriptParser.cs" />
+    <Compile Include="TestException.cs" />
+    <Compile Include="TestQueue.cs" />
+    <Compile Include="TestResultFactory.cs" />
+    <Compile Include="Watcher.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="IScriptFinder.cs" />
     <Compile Include="ISourceDependencies.cs" />
-    <Compile Include="ISyntaxTree.cs" />
-    <Compile Include="Source.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="SourceDependencies.cs" />
-    <Compile Include="IBackgroundWatcher.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="IWatcher.cs" />
+    <Compile Include="Bootstrap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunnerModule.cs" />
+    <Compile Include="Container.cs" />
     <Compile Include="ScriptLoader.cs" />
     <Compile Include="IScriptLoader.cs" />
     <Compile Include="IScript.cs" />
@@ -74,12 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="runner\LICENSE" />
-    <None Include="runner\package.json" />
-    <None Include="runner\scripts\single-run.sh" />
-    <None Include="runner\scripts\start.sh" />
-    <None Include="runner\tsconfig.json" />
-    <None Include="runner\tsd.json" />
+    <None Include="Runner\LICENSE" />
+    <None Include="Runner\package.json" />
+    <None Include="Runner\scripts\single-run.sh" />
+    <None Include="Runner\scripts\start.sh" />
+    <None Include="Runner\tsconfig.json" />
+    <None Include="Runner\tsd.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="trifleJS\TrifleJS.csproj">
@@ -88,15 +104,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="runner\formatString.ts" />
-    <TypeScriptCompile Include="runner\HttpServer.ts" />
-    <TypeScriptCompile Include="runner\logger.ts" />
-    <TypeScriptCompile Include="runner\PortAllocator.ts" />
-    <TypeScriptCompile Include="runner\runner.ts" />
-    <TypeScriptCompile Include="runner\typings\lodash\lodash.d.ts" />
-    <TypeScriptCompile Include="runner\typings\node\node.d.ts" />
-    <TypeScriptCompile Include="runner\typings\tsd.d.ts" />
-    <TypeScriptCompile Include="runner\typings\winston\winston.d.ts" />
+    <TypeScriptCompile Include="Runner\formatString.ts" />
+    <TypeScriptCompile Include="Runner\HttpServer.ts" />
+    <TypeScriptCompile Include="Runner\logger.ts" />
+    <TypeScriptCompile Include="Runner\PortAllocator.ts" />
+    <TypeScriptCompile Include="Runner\runner.ts" />
+    <TypeScriptCompile Include="Runner\typings\lodash\lodash.d.ts" />
+    <TypeScriptCompile Include="Runner\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="Runner\typings\tsd.d.ts" />
+    <TypeScriptCompile Include="Runner\typings\winston\winston.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

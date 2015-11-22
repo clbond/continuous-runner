@@ -7,7 +7,8 @@ namespace TestRunner
         Passed,
         Failed,
         Indeterminate,
-        InProgress
+        InProgress,
+        Deleted
     }
 }
 

@@ -1,9 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 
 namespace TestRunner
 {
     public interface ITest
     {
-        Task<TestResult> Run();
+        Guid Id { get; }
+
+        string Name { get; }
+
+        TestSuite Suite { get; }
+
+        TestResult Result { get; set; }
+
+        TestResult Run();
     }
 }

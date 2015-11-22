@@ -17,9 +17,23 @@ namespace TestRunner
         SyntaxTree SyntaxTree { get; }
 
         /// <summary>
+        /// The module definition extracted from the JavaScript code (define() statement details)
+        /// </summary>
+        ModuleDefinition Module { get; }
+
+        /// <summary>
         /// Get a collection of test suites defined in this script
         /// </summary>
-        /// <returns>The suites.</returns>
-        IEnumerable<TestSuite> GetSuites();
+        IEnumerable<TestSuite> Suites { get; }
+
+        /// <summary>
+        /// Get a collection of scripts that this one references as dependencies
+        /// </summary>
+        IEnumerable<IScript> Requires { get; } 
+
+        /// <summary>
+        /// Reload the contents of this script since it has changed on disk
+        /// </summary>
+        void Reload();
     }
 }

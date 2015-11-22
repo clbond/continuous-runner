@@ -4,40 +4,26 @@ namespace TestRunner
 {
     public class ScriptLoader : IScriptLoader
     {
-        #region IScriptLoader
+        private readonly IModuleReader _moduleReader;
+
+        private readonly IScriptParser _scriptParser;
+
+        public ScriptLoader(IModuleReader moduleReader, IScriptParser scriptParser)
+        {
+            _moduleReader = moduleReader;
+
+            _scriptParser = scriptParser;
+        }
+
+        #region Implementation of IScriptLoader
 
         public IScript Load(FileInfo script)
         {
-            return new Script
+            return new Script(_moduleReader, _scriptParser)
             {
                 File = script,
-                SyntaxTree = Parse(script)
+                SyntaxTree = _scriptParser.Parse(script)
             };
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private static SyntaxTree Parse(FileInfo script)
-        {
-            var parser = new Jint.Parser.JavaScriptParser();
-
-            return new SyntaxTree
-            {
-                Root = parser.Parse(GetScript(script))
-            };
-        }
-
-        private static string GetScript(FileInfo script)
-        {
-            using (var stream = script.OpenRead())
-            {
-                using (var sr = new StreamReader(stream))
-                {
-                    return sr.ReadToEnd();
-                }
-            }
         }
 
         #endregion

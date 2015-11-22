@@ -7,23 +7,34 @@ namespace TestRunner
 {
     public class SourceDependencies : ISourceDependencies
     {
+        public SourceDependencies(ITestQueue testQueue)
+        {
+            _testQueue = testQueue;
+        }
+
         #region Private members
 
         private readonly ISet<IScript> _set = new SortedSet<IScript>();
 
         private readonly IDictionary<string, IScript> _map = new Dictionary<string, IScript>(Constants.EstimatedFiles);
 
+        private readonly ITestQueue _testQueue;
+
         #endregion
 
         public void Add(IScript script)
         {
             _set.Add(script);
+
             _map.Add(script.File.Name, script);
+
+            Changed(script);
         }
 
         public void Remove(IScript script)
         {
             _set.Remove(script);
+
             _map.Remove(script.File.Name);
         }
 
@@ -34,9 +45,34 @@ namespace TestRunner
             matches.Each(Remove);
         }
 
+        public void Changed(IScript script)
+        {
+            _testQueue.Push(script);
+
+            foreach (var dependency in GetDependencies(script))
+            {
+                _testQueue.Push(dependency);
+            }
+        }
+
+        public IScript GetScript(FileInfo fileInfo)
+        {
+            if (_map.ContainsKey(fileInfo.FullName))
+            {
+                return _map[fileInfo.FullName];
+            }
+
+            return null;
+        }
+
         public IEnumerable<IScript> GetDependencies(IScript origin)
         {
             yield break;
-        } 
+        }
+
+        public IEnumerable<TestSuite> GetSuites()
+        {
+            return _set.SelectMany(script => script.Suites);
+        }
     }
 }

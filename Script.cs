@@ -6,15 +6,54 @@ namespace TestRunner
 {
     public class Script : IScript
     {
+        private readonly IModuleReader _reader;
+
+        private readonly IScriptParser _scriptParser;
+
+        private Lazy<IEnumerable<TestSuite>> _suites;
+        
+        private SyntaxTree _syntaxTree;
+
+        public Script(IModuleReader reader, IScriptParser scriptParser)
+        {
+            _reader = reader;
+
+            _scriptParser = scriptParser;
+        }
+
         #region Implementation of IScript
 
         public FileInfo File { get; set; }
 
-        public SyntaxTree SyntaxTree { get; set; }
+        public ModuleDefinition Module { get; private set; }
 
-        public IEnumerable<TestSuite> GetSuites()
+        public IEnumerable<TestSuite> Suites => _suites.Value;
+
+        public IEnumerable<IScript> Requires => Module.Dependencies;
+
+        public SyntaxTree SyntaxTree
         {
-            throw new NotImplementedException();
+            get
+            {
+                return _syntaxTree;
+            }
+            set
+            {
+                Reset();
+
+                _syntaxTree = value;
+
+                // When our syntax tree changes -- i.e., when the file has been loaded, or it has been
+                // changed and the change detected by the file watcher -- then we need to search through
+                // the code again to extract the define() call and determine what the dependencies of
+                // this file are so that we can construct a dependency tree.
+                Module = _reader.ReadModule(this);
+            }
+        }
+
+        public void Reload()
+        {
+            SyntaxTree = _scriptParser.Parse(File);
         }
 
         #endregion
@@ -24,6 +63,20 @@ namespace TestRunner
         public int CompareTo(IScript other)
         {
             return string.Compare(File.Name, other.File.Name, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void Reset()
+        {
+            _suites = new Lazy<IEnumerable<TestSuite>>(GetSuites);
+        }
+
+        private IEnumerable<TestSuite> GetSuites()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

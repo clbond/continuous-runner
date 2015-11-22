@@ -7,7 +7,7 @@ namespace TestRunner
         /// <summary>
         /// The expression we will use to search for TypeScript tests
         /// </summary>
-        public readonly Regex SearchExpression = new Regex("(spec|tests|test).(ts|js)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        public static readonly Regex SearchExpression = new Regex("(spec|tests|test).(ts|js)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// An overly-broad string to narrow the list of files that we care about watching (but the regular expression above
