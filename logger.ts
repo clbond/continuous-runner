@@ -19,7 +19,6 @@ var logger = new PrimaryLogger({
     new transports.Console({
       level: 'debug',
       handleExceptions: true,
-//      humanReadableUnhandledException: true,
       json: false,
       colorize: true,
       prettyPrint: true
@@ -27,8 +26,6 @@ var logger = new PrimaryLogger({
   ],
   exitOnError: false
 });
-
-//logger.cli();
 
 addColors({
     debug: 'green',
