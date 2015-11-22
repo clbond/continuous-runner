@@ -6,32 +6,24 @@ namespace TestRunner
 {
     public class Script : IScript
     {
-        private readonly FileInfo _fileInfo;
+        #region Implementation of IScript
 
-        public Script(FileInfo fileInfo)
-        {
-            _fileInfo = fileInfo;
-        }
+        public FileInfo File { get; set; }
 
-        #region IScript implementation
+        public SyntaxTree SyntaxTree { get; set; }
 
         public IEnumerable<TestSuite> GetSuites()
         {
-            using (var stream = _fileInfo.OpenRead())
-            {
-                using (var sr = new StreamReader(stream))
-                {
-                    yield break;
-                }
-            }
+            throw new NotImplementedException();
         }
 
-        public FileInfo File
+        #endregion
+
+        #region Implementation of IComparable<in IScript>
+
+        public int CompareTo(IScript other)
         {
-            get
-            {
-                return _fileInfo;
-            }
+            return string.Compare(File.Name, other.File.Name, StringComparison.InvariantCultureIgnoreCase);
         }
 
         #endregion

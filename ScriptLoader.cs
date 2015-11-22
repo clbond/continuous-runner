@@ -1,25 +1,43 @@
 ﻿using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 
 namespace TestRunner
 {
     public class ScriptLoader : IScriptLoader
     {
-        #region Implementation of IScriptLoader
+        #region IScriptLoader
 
-        public IEnumerable<IScript> Load(DirectoryInfo root)
+        public IScript Load(FileInfo script)
         {
-            return root.GetFiles("*.js", SearchOption.AllDirectories).Select(f => new Script(f));
+            return new Script
+            {
+                File = script,
+                SyntaxTree = Parse(script)
+            };
         }
 
         #endregion
 
-        #region Implementation of IDisposable
+        #region Private methods
 
-        public void Dispose()
+        private static SyntaxTree Parse(FileInfo script)
         {
+            var parser = new Jint.Parser.JavaScriptParser();
 
+            return new SyntaxTree
+            {
+                Root = parser.Parse(GetScript(script))
+            };
+        }
+
+        private static string GetScript(FileInfo script)
+        {
+            using (var stream = script.OpenRead())
+            {
+                using (var sr = new StreamReader(stream))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
         }
 
         #endregion

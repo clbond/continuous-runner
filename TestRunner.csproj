@@ -30,19 +30,42 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Autofac, Version=3.5.0.0, Culture=neutral, PublicKeyToken=17863af14b0044da, processorArchitecture=MSIL">
-      <HintPath>packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
+    <Reference Include="Autofac">
+      <HintPath>packages\Autofac.3.5.2\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Jint, Version=2.6.0.0, Culture=neutral, PublicKeyToken=2e92ba9c8d81157f, processorArchitecture=MSIL">
+      <HintPath>packages\Jint.2.7.1\lib\portable-net40+sl50+win+WindowsPhoneApp81+wp80\Jint.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Magnum, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
+      <HintPath>packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>packages\NLog.4.2.1\lib\net45\NLog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Container.cs" />
+    <Compile Include="BackgroundWatcher.cs" />
+    <Compile Include="Constants.cs" />
+    <Compile Include="ISourceDependencies.cs" />
+    <Compile Include="ISyntaxTree.cs" />
+    <Compile Include="Source.cs" />
+    <Compile Include="SourceDependencies.cs" />
+    <Compile Include="IBackgroundWatcher.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RunnerModule.cs" />
     <Compile Include="ScriptLoader.cs" />
     <Compile Include="IScriptLoader.cs" />
     <Compile Include="IScript.cs" />
+    <Compile Include="SyntaxTree.cs" />
     <Compile Include="TestResult.cs" />
     <Compile Include="TestStatus.cs" />
     <Compile Include="ITest.cs" />
@@ -51,12 +74,29 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="runner\LICENSE" />
+    <None Include="runner\package.json" />
+    <None Include="runner\scripts\single-run.sh" />
+    <None Include="runner\scripts\start.sh" />
+    <None Include="runner\tsconfig.json" />
+    <None Include="runner\tsd.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="trifleJS\TrifleJS.csproj">
       <Project>{6130407f-322b-4e41-afdb-fcf1c17d6c19}</Project>
       <Name>TrifleJS</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="runner\formatString.ts" />
+    <TypeScriptCompile Include="runner\HttpServer.ts" />
+    <TypeScriptCompile Include="runner\logger.ts" />
+    <TypeScriptCompile Include="runner\PortAllocator.ts" />
+    <TypeScriptCompile Include="runner\runner.ts" />
+    <TypeScriptCompile Include="runner\typings\lodash\lodash.d.ts" />
+    <TypeScriptCompile Include="runner\typings\node\node.d.ts" />
+    <TypeScriptCompile Include="runner\typings\tsd.d.ts" />
+    <TypeScriptCompile Include="runner\typings\winston\winston.d.ts" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

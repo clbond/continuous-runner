@@ -4,6 +4,6 @@ namespace TestRunner
 {
     public class TestSuite
     {
-        public IList<ITest> Tests { get; private set; }
+        public IList<ITest> Tests { get; set; }
     }
 }
