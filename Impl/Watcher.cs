@@ -76,7 +76,7 @@ namespace TestRunner.Impl
 
             _watcher.Path = path.FullName;
             _watcher.EnableRaisingEvents = true;
-            _watcher.Filter = Constants.FileFilter; // .ts, .js probably
+            _watcher.Filter = Constants.FilenameFilter; // .ts, .js probably
 
             _watcher.Error += OnError;
             _watcher.Changed += OnChanged;

@@ -37,14 +37,14 @@ namespace TestRunner.Impl
 
         public IEnumerable<IScript> GetScripts()
         {
-            var files = _options.Root.GetFiles(Constants.FileFilter, SearchOption.AllDirectories);
+            var files = _options.Root.GetFiles(Constants.FilenameFilter, SearchOption.AllDirectories);
 
             return files.Select(TryLoad).Where(s => s != null).ToList();
         }
 
         public IEnumerable<IScript> GetTestScripts()
         {
-            var files = _options.Root.GetFiles(Constants.FileFilter, SearchOption.AllDirectories);
+            var files = _options.Root.GetFiles(Constants.FilenameFilter, SearchOption.AllDirectories);
 
             files = files.Where(f => Constants.SearchExpression.IsMatch(f.Name)).ToArray();
 

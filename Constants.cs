@@ -14,11 +14,6 @@ namespace TestRunner
         /// is the final word on whether a file will be considered for inclusion in the watch set, not this filter; this
         /// is just a performance optimization).
         /// </summary>
-        public const string FileFilter = @"*.?s";
-
-        /// <summary>
-        /// A rough guess of what number of source files we should optimize for
-        /// </summary>
-        public const int EstimatedFiles = 1000;
+        public const string FilenameFilter = @"*.?s";
     }
 }

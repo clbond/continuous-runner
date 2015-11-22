@@ -2,6 +2,8 @@
 
 namespace TestRunner
 {
+    using Impl;
+
     public class Container : Module
     {
         protected override void Load(ContainerBuilder builder)

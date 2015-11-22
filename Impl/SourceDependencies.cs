@@ -18,7 +18,7 @@ namespace TestRunner.Impl
 
         private readonly ISet<IScript> _set = new SortedSet<IScript>();
 
-        private readonly IDictionary<string, IScript> _map = new Dictionary<string, IScript>(Constants.EstimatedFiles);
+        private readonly IDictionary<string, IScript> _map = new Dictionary<string, IScript>();
 
         private readonly IRunQueue _testQueue;
 
