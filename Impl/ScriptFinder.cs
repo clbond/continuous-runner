@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using NLog;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
     public class ScriptFinder : IScriptFinder
     {

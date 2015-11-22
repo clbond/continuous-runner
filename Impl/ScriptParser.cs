@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class ScriptParser : IScriptParser
     {
         #region Implementation of IScriptParser

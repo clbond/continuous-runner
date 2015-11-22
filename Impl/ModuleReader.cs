@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Jint.Parser.Ast;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class ModuleReader : IModuleReader
     {
         #region Constructors

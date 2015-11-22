@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using NLog;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class ResultWriter : IResultWriter
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();

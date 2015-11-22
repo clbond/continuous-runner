@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
     public class ScriptLoader : IScriptLoader
     {

@@ -2,6 +2,8 @@
 
 namespace TestRunner
 {
+    using Data;
+
     public interface ITest
     {
         Guid Id { get; }

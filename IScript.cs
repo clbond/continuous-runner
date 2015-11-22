@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace TestRunner
 {
+    using Data;
+
     public interface IScript : IComparable<IScript>
     {
         /// <summary>

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using Magnum.Extensions;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class SourceDependencies : ISourceDependencies
     {
         public SourceDependencies(IRunQueue testQueue)

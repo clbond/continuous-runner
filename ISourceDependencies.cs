@@ -3,6 +3,8 @@ using System.IO;
 
 namespace TestRunner
 {
+    using Data;
+
     public interface ISourceDependencies
     {
         void Add(IScript script);

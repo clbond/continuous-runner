@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class Script : IScript
     {
         private readonly IModuleReader _reader;

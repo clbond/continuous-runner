@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TestRunner
+namespace TestRunner.Impl
 {
+    using Data;
+
     public class RunQueue : IRunQueue
     {
         private readonly Queue<IScript> _queue = new Queue<IScript>();
@@ -14,7 +16,7 @@ namespace TestRunner
             _queue.Enqueue(script);
         }
 
-        public Task<IEnumerable<TestResult>> Run()
+        public IEnumerable<Task<TestResult>> Run()
         {
             throw new System.NotImplementedException();
         }

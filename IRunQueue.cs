@@ -3,10 +3,15 @@ using System.Threading.Tasks;
 
 namespace TestRunner
 {
+    using Data;
+
+    /// <summary>
+    /// Represents a queue of tests that need to be run
+    /// </summary>
     public interface IRunQueue
     {
         void Push(IScript script);
 
-        Task<IEnumerable<TestResult>> Run();
+        IEnumerable<Task<TestResult>> Run();
     }
 }

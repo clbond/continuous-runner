@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TestRunner
+namespace TestRunner.Data
 {
     public class TestResult
     {
