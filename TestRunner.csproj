@@ -57,16 +57,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IModuleReader.cs" />
+    <Compile Include="IReferenceResolver.cs" />
     <Compile Include="IResultWriter.cs" />
     <Compile Include="IScriptParser.cs" />
-    <Compile Include="ITestQueue.cs" />
+    <Compile Include="IRunQueue.cs" />
     <Compile Include="ModuleDefinition.cs" />
     <Compile Include="ModuleReader.cs" />
+    <Compile Include="ReferenceResolver.cs" />
     <Compile Include="ResultWriter.cs" />
     <Compile Include="ScriptFinder.cs" />
     <Compile Include="ScriptParser.cs" />
+    <Compile Include="SyntaxExtensions.cs" />
     <Compile Include="TestException.cs" />
-    <Compile Include="TestQueue.cs" />
+    <Compile Include="RunQueue.cs" />
     <Compile Include="TestResultFactory.cs" />
     <Compile Include="Watcher.cs" />
     <Compile Include="Constants.cs" />

@@ -18,7 +18,7 @@ namespace TestRunner
                     Root = parser.Parse(GetScript(fileInfo))
                 };
             }
-            catch (Jint.Parser.ParserException ex)
+            catch (Exception ex)
             {
                 throw new TestException($"Failed to parse JavaScript file: {fileInfo}: {ex.Message}", ex);
             }

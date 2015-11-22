@@ -2,6 +2,6 @@
 {
     public interface IModuleReader
     {
-        ModuleDefinition ReadModule(IScript script);
+        ModuleDefinition Get(IScript script);
     }
 }

@@ -7,7 +7,7 @@ namespace TestRunner
 {
     public class SourceDependencies : ISourceDependencies
     {
-        public SourceDependencies(ITestQueue testQueue)
+        public SourceDependencies(IRunQueue testQueue)
         {
             _testQueue = testQueue;
         }
@@ -18,7 +18,7 @@ namespace TestRunner
 
         private readonly IDictionary<string, IScript> _map = new Dictionary<string, IScript>(Constants.EstimatedFiles);
 
-        private readonly ITestQueue _testQueue;
+        private readonly IRunQueue _testQueue;
 
         #endregion
 
@@ -63,6 +63,11 @@ namespace TestRunner
             }
 
             return null;
+        }
+
+        public IScript GetScriptFromModuleReference(string absoluteReference)
+        {
+            return _set.FirstOrDefault(script => script.Module.ModuleName == absoluteReference);
         }
 
         public IEnumerable<IScript> GetDependencies(IScript origin)

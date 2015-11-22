@@ -15,6 +15,8 @@ namespace TestRunner
 
         IScript GetScript(FileInfo fileInfo);
 
+        IScript GetScriptFromModuleReference(string absoluteReference);
+
         IEnumerable<IScript> GetDependencies(IScript origin);
 
         IEnumerable<TestSuite> GetSuites();

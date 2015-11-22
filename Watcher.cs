@@ -10,7 +10,7 @@ namespace TestRunner
     {
         #region Constructors
 
-        public Watcher(ISourceDependencies dependencies, IScriptLoader scriptLoader, ITestQueue testQueue)
+        public Watcher(ISourceDependencies dependencies, IScriptLoader scriptLoader, IRunQueue testQueue)
         {
             _dependencies = dependencies;
 
@@ -33,7 +33,7 @@ namespace TestRunner
 
         private readonly IScriptLoader _scriptLoader;
 
-        private readonly ITestQueue _testQueue;
+        private readonly IRunQueue _testQueue;
 
         #endregion
 

@@ -10,8 +10,10 @@ namespace TestRunner
     {
         #region Constructors
 
-        public ScriptFinder(IScriptLoader scriptLoader, Options options)
+        public ScriptFinder(ISourceDependencies dependencies, IScriptLoader scriptLoader, Options options)
         {
+            _dependencies = dependencies;
+
             _scriptLoader = scriptLoader;
 
             _options = options;
@@ -27,26 +29,43 @@ namespace TestRunner
 
         private readonly IScriptLoader _scriptLoader;
 
+        private readonly ISourceDependencies _dependencies;
+
         #endregion
 
         #region Implementation of IScriptFinder
 
         public IEnumerable<IScript> GetScripts()
         {
-            var root = new DirectoryInfo(_options.Path);
+            var files = _options.Root.GetFiles(Constants.FileFilter, SearchOption.AllDirectories);
 
-            var files = root.GetFiles(Constants.FileFilter, SearchOption.AllDirectories);
+            return files.Select(TryLoad).Where(s => s != null).ToList();
+        }
+
+        public IEnumerable<IScript> GetTestScripts()
+        {
+            var files = _options.Root.GetFiles(Constants.FileFilter, SearchOption.AllDirectories);
 
             files = files.Where(f => Constants.SearchExpression.IsMatch(f.Name)).ToArray();
 
             return files.Select(TryLoad).Where(s => s != null).ToList();
         }
 
+        #endregion
+
+        #region Private methods
+
         private IScript TryLoad(FileInfo fileInfo)
         {
             try
             {
-                return _scriptLoader.Load(fileInfo);
+                var script = _dependencies.GetScript(fileInfo);
+                if (script == null)
+                {
+                    script = _scriptLoader.Load(fileInfo);
+                }
+
+                return script;
             }
             catch (Exception ex)
             {

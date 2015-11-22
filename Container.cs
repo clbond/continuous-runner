@@ -24,10 +24,13 @@ namespace TestRunner
                    .SingleInstance()
                    .AsImplementedInterfaces();
 
+            builder.RegisterType<ReferenceResolver>()
+                   .AsImplementedInterfaces();
+
             builder.RegisterType<ResultWriter>()
                    .AsImplementedInterfaces();
 
-            builder.RegisterType<TestQueue>()
+            builder.RegisterType<RunQueue>()
                    .SingleInstance()
                    .AsImplementedInterfaces();
 

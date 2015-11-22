@@ -13,6 +13,29 @@ namespace TestRunner
             HelpText = "The path to search for JavaScript modules and tests")]
         public string Path { get; set; }
 
+        [Option('m', "module-namespace",
+            DefaultValue = "R2CIQ",
+            Required = false,
+            HelpText = "The module namespace that our source files reside in")]
+        public string ModuleNamespace { get; set; }
+
+        #endregion
+
+        #region Type-safe representations of command-line options
+
+        public DirectoryInfo Root
+        {
+            get
+            {
+                if (Directory.Exists(Path) == false)
+                {
+                    throw new TestException($"Root path does not exist: {Path}");
+                }
+
+                return new DirectoryInfo(Path);
+            }
+        }
+
         #endregion
 
         #region Factory methods

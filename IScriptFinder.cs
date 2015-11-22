@@ -5,5 +5,7 @@ namespace TestRunner
     public interface IScriptFinder
     {
         IEnumerable<IScript> GetScripts();
+
+        IEnumerable<IScript> GetTestScripts();
     }
 }

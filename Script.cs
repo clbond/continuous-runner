@@ -11,7 +11,9 @@ namespace TestRunner
         private readonly IScriptParser _scriptParser;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
-        
+
+        private Lazy<IEnumerable<IScript>> _dependencies; 
+
         private SyntaxTree _syntaxTree;
 
         public Script(IModuleReader reader, IScriptParser scriptParser)
@@ -29,7 +31,7 @@ namespace TestRunner
 
         public IEnumerable<TestSuite> Suites => _suites.Value;
 
-        public IEnumerable<IScript> Requires => Module.Dependencies;
+        public IEnumerable<IScript> Requires => _dependencies.Value;
 
         public SyntaxTree SyntaxTree
         {
@@ -47,7 +49,7 @@ namespace TestRunner
                 // changed and the change detected by the file watcher -- then we need to search through
                 // the code again to extract the define() call and determine what the dependencies of
                 // this file are so that we can construct a dependency tree.
-                Module = _reader.ReadModule(this);
+                Module = _reader.Get(this);
             }
         }
 
@@ -72,11 +74,18 @@ namespace TestRunner
         private void Reset()
         {
             _suites = new Lazy<IEnumerable<TestSuite>>(GetSuites);
+
+            _dependencies = new Lazy<IEnumerable<IScript>>(GetDependencies);
+        }
+
+        private IEnumerable<IScript> GetDependencies()
+        {
+            return Module.GetDependencies();
         }
 
         private IEnumerable<TestSuite> GetSuites()
         {
-            throw new NotImplementedException();
+            yield break;
         }
 
         #endregion
