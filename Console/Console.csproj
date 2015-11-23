@@ -70,10 +70,6 @@
       <Project>{7337d0d8-505f-4a3d-ab7c-cbbce60d065e}</Project>
       <Name>ContinuousRunner</Name>
     </ProjectReference>
-    <ProjectReference Include="..\trifleJS\TrifleJS.csproj">
-      <Project>{6130407f-322b-4e41-afdb-fcf1c17d6c19}</Project>
-      <Name>TrifleJS</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
