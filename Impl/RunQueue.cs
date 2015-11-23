@@ -54,14 +54,16 @@ namespace ContinuousRunner.Impl
                 foreach (var script in scripts)
                 {
                     var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
-
-                    _logger.Info($"Running {scriptTasks.Count} tests");
-
-                    Task.WhenAll(scriptTasks).ContinueWith(t => _waiting.WriteLock(set => set.Remove(script)));
-
-                    foreach (var task in scriptTasks)
+                    if (scriptTasks.Any())
                     {
-                        yield return task;
+                        _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
+
+                        Task.WhenAll(scriptTasks).ContinueWith(t => _waiting.WriteLock(set => set.Remove(script)));
+
+                        foreach (var task in scriptTasks)
+                        {
+                            yield return task;
+                        }
                     }
                 }
             }
