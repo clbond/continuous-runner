@@ -12,18 +12,14 @@ namespace ContinuousRunner
 
             builder.RegisterType<ModuleReader>()
                    .AsImplementedInterfaces();
-
-            builder.RegisterType<SourceMutator>()
-                   .SingleInstance()
-                   .AsImplementedInterfaces();
-
+            
             builder.RegisterType<SourceObserver>()
                    .AsImplementedInterfaces();
 
             builder.RegisterType<ScriptLoader>()
                    .AsImplementedInterfaces();
 
-            builder.RegisterType<ScriptParser>()
+            builder.RegisterType<Parser>()
                    .AsImplementedInterfaces();
 
             builder.RegisterType<SourceSet>()

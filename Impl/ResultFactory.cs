@@ -5,7 +5,7 @@ namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class TestResultFactory : ITestResultFactory
+    public class ResultFactory : IResultFactory
     {
         #region Implementation of ITestResultFactory
 

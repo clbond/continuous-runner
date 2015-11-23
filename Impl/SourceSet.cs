@@ -9,7 +9,7 @@ namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class SourceSet : ISourceSet
+    public class SourceSet : ISourceSet, ISourceMutator
     {
         #region Constructors
 

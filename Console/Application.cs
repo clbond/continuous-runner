@@ -1,9 +1,9 @@
-﻿namespace ContinuousRunner.Console
-{
-    using System;
-    using Autofac;
-    using NLog;
+﻿using System;
+using Autofac;
+using NLog;
 
+namespace ContinuousRunner.Console
+{
     public class Application
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -14,13 +14,10 @@
             {
                 var options = CommandLineOptions.FromArgs(args);
 
-                var containerBuilder = new ContainerBuilder();
-
-                containerBuilder.RegisterInstance(options).As<IInstanceContext>();
-
-                containerBuilder.RegisterModule<ContinuousRunner.Module>();
-
-                var container = containerBuilder.Build();
+                using (var container = Container.Build(options))
+                {
+                    var loader = container.Resolve<IScriptLoader>();
+                }
             }
             catch (Exception ex)
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Magnum;
 using NLog;
 
@@ -12,27 +11,23 @@ namespace ContinuousRunner.Impl
         #region Constructors
 
         public Watcher(
-            ISourceSet sourceSet,
-            IScriptLoader scriptLoader,
-            IRunQueue testQueue)
+            [NotNull] ISourceMutator mutator,
+            [NotNull] ISourceSet sourceSet,
+            [NotNull] IScriptLoader scriptLoader)
         {
+            Guard.AgainstNull(mutator, nameof(mutator));
+            _mutator = mutator;
+
             Guard.AgainstNull(sourceSet, nameof(sourceSet));
             _sourceSet = sourceSet;
 
             Guard.AgainstNull(scriptLoader, nameof(scriptLoader));
             _scriptLoader = scriptLoader;
-
-            Guard.AgainstNull(testQueue, nameof(testQueue));
-            _testQueue = testQueue;
         }
 
         #endregion
 
         #region Private members
-
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
-
-        private readonly FileSystemWatcher _watcher = new FileSystemWatcher();
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -40,71 +35,31 @@ namespace ContinuousRunner.Impl
 
         private readonly IScriptLoader _scriptLoader;
 
-        private readonly IRunQueue _testQueue;
+        private readonly ISourceMutator _mutator;
 
         #endregion
 
         #region Implementation of IBackgroundRunner
-
-        public DirectoryInfo Root
+        
+        public ICancellable Watch(DirectoryInfo scriptPath)
         {
-            get
-            {
-                return new DirectoryInfo(_watcher.Path);
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException("value");
-                }
+            var watcher = new FileSystemWatcher(scriptPath.FullName);
 
-                _watcher.Path = value.FullName;
-            }
-        }
+            watcher.BeginInit();
 
-        public async void Watch()
-        {
-            await Task.Run(() => Start(Root), _cancellationToken.Token);
-        }
+            watcher.Path = scriptPath.FullName;
+            watcher.EnableRaisingEvents = true;
+            watcher.Filter = Constants.FilenameFilter; // .ts, .js probably
 
-        public void Stop()
-        {
-            _watcher.EnableRaisingEvents = false;
+            watcher.Error += OnError;
+            watcher.Changed += OnChanged;
+            watcher.Created += OnCreated;
+            watcher.Deleted += OnDeleted;
+            watcher.Renamed += OnRenamed;
 
-            _cancellationToken.Cancel();
-        }
+            watcher.EndInit();
 
-        private Task Start(DirectoryInfo path)
-        {
-            var tsc = new TaskCompletionSource<int>();
-
-            _watcher.BeginInit();
-
-            _watcher.Path = path.FullName;
-            _watcher.EnableRaisingEvents = true;
-            _watcher.Filter = Constants.FilenameFilter; // .ts, .js probably
-
-            _watcher.Error += OnError;
-            _watcher.Changed += OnChanged;
-            _watcher.Created += OnCreated;
-            _watcher.Deleted += OnDeleted;
-            _watcher.Renamed += OnRenamed;
-
-            _watcher.EndInit();
-
-            return tsc.Task;
-        }
-
-        #endregion
-
-        #region Implementation of IDisposable
-
-        public void Dispose()
-        {
-            _cancellationToken.Dispose();
-
-            _watcher.Dispose();
+            return new Cancellable(() => watcher.Dispose());
         }
 
         #endregion
@@ -115,25 +70,23 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                _sourceSet.Remove(new FileInfo(e.OldFullPath));
+                _mutator.Remove(new FileInfo(e.OldFullPath));
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Cannot remove source file from dependency mapper");
+                _logger.Error(ex, $"Cannot remove file from source set: {e.OldFullPath}: {ex.Message}");
             }
 
             try
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                _sourceSet.Add(script);
+                _mutator.Add(script);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex,
-                    "Failed to load script file (during rename operation): {0} (from {1})",
-                    e.OldName,
-                    e.OldFullPath);
+                              $"Failed to load script file (file rename operation): {e.FullPath} (from {e.OldFullPath}): {ex.Message}");
             }
         }
 
@@ -141,11 +94,11 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                _sourceSet.Remove(new FileInfo(e.FullPath));
+                _mutator.Remove(new FileInfo(e.FullPath));
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Cannot remove source file from dependency mapper");
+                _logger.Error(ex, $"Cannot remove source file from dependency mapper: {ex.Message}");
             }
         }
 
@@ -155,11 +108,11 @@ namespace ContinuousRunner.Impl
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                _sourceSet.Add(script);
+                _mutator.Add(script);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to load script file (during rename operation): {0}", e.FullPath);
+                _logger.Error(ex, $"Failed to load script file (file create operation): {e.FullPath}: {ex.Message}");
             }
         }
 
@@ -172,26 +125,26 @@ namespace ContinuousRunner.Impl
                 {
                     script.Reload();
 
-                    _sourceSet.Changed(script);
+                    _mutator.Changed(script);
                 }
                 else
                 {
-                    script  = _scriptLoader.Load(new FileInfo(e.FullPath));
+                    script = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                    _sourceSet.Add(script);
+                    _mutator.Add(script);
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Failed to load script file (during rename operation): {0}", e.FullPath);
+                _logger.Error(ex, $"Failed to load script file (file change operation): {e.FullPath}: {ex.Message}");
             }
         }
 
         private void OnError(object sender, ErrorEventArgs e)
         {
-            _logger.Error(e.GetException(), @"Error while watching for filesystem changes");
+            var exception = e.GetException();
 
-            Stop();
+            _logger.Error(exception, $"Error while watching for filesystem changes: {exception.Message}");
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
 {
@@ -8,22 +9,32 @@ namespace ContinuousRunner.Impl
 
     public class Script : IScript
     {
-        private readonly IModuleReader _reader;
+        #region Constructors
 
-        private readonly IScriptParser _scriptParser;
+        public Script(
+            [NotNull] Func<IScript, SyntaxTree> reloader,
+            [NotNull] Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader) 
+        {
+            _reloader = reloader;
+
+            _moduleLoader = moduleLoader;
+        }
+
+        #endregion
+
+        #region Private members
+
+        private readonly Func<IScript, SyntaxTree> _reloader;
+
+        private readonly Func<IScript, SyntaxTree, ModuleDefinition> _moduleLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
 
-        private Lazy<IEnumerable<IScript>> _dependencies; 
+        private Lazy<IEnumerable<IScript>> _dependencies;
 
         private SyntaxTree _syntaxTree;
 
-        public Script(IModuleReader reader, IScriptParser scriptParser)
-        {
-            _reader = reader;
-
-            _scriptParser = scriptParser;
-        }
+        #endregion
 
         #region Implementation of IScript
 
@@ -39,6 +50,11 @@ namespace ContinuousRunner.Impl
         {
             get
             {
+                if (_syntaxTree == null)
+                {
+                    SyntaxTree = _reloader?.Invoke(this);
+                }
+
                 return _syntaxTree;
             }
             set
@@ -51,13 +67,18 @@ namespace ContinuousRunner.Impl
                 // changed and the change detected by the file watcher -- then we need to search through
                 // the code again to extract the define() call and determine what the dependencies of
                 // this file are so that we can construct a dependency tree.
-                Module = _reader.Get(this);
+                Module = _moduleLoader?.Invoke(this, value);
             }
         }
-
+        
         public void Reload()
         {
-            SyntaxTree = _scriptParser.Parse(File);
+            SyntaxTree = _reloader?.Invoke(this);
+
+            if (SyntaxTree == null)
+            {
+                throw new TestException($"Reload failed: reloader delegate returned null");
+            }
         }
 
         #endregion

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Jint.Parser.Ast;
+using Magnum;
 
 namespace ContinuousRunner.Impl
 {
@@ -13,13 +15,18 @@ namespace ContinuousRunner.Impl
     {
         #region Constructors
 
-        public ModuleReader(IInstanceContext IInstanceContext, ISourceSet SourceSet,
-            IReferenceResolver referenceResolver)
+        public ModuleReader(
+            [NotNull] IInstanceContext instanceContext,
+            [NotNull] ISourceSet sourceSet,
+            [NotNull] IReferenceResolver referenceResolver)
         {
-            _context = IInstanceContext;
+            Guard.AgainstNull(instanceContext, nameof(instanceContext));
+            _context = instanceContext;
 
-            _SourceSet = SourceSet;
+            Guard.AgainstNull(sourceSet, nameof(sourceSet));
+            _SourceSet = sourceSet;
 
+            Guard.AgainstNull(instanceContext, nameof(referenceResolver));
             _referenceResolver = referenceResolver;
         }
 

@@ -3,12 +3,11 @@ using System.IO;
 
 namespace ContinuousRunner
 {
-    public interface IWatcher : IDisposable
+    public interface IWatcher
     {
-        DirectoryInfo Root { get; set; }
-
-        void Watch();
-
-        void Stop();
+        /// <summary>
+        /// Begin watching <paramref name="scriptPath"/> for filesystem changes, sending changes to <seealso cref="ISourceMutator"/>.
+        /// </summary>
+        ICancellable Watch(DirectoryInfo scriptPath);
     }
 }

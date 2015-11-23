@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Magnum;
 
 namespace ContinuousRunner.Impl
@@ -8,7 +9,7 @@ namespace ContinuousRunner.Impl
     {
         #region Constructors
 
-        public ReferenceResolver(IInstanceContext instanceContext)
+        public ReferenceResolver([NotNull] IInstanceContext instanceContext)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             _instanceContext = instanceContext;

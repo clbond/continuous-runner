@@ -4,6 +4,8 @@ using System.Linq;
 using Magnum;
 using NLog;
 using System.IO;
+using ContinuousRunner.Data;
+using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
 {
@@ -12,10 +14,10 @@ namespace ContinuousRunner.Impl
         #region Constructors
 
         public ScriptLoader(
-            IInstanceContext instanceContext,
-            IModuleReader moduleReader,
-            IScriptParser scriptParser,
-            ISourceSet sourceSet)
+            [NotNull] IInstanceContext instanceContext,
+            [NotNull] IModuleReader moduleReader,
+            [NotNull] IParser scriptParser,
+            [NotNull] ISourceSet sourceSet)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             _instanceContext = instanceContext;
@@ -40,7 +42,7 @@ namespace ContinuousRunner.Impl
 
         private readonly IModuleReader _moduleReader;
 
-        private readonly IScriptParser _scriptParser;
+        private readonly IParser _scriptParser;
 
         private readonly ISourceSet _SourceSet;
 
@@ -67,10 +69,13 @@ namespace ContinuousRunner.Impl
 
         public IScript Load(FileInfo script)
         {
-            return new Script(_moduleReader, _scriptParser)
+            Func<IScript, SyntaxTree> loader = s => _scriptParser.Parse(s.File);
+
+            Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
+
+            return new Script(loader, moduleLoader)
                    {
-                       File = script,
-                       SyntaxTree = _scriptParser.Parse(script)
+                       File = script
                    };
         }
 

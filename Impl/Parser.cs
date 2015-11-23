@@ -5,7 +5,7 @@ namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class ScriptParser : IScriptParser
+    public class Parser : IParser
     {
         #region Implementation of IScriptParser
 

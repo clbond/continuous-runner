@@ -4,7 +4,7 @@ namespace ContinuousRunner
 {
     using Data;
 
-    public interface IScriptParser
+    public interface IParser
     {
         SyntaxTree Parse(FileInfo fileInfo);
     }

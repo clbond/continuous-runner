@@ -5,7 +5,7 @@ namespace ContinuousRunner
 {
     using Data;
 
-    public interface ITestResultFactory
+    public interface IResultFactory
     {
         TestResult Deleted();
 
