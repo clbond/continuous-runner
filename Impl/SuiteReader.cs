@@ -83,9 +83,17 @@ namespace ContinuousRunner.Impl
         {
             var hashCode = suite.Name.GetHashCode() ^ description.GetHashCode();
 
-            var bytes = BitConverter.GetBytes(hashCode);
+            var bytes = To16Bytes(BitConverter.GetBytes(hashCode));
 
             return new Guid(bytes);
+        }
+
+        private static byte[] To16Bytes(byte[] bytes)
+        {
+            var b = new byte[16];
+            bytes.CopyTo(b, b.Length - bytes.Length - 1);
+
+            return b;
         }
 
         private static string GetDescription(CallExpression expr)
@@ -111,15 +119,14 @@ namespace ContinuousRunner.Impl
             return InvocationMatch(expr, Constants.FunctionIdentifiers.TestFunction);
         }
 
-        private static bool InvocationMatch(CallExpression expr, string[] functions)
+        private static bool InvocationMatch(CallExpression expr, IEnumerable<string> functions)
         {
-            var identifier = expr.Callee.As<Identifier>();
-            if (identifier == null)
+            if (expr.Callee.Type == SyntaxNodes.Identifier)
             {
-                return false;
+                return functions.Any(f => f.Equals(expr.Callee.As<Identifier>().Name));
             }
 
-            return functions.Any(f => f.Equals(identifier.Name));
+            return false;
         }
 
         #endregion

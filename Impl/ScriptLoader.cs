@@ -116,7 +116,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script: {fileInfo.FullName}: {ex.Message}");
+                _logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
 
                 return null;
             }

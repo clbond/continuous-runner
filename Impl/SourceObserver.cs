@@ -15,7 +15,7 @@ namespace ContinuousRunner.Impl
 
             foreach (var ex in exceptions)
             {
-                _logger.Error(ex, $"Error while processing file-added event: {script.File.Name}: {ex.Message}");
+                _logger.Error(ex, $"Error while processing file-added event: {script.File.Name}");
             }
         }
 
@@ -27,7 +27,7 @@ namespace ContinuousRunner.Impl
 
             foreach (var ex in exceptions)
             {
-                _logger.Error(ex, $"Error while processing file-removed event: {script.File.Name}: {ex.Message}");
+                _logger.Error(ex, $"Error while processing file-removed event: {script.File.Name}");
             }
         }
 
@@ -39,7 +39,7 @@ namespace ContinuousRunner.Impl
 
             foreach (var ex in exceptions)
             {
-                _logger.Error(ex, $"Error while processing source-changed event: {script.File.Name}: {ex.Message}");
+                _logger.Error(ex, $"Error while processing source-changed event: {script.File.Name}");
             }
         }
 

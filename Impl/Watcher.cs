@@ -85,7 +85,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Cannot remove file from source set: {e.OldFullPath}: {ex.Message}");
+                _logger.Error(ex, $"Cannot remove file from source set: {e.OldFullPath}");
             }
 
             try
@@ -97,7 +97,7 @@ namespace ContinuousRunner.Impl
             catch (Exception ex)
             {
                 _logger.Error(ex,
-                              $"Failed to load script file (file rename operation): {e.FullPath} (from {e.OldFullPath}): {ex.Message}");
+                              $"Failed to load script file (file rename operation): {e.FullPath} (from {e.OldFullPath})");
             }
         }
 
@@ -109,7 +109,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Cannot remove source file from dependency mapper: {ex.Message}");
+                _logger.Error(ex, $"Cannot remove source file from dependency mapper");
             }
         }
 
@@ -123,7 +123,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script file (file create operation): {e.FullPath}: {ex.Message}");
+                _logger.Error(ex, $"Failed to load script file (file create operation): {e.FullPath}");
             }
         }
 
@@ -147,7 +147,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script file (file change operation): {e.FullPath}: {ex.Message}");
+                _logger.Error(ex, $"Failed to load script file (file change operation): {e.FullPath}");
             }
         }
 

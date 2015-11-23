@@ -69,6 +69,11 @@ namespace ContinuousRunner.Impl
 
         private static bool IsDefineStatement(CallExpression functionExpr)
         {
+            if (functionExpr.Callee.Type != SyntaxNodes.Identifier)
+            {
+                return false;
+            }
+
             var identifier = functionExpr?.Callee.As<Identifier>();
 
             return identifier?.Name == "define";

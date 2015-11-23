@@ -22,7 +22,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                throw new TestException($"Failed to parse JavaScript file: {fileInfo}: {ex.Message}", ex);
+                throw new TestException($"Failed to parse JavaScript file: {fileInfo}", ex);
             }
         }
 
