@@ -23,6 +23,15 @@ namespace ContinuousRunner.Impl
 
         public void Push(IScript script)
         {
+            var existing = false;
+
+            _waiting.ReadLock(set => existing = set.Contains(script));
+
+            if (existing)
+            {
+                return;
+            }
+
             _waiting.WriteLock(
                 set =>
                 {
@@ -49,23 +58,29 @@ namespace ContinuousRunner.Impl
 
             _waiting.ReadLock(set => scripts = set.ToArray());
 
-            if (scripts.Length > 0)
+            if (scripts.Length == 0)
             {
-                foreach (var script in scripts)
+                yield break;
+            }
+
+            foreach (var script in scripts)
+            {
+                var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
+                if (scriptTasks.Any() == false)
                 {
-                    var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
-                    if (scriptTasks.Any())
-                    {
-                        _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
-
-                        Task.WhenAll(scriptTasks).ContinueWith(t => _waiting.WriteLock(set => set.Remove(script)));
-
-                        foreach (var task in scriptTasks)
-                        {
-                            yield return task;
-                        }
-                    }
+                    continue;
                 }
+
+                _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
+
+                Task.WhenAll(scriptTasks).ContinueWith(t => _waiting.WriteLock(set => set.Remove(script)));
+
+                foreach (var task in scriptTasks)
+                {
+                    yield return task;
+                }
+
+                _waiting.WriteLock(set => set.Remove(script));
             }
         }
 
