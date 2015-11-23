@@ -1,4 +1,4 @@
-﻿namespace TestRunner
+﻿namespace ContinuousRunner
 {
     using Data;
 

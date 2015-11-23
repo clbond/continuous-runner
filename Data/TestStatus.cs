@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestRunner.Data
+namespace ContinuousRunner.Data
 {
     public enum TestStatus
     {

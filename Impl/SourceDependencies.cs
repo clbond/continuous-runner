@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using Magnum.Extensions;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     using Data;
 
     public class SourceDependencies : ISourceDependencies
     {
+        #region Constructors
+
         public SourceDependencies(IRunQueue testQueue)
         {
             _testQueue = testQueue;
         }
+
+        #endregion
 
         #region Private members
 
@@ -23,6 +27,8 @@ namespace TestRunner.Impl
         private readonly IRunQueue _testQueue;
 
         #endregion
+
+        #region Implementation of ISourceDependencies
 
         public void Add(IScript script)
         {
@@ -81,5 +87,7 @@ namespace TestRunner.Impl
         {
             return _set.SelectMany(script => script.Suites);
         }
+
+        #endregion
     }
 }

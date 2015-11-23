@@ -1,10 +1,10 @@
 ﻿using Autofac;
 
-namespace TestRunner
+namespace ContinuousRunner
 {
     using Impl;
 
-    public class Container : Module
+    public class Module : Autofac.Module
     {
         protected override void Load(ContainerBuilder builder)
         {
@@ -12,10 +12,7 @@ namespace TestRunner
 
             builder.RegisterType<ModuleReader>()
                    .AsImplementedInterfaces();
-
-            builder.RegisterType<ScriptFinder>()
-                   .AsImplementedInterfaces();
-
+            
             builder.RegisterType<ScriptLoader>()
                    .AsImplementedInterfaces();
 

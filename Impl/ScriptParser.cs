@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     using Data;
 

@@ -1,4 +1,4 @@
-// Type definitions for Lo-Dash
+﻿// Type definitions for Lo-Dash
 // Project: http://lodash.com/
 // Definitions by: Brian Zengel <https://github.com/bczengel>, Ilya Mochalov <https://github.com/chrootsu>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
@@ -7828,7 +7828,7 @@ declare module _ {
         * timeout.
         * @param func The function to debounce.
         * @param wait The number of milliseconds to delay.
-        * @param options The options object.
+        * @param options The instanceContext object.
         * @param options.leading Specify execution on the leading edge of the timeout.
         * @param options.maxWait The maximum time func is allowed to be delayed before it's called.
         * @param options.trailing Specify execution on the trailing edge of the timeout.
@@ -8326,7 +8326,7 @@ declare module _ {
         * the timeout only if the the throttled function is invoked more than once during the wait timeout.
         * @param func The function to throttle.
         * @param wait The number of milliseconds to throttle executions to.
-        * @param options The options object.
+        * @param options The instanceContext object.
         * @param options.leading Specify execution on the leading edge of the timeout.
         * @param options.trailing Specify execution on the trailing edge of the timeout.
         * @return The new throttled function.
@@ -11952,7 +11952,7 @@ declare module _ {
          * [Chrome's extensions documentation](https://developer.chrome.com/extensions/sandboxingEval).
          *
          * @param string The template string.
-         * @param options The options object.
+         * @param options The instanceContext object.
          * @param options.escape The HTML "escape" delimiter.
          * @param options.evaluate The "evaluate" delimiter.
          * @param options.imports An object to import into the template as free variables.
@@ -12084,7 +12084,7 @@ declare module _ {
          * string are replaced with the omission string which defaults to "…".
          *
          * @param string The string to truncate.
-         * @param options The options object or maximum string length.
+         * @param options The instanceContext object or maximum string length.
          * @return Returns the truncated string.
          */
         trunc(
@@ -12617,7 +12617,7 @@ declare module _ {
          *
          * @param object The destination object.
          * @param source The object of functions to add.
-         * @param options The options object.
+         * @param options The instanceContext object.
          * @param options.chain Specify whether the functions added are chainable.
          * @return Returns object.
          */

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Jint.Parser.Ast;
 
-namespace TestRunner
+namespace ContinuousRunner
 {
     public static class SyntaxExtensions
     {

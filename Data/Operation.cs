@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace TestRunner.Data
+namespace ContinuousRunner.Data
 {
     public enum Operation
     {

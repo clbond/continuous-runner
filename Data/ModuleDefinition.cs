@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TestRunner.Data
+namespace ContinuousRunner.Data
 {
     public class ModuleDefinition
     {

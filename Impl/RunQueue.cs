@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     using Data;
 
@@ -13,7 +13,10 @@ namespace TestRunner.Impl
 
         public void Push(IScript script)
         {
-            _queue.Enqueue(script);
+            if (_queue.Contains(script) == false) // no sense in adding the same script twice
+            {
+                _queue.Enqueue(script);
+            }
         }
 
         public IEnumerable<Task<TestResult>> Run()

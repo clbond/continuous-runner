@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NLog;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     using Data;
 

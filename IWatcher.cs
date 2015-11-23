@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace TestRunner
+namespace ContinuousRunner
 {
     public interface IWatcher : IDisposable
     {

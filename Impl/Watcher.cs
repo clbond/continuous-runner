@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     public class Watcher : IWatcher
     {

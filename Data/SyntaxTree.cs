@@ -1,4 +1,4 @@
-﻿namespace TestRunner.Data
+﻿namespace ContinuousRunner.Data
 {
     public class SyntaxTree
     {

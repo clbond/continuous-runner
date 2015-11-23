@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TestRunner.Data
+namespace ContinuousRunner.Data
 {
     public class TestSuite
     {

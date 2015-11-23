@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Jint.Parser.Ast;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     using Data;
 
@@ -13,10 +13,10 @@ namespace TestRunner.Impl
     {
         #region Constructors
 
-        public ModuleReader(Options options, ISourceDependencies sourceDependencies,
+        public ModuleReader(IInstanceContext IInstanceContext, ISourceDependencies sourceDependencies,
             IReferenceResolver referenceResolver)
         {
-            _options = options;
+            _context = IInstanceContext;
 
             _sourceDependencies = sourceDependencies;
 
@@ -27,7 +27,7 @@ namespace TestRunner.Impl
 
         #region Private members
 
-        private readonly Options _options;
+        private readonly IInstanceContext _context;
 
         private readonly ISourceDependencies _sourceDependencies;
 
@@ -96,9 +96,11 @@ namespace TestRunner.Impl
 
         private string GetModuleNameFromScript(IScript script)
         {
-            if (script.File.FullName.StartsWith(_options.Root.FullName))
+            var path = _context.ScriptsRoot.FullName;
+
+            if (script.File.FullName.StartsWith(path))
             {
-                return PathToModule(script.File.FullName.Substring(_options.Root.FullName.Length + 1));
+                return PathToModule(script.File.FullName.Substring(path.Length + 1));
             }
 
             throw new TestException($"Cannot determine module name from {script.File.FullName}");
@@ -112,7 +114,7 @@ namespace TestRunner.Impl
 
             var segments = path.Split(split, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-            segments.Insert(0, _options.ModuleNamespace);
+            segments.Insert(0, _context.ModuleNamespace);
 
             return string.Join("/", segments);
         }

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 
-namespace TestRunner
+namespace ContinuousRunner
 {
     using Data;
 

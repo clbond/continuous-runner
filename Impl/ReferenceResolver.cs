@@ -1,16 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TestRunner.Impl
+namespace ContinuousRunner.Impl
 {
     public class ReferenceResolver : IReferenceResolver
     {
-        private readonly Options _options;
+        #region Constructors
 
-        public ReferenceResolver(Options options)
+        public ReferenceResolver(IInstanceContext instanceContext)
         {
-            _options = options;
+            Magnum.Guard.AgainstNull(instanceContext, nameof(instanceContext));
+
+            _instanceContext = instanceContext;
         }
+
+        #endregion
+
+        #region Private members
+
+        private readonly IInstanceContext _instanceContext;
+
+        #endregion
 
         #region Implementation of IReferenceResolver
 
@@ -28,7 +38,7 @@ namespace TestRunner.Impl
 
             var segments = require.Split(new[] {'.', '/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
 
-            var qualifiers = new List<string> {_options.ModuleNamespace};
+            var qualifiers = new List<string> {_instanceContext.ModuleNamespace};
 
             var path = script.File.Directory;
             if (path == null)
@@ -36,7 +46,7 @@ namespace TestRunner.Impl
                 throw new TestException($"Cannot resolve module reference: {require}");
             }
 
-            while (path != null && path.FullName != _options.Root.FullName)
+            while (path != null && path.FullName != _instanceContext.ScriptsRoot.FullName)
             {
                 qualifiers.Add(path.Name);
 

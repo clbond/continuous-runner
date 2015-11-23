@@ -2,16 +2,22 @@
 using System.IO;
 using CommandLine;
 
-namespace TestRunner
+namespace ContinuousRunner.Console
 {
-    public class Options
+    public class CommandLineOptions : IInstanceContext
     {
-        #region Command-line arguments
+        #region Command-line arguments and options
 
         [Option('p', "path",
             Required = true,
             HelpText = "The path to search for JavaScript modules and tests")]
         public string Path { get; set; }
+
+        #endregion
+        
+        #region Implementation of IInstanceContext
+
+        public DirectoryInfo ScriptsRoot => new DirectoryInfo(Path);
 
         [Option('m', "module-namespace",
             DefaultValue = "R2CIQ",
@@ -21,28 +27,11 @@ namespace TestRunner
 
         #endregion
 
-        #region Type-safe representations of command-line options
-
-        public DirectoryInfo Root
-        {
-            get
-            {
-                if (Directory.Exists(Path) == false)
-                {
-                    throw new TestException($"Root path does not exist: {Path}");
-                }
-
-                return new DirectoryInfo(Path);
-            }
-        }
-
-        #endregion
-
         #region Factory methods
 
-        public static Options FromArgs(string[] args)
+        public static IInstanceContext FromArgs(string[] args)
         {
-            var options = new Options();
+            var options = new CommandLineOptions();
 
             if (CommandLine.Parser.Default.ParseArgumentsStrict(args, options, () => Environment.Exit(1)) == false)
             {

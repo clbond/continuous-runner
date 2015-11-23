@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestRunner
+namespace ContinuousRunner
 {
     public class TestException : ApplicationException
     {
