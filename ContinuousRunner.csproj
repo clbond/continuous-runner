@@ -19,7 +19,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>full</DebugType>
@@ -28,7 +28,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject />
@@ -45,9 +45,8 @@
       <HintPath>packages\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Jint, Version=2.6.0.0, Culture=neutral, PublicKeyToken=2e92ba9c8d81157f, processorArchitecture=MSIL">
-      <HintPath>packages\Jint.2.7.1\lib\portable-net40+sl50+win+WindowsPhoneApp81+wp80\Jint.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Jint">
+      <HintPath>packages\Jint.2.7.1\lib\portable-net40%2Bsl50%2Bwin%2BWindowsPhoneApp81%2Bwp80\Jint.dll</HintPath>
     </Reference>
     <Reference Include="Magnum, Version=2.1.3.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
@@ -67,7 +66,9 @@
   <ItemGroup>
     <Compile Include="Data\Assertion.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
+    <Compile Include="Frameworks\Framework.cs" />
     <Compile Include="ICancellable.cs" />
+    <Compile Include="IFrameworkDetector.cs" />
     <Compile Include="IInstanceContext.cs" />
     <Compile Include="IModuleReader.cs" />
     <Compile Include="Impl\Cancellable.cs" />
@@ -140,6 +141,11 @@
   <ItemGroup>
     <Content Include="Exports\CallbackManager.h" />
     <Content Include="Exports\VersionSymbols.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Frameworks\Jasmine\" />
+    <Folder Include="Frameworks\NodeJs\" />
+    <Folder Include="Frameworks\RequireJs\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

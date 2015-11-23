@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ContinuousRunner.Extensions;
+using ContinuousRunner.Frameworks;
 using JetBrains.Annotations;
 using Jint.Parser.Ast;
 using Magnum;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ContinuousRunner.Data;
+using ContinuousRunner.Extensions;
 using JetBrains.Annotations;
 using Jint.Parser.Ast;
 using Magnum;
