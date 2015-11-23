@@ -13,12 +13,12 @@ namespace ContinuousRunner.Impl
     {
         #region Constructors
 
-        public ModuleReader(IInstanceContext IInstanceContext, ISourceDependencies sourceDependencies,
+        public ModuleReader(IInstanceContext IInstanceContext, ISourceSet SourceSet,
             IReferenceResolver referenceResolver)
         {
             _context = IInstanceContext;
 
-            _sourceDependencies = sourceDependencies;
+            _SourceSet = SourceSet;
 
             _referenceResolver = referenceResolver;
         }
@@ -29,7 +29,7 @@ namespace ContinuousRunner.Impl
 
         private readonly IInstanceContext _context;
 
-        private readonly ISourceDependencies _sourceDependencies;
+        private readonly ISourceSet _SourceSet;
 
         private readonly IReferenceResolver _referenceResolver;
 
@@ -43,7 +43,7 @@ namespace ContinuousRunner.Impl
         {
             var define = GetDefinitionExpression(script);
 
-            return new ModuleDefinition(@ref => _sourceDependencies.GetScriptFromModuleReference(@ref))
+            return new ModuleDefinition(@ref => _SourceSet.GetScriptFromModuleReference(@ref))
                    {
                        ModuleReferences = GetDependencies(script, define).ToList(),
                        Expression = GetDefinitionReturnExpression(define),

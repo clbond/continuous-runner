@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Magnum;
 
 namespace ContinuousRunner.Impl
 {
@@ -9,8 +10,7 @@ namespace ContinuousRunner.Impl
 
         public ReferenceResolver(IInstanceContext instanceContext)
         {
-            Magnum.Guard.AgainstNull(instanceContext, nameof(instanceContext));
-
+            Guard.AgainstNull(instanceContext, nameof(instanceContext));
             _instanceContext = instanceContext;
         }
 

@@ -1,19 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using Magnum;
 using Magnum.Extensions;
 
 namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class SourceDependencies : ISourceDependencies
+    public class SourceSet : ISourceSet
     {
         #region Constructors
 
-        public SourceDependencies(IRunQueue testQueue)
+        public SourceSet(IRunQueue testQueue, IEnumerable<ISourceObserver> observers)
         {
+            Guard.AgainstNull(testQueue, nameof(testQueue));
             _testQueue = testQueue;
+
+            _observers = observers;
         }
 
         #endregion
@@ -26,9 +31,11 @@ namespace ContinuousRunner.Impl
 
         private readonly IRunQueue _testQueue;
 
+        private readonly IEnumerable<ISourceObserver> _observers;
+
         #endregion
 
-        #region Implementation of ISourceDependencies
+        #region Implementation of ISourceSet
 
         public void Add(IScript script)
         {
@@ -37,6 +44,8 @@ namespace ContinuousRunner.Impl
             _map.Add(script.File.Name, script);
 
             Changed(script);
+
+            NotifyObservers(o => o.Added(script));
         }
 
         public void Remove(IScript script)
@@ -44,6 +53,8 @@ namespace ContinuousRunner.Impl
             _set.Remove(script);
 
             _map.Remove(script.File.Name);
+
+            NotifyObservers(o => o.Removed(script));
         }
 
         public void Remove(FileInfo fileInfo)
@@ -55,6 +66,8 @@ namespace ContinuousRunner.Impl
 
         public void Changed(IScript script)
         {
+            NotifyObservers(o => o.Changed(script));
+
             _testQueue.Push(script);
 
             foreach (var dependency in GetDependencies(script))
@@ -86,6 +99,23 @@ namespace ContinuousRunner.Impl
         public IEnumerable<TestSuite> GetSuites()
         {
             return _set.SelectMany(script => script.Suites);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private void NotifyObservers(Action<ISourceObserver> handler)
+        {
+            if (_observers == null)
+            {
+                return;
+            }
+
+            foreach (var observer in _observers)
+            {
+                handler?.Invoke(observer);
+            }
         }
 
         #endregion

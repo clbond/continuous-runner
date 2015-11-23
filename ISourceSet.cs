@@ -1,19 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using ContinuousRunner.Data;
 
 namespace ContinuousRunner
 {
-    public interface ISourceDependencies
+    using Data;
+
+    public interface ISourceSet
     {
-        void Add(IScript script);
-
-        void Remove(IScript script);
-
-        void Remove(FileInfo fileInfo);
-
-        void Changed(IScript script);
-
         IScript GetScript(FileInfo fileInfo);
 
         IScript GetScriptFromModuleReference(string absoluteReference);

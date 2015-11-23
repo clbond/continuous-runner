@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Magnum;
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -10,12 +11,18 @@ namespace ContinuousRunner.Impl
     {
         #region Constructors
 
-        public Watcher(ISourceDependencies dependencies, IScriptLoader scriptLoader, IRunQueue testQueue)
+        public Watcher(
+            ISourceSet sourceSet,
+            IScriptLoader scriptLoader,
+            IRunQueue testQueue)
         {
-            _dependencies = dependencies;
+            Guard.AgainstNull(sourceSet, nameof(sourceSet));
+            _sourceSet = sourceSet;
 
+            Guard.AgainstNull(scriptLoader, nameof(scriptLoader));
             _scriptLoader = scriptLoader;
 
+            Guard.AgainstNull(testQueue, nameof(testQueue));
             _testQueue = testQueue;
         }
 
@@ -29,7 +36,7 @@ namespace ContinuousRunner.Impl
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ISourceDependencies _dependencies;
+        private readonly ISourceSet _sourceSet;
 
         private readonly IScriptLoader _scriptLoader;
 
@@ -108,7 +115,7 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                _dependencies.Remove(new FileInfo(e.OldFullPath));
+                _sourceSet.Remove(new FileInfo(e.OldFullPath));
             }
             catch (Exception ex)
             {
@@ -119,7 +126,7 @@ namespace ContinuousRunner.Impl
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                _dependencies.Add(script);
+                _sourceSet.Add(script);
             }
             catch (Exception ex)
             {
@@ -134,7 +141,7 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                _dependencies.Remove(new FileInfo(e.FullPath));
+                _sourceSet.Remove(new FileInfo(e.FullPath));
             }
             catch (Exception ex)
             {
@@ -148,7 +155,7 @@ namespace ContinuousRunner.Impl
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                _dependencies.Add(script);
+                _sourceSet.Add(script);
             }
             catch (Exception ex)
             {
@@ -160,18 +167,18 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                var script = _dependencies.GetScript(new FileInfo(e.FullPath));
+                var script = _sourceSet.GetScript(new FileInfo(e.FullPath));
                 if (script != null)
                 {
                     script.Reload();
 
-                    _dependencies.Changed(script);
+                    _sourceSet.Changed(script);
                 }
                 else
                 {
                     script  = _scriptLoader.Load(new FileInfo(e.FullPath));
 
-                    _dependencies.Add(script);
+                    _sourceSet.Add(script);
                 }
             }
             catch (Exception ex)

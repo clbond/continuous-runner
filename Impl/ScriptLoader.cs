@@ -9,6 +9,29 @@ namespace ContinuousRunner.Impl
 {
     public class ScriptLoader : IScriptLoader
     {
+        #region Constructors
+
+        public ScriptLoader(
+            IInstanceContext instanceContext,
+            IModuleReader moduleReader,
+            IScriptParser scriptParser,
+            ISourceSet sourceSet)
+        {
+            Guard.AgainstNull(instanceContext, nameof(instanceContext));
+            _instanceContext = instanceContext;
+
+            Guard.AgainstNull(moduleReader, nameof(moduleReader));
+            _moduleReader = moduleReader;
+
+            Guard.AgainstNull(scriptParser, nameof(scriptParser));
+            _scriptParser = scriptParser;
+
+            Guard.AgainstNull(sourceSet, nameof(sourceSet));
+            _SourceSet = sourceSet;
+        }
+
+        #endregion
+
         #region Private members
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -19,29 +42,10 @@ namespace ContinuousRunner.Impl
 
         private readonly IScriptParser _scriptParser;
 
-        private readonly ISourceDependencies _sourceDependencies;
+        private readonly ISourceSet _SourceSet;
 
         #endregion
 
-        public ScriptLoader(
-            IInstanceContext instanceContext,
-            IModuleReader moduleReader,
-            IScriptParser scriptParser,
-            ISourceDependencies sourceDependencies)
-        {
-            Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            Guard.AgainstNull(moduleReader, nameof(moduleReader));
-            Guard.AgainstNull(scriptParser, nameof(scriptParser));
-            Guard.AgainstNull(sourceDependencies, nameof(sourceDependencies));
-
-            _instanceContext = instanceContext;
-
-            _moduleReader = moduleReader;
-
-            _scriptParser = scriptParser;
-
-            _sourceDependencies = sourceDependencies;
-        }
 
         #region Implementation of IScriptLoader
 
@@ -78,7 +82,7 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                var script = _sourceDependencies.GetScript(fileInfo);
+                var script = _SourceSet.GetScript(fileInfo);
                 if (script == null)
                 {
                     script = Load(fileInfo);
