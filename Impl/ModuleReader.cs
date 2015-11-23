@@ -88,6 +88,11 @@ namespace ContinuousRunner.Impl
 
         private IEnumerable<string> ExtractReferencesFromArgument(IScript script, Expression expression)
         {
+            if (expression == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
             var array = expression.As<ArrayExpression>();
 
             return array.Elements

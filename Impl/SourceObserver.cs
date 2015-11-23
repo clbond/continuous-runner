@@ -1,4 +1,4 @@
-﻿using System;
+﻿using ContinuousRunner.Extensions;
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -6,60 +6,44 @@ namespace ContinuousRunner.Impl
     public class SourceObserver : ISourceObserver
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        #region Implementation of ISourceObserver
         
-        #endregion
-
         #region Implementation of ISourceObserver
 
         public void Added(IScript script)
         {
-            SafeInvoke(OnAdded, script);
+            var exceptions = OnAdded.SafeInvoke(script);
+
+            foreach (var ex in exceptions)
+            {
+                _logger.Error(ex, $"Error while processing file-added event: {script.File.Name}: {ex.Message}");
+            }
         }
 
         public event SourceChangedHandler OnAdded;
 
         public void Removed(IScript script)
         {
-            SafeInvoke(OnRemoved, script);
+            var exceptions = OnRemoved.SafeInvoke(script);
+
+            foreach (var ex in exceptions)
+            {
+                _logger.Error(ex, $"Error while processing file-removed event: {script.File.Name}: {ex.Message}");
+            }
         }
 
         public event SourceChangedHandler OnRemoved;
 
         public void Changed(IScript script)
         {
-            SafeInvoke(OnChanged, script);
+            var exceptions = OnChanged.SafeInvoke(script);
+
+            foreach (var ex in exceptions)
+            {
+                _logger.Error(ex, $"Error while processing source-changed event: {script.File.Name}: {ex.Message}");
+            }
         }
 
         public event SourceChangedHandler OnChanged;
-
-        #endregion
-
-        #region Private methods
-
-        /// <summary>
-        /// We do not want an exception thrown from one event handler to impact subsequent handlers, so we
-        /// wrap each handler invocation in a try-catch block so that we can at least ensure each handler is
-        /// called, regardless of the success or failure of prior handlers
-        /// </summary>
-        private void SafeInvoke(SourceChangedHandler sourceChangedHandler, IScript script)
-        {
-            if (sourceChangedHandler != null)
-            {
-                foreach (var invoke in sourceChangedHandler.GetInvocationList())
-                {
-                    try
-                    {
-                        invoke.DynamicInvoke(script);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error(ex, $"Uncaught exception while processing script add event: {ex.Message}");
-                    }
-                }
-            }
-        }
 
         #endregion
     }

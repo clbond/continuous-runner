@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace ContinuousRunner
 {
     using Data;
 
-    public interface ISourceSet
+    public interface ISourceSet : IDisposable
     {
         IScript GetScript(FileInfo fileInfo);
 

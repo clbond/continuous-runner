@@ -21,7 +21,12 @@ namespace ContinuousRunner.Data
 
         public IEnumerable<IScript> GetDependencies()
         {
-            return ModuleReferences.Select(@ref => _dependencyResolver(@ref)).Where(script => script != null);
+            if (_dependencyResolver == null)
+            {
+                return Enumerable.Empty<IScript>();
+            }
+
+            return ModuleReferences.Select(_dependencyResolver).Where(script => script != null);
         }
     }
 }

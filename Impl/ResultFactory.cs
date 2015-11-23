@@ -9,11 +9,19 @@ namespace ContinuousRunner.Impl
     {
         #region Implementation of ITestResultFactory
 
+        public TestResult InitialState()
+        {
+            return new TestResult
+                   {
+                       Status = TestStatus.Indeterminate
+                   };
+        }
+
         public TestResult Deleted()
         {
             return new TestResult
             {
-                Logs = SingleLog("This test has been deleted from the source"),
+                Logs = SingleLog("Test has been deleted from the source"),
                 Status = TestStatus.Deleted
             };
         }

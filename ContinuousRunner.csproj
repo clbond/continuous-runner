@@ -66,13 +66,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Assertion.cs" />
+    <Compile Include="Extensions\DelegateExtensions.cs" />
     <Compile Include="ICancellable.cs" />
-    <Compile Include="IContinuousRunner.cs" />
     <Compile Include="IInstanceContext.cs" />
     <Compile Include="IModuleReader.cs" />
     <Compile Include="Impl\Cancellable.cs" />
+    <Compile Include="Impl\ResultObserver.cs" />
     <Compile Include="Impl\SourceObserver.cs" />
+    <Compile Include="Impl\SuiteReader.cs" />
+    <Compile Include="Impl\Test.cs" />
     <Compile Include="IReferenceResolver.cs" />
+    <Compile Include="IResultObserver.cs" />
     <Compile Include="IResultWriter.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IRunQueue.cs" />
@@ -86,6 +90,7 @@
     <Compile Include="Impl\ResultWriter.cs" />
     <Compile Include="Impl\Parser.cs" />
     <Compile Include="Extensions\SyntaxExtensions.cs" />
+    <Compile Include="ISuiteReader.cs" />
     <Compile Include="SourceChangedHandler.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="Impl\RunQueue.cs" />
@@ -106,6 +111,8 @@
     <Compile Include="ITest.cs" />
     <Compile Include="Data\TestSuite.cs" />
     <Compile Include="Impl\Script.cs" />
+    <Compile Include="TestResultChanged.cs" />
+    <Compile Include="TestResultChangedHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Licenses\ClearScript.main.license" />

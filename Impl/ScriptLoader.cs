@@ -16,20 +16,24 @@ namespace ContinuousRunner.Impl
         public ScriptLoader(
             [NotNull] IInstanceContext instanceContext,
             [NotNull] IModuleReader moduleReader,
-            [NotNull] IParser scriptParser,
-            [NotNull] ISourceSet sourceSet)
+            [NotNull] IParser parser,
+            [NotNull] ISourceMutator sourceMutator,
+            [NotNull] ISourceSet sourceSet,
+            [NotNull] ISuiteReader suiteReader)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            _instanceContext = instanceContext;
-
             Guard.AgainstNull(moduleReader, nameof(moduleReader));
-            _moduleReader = moduleReader;
-
-            Guard.AgainstNull(scriptParser, nameof(scriptParser));
-            _scriptParser = scriptParser;
-
+            Guard.AgainstNull(parser, nameof(parser));
+            Guard.AgainstNull(sourceMutator, nameof(sourceMutator));
             Guard.AgainstNull(sourceSet, nameof(sourceSet));
-            _SourceSet = sourceSet;
+            Guard.AgainstNull(suiteReader, nameof(suiteReader));
+
+            _instanceContext = instanceContext;
+            _moduleReader = moduleReader;
+            _parser = parser;
+            _sourceMutator = sourceMutator;
+            _sourceSet = sourceSet;
+            _suiteReader = suiteReader;
         }
 
         #endregion
@@ -42,9 +46,13 @@ namespace ContinuousRunner.Impl
 
         private readonly IModuleReader _moduleReader;
 
-        private readonly IParser _scriptParser;
+        private readonly IParser _parser;
 
-        private readonly ISourceSet _SourceSet;
+        private readonly ISourceSet _sourceSet;
+
+        private readonly ISourceMutator _sourceMutator;
+
+        private readonly ISuiteReader _suiteReader;
 
         #endregion
 
@@ -55,7 +63,7 @@ namespace ContinuousRunner.Impl
         {
             var files = _instanceContext.ScriptsRoot.GetFiles(Constants.FilenameFilter, SearchOption.AllDirectories);
 
-            return files.Select(TryLoad).Where(s => s != null).ToList();
+            return files.Select(TryLoad).Where(script => script != null);
         }
 
         public IEnumerable<IScript> GetTestScripts()
@@ -64,18 +72,21 @@ namespace ContinuousRunner.Impl
 
             files = files.Where(f => Constants.SearchExpression.IsMatch(f.Name)).ToArray();
 
-            return files.Select(TryLoad).Where(s => s != null).ToList();
+            return files.Select(TryLoad).Where(s => s != null);
         }
 
         public IScript Load(FileInfo script)
         {
-            Func<IScript, SyntaxTree> loader = s => _scriptParser.Parse(s.File);
+            Func<IScript, SyntaxTree> loader = s => _parser.Parse(s.File);
 
             Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
 
-            return new Script(loader, moduleLoader)
+            Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.Get(s);
+
+            return new Script(loader, moduleLoader, suiteLoader)
                    {
-                       File = script
+                       File = script,
+                       SyntaxTree = _parser.Parse(script)
                    };
         }
 
@@ -87,7 +98,9 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                var script = _SourceSet.GetScript(fileInfo);
+                _logger.Debug($"Loading script: {0}", fileInfo.Name);
+
+                var script = _sourceSet.GetScript(fileInfo);
                 if (script == null)
                 {
                     script = Load(fileInfo);
@@ -96,6 +109,8 @@ namespace ContinuousRunner.Impl
                 {
                     script.Reload();
                 }
+
+                _sourceMutator.Add(script);
 
                 return script;
             }

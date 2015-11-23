@@ -7,6 +7,11 @@ namespace ContinuousRunner
 
     public interface IResultFactory
     {
+        /// <summary>
+        /// Create a state indicating that the test has never been run
+        /// </summary>
+        TestResult InitialState();
+
         TestResult Deleted();
 
         TestResult FailedToRun(Exception exception);

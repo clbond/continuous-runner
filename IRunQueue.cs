@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContinuousRunner
@@ -8,7 +9,7 @@ namespace ContinuousRunner
     /// <summary>
     /// Represents a queue of tests that need to be run
     /// </summary>
-    public interface IRunQueue
+    public interface IRunQueue : IDisposable
     {
         void Push(IScript script);
 

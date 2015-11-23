@@ -11,10 +11,14 @@ namespace ContinuousRunner.Impl
         #region Constructors
 
         public Watcher(
+            [NotNull] IInstanceContext instanceContext,
             [NotNull] ISourceMutator mutator,
             [NotNull] ISourceSet sourceSet,
             [NotNull] IScriptLoader scriptLoader)
         {
+            Guard.AgainstNull(instanceContext, nameof(instanceContext));
+            _instanceContext = instanceContext;
+
             Guard.AgainstNull(mutator, nameof(mutator));
             _mutator = mutator;
 
@@ -30,6 +34,8 @@ namespace ContinuousRunner.Impl
         #region Private members
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        private readonly IInstanceContext _instanceContext;
 
         private readonly ISourceSet _sourceSet;
 
@@ -60,6 +66,11 @@ namespace ContinuousRunner.Impl
             watcher.EndInit();
 
             return new Cancellable(() => watcher.Dispose());
+        }
+
+        public ICancellable Watch()
+        {
+            return Watch(_instanceContext.ScriptsRoot);
         }
 
         #endregion

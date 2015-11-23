@@ -13,11 +13,16 @@ namespace ContinuousRunner.Impl
 
         public Script(
             [NotNull] Func<IScript, SyntaxTree> reloader,
-            [NotNull] Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader) 
+            [NotNull] Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader,
+            [NotNull] Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader)
         {
             _reloader = reloader;
 
             _moduleLoader = moduleLoader;
+
+            _suiteLoader = suiteLoader;
+
+            Reset();
         }
 
         #endregion
@@ -27,6 +32,8 @@ namespace ContinuousRunner.Impl
         private readonly Func<IScript, SyntaxTree> _reloader;
 
         private readonly Func<IScript, SyntaxTree, ModuleDefinition> _moduleLoader;
+
+        private readonly Func<IScript, SyntaxTree, IEnumerable<TestSuite>> _suiteLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
 
@@ -68,6 +75,9 @@ namespace ContinuousRunner.Impl
                 // the code again to extract the define() call and determine what the dependencies of
                 // this file are so that we can construct a dependency tree.
                 Module = _moduleLoader?.Invoke(this, value);
+
+                // Let observers know that we have changed
+                Changed?.Invoke(this);
             }
         }
         
@@ -80,6 +90,8 @@ namespace ContinuousRunner.Impl
                 throw new TestException($"Reload failed: reloader delegate returned null");
             }
         }
+
+        public event SourceChangedHandler Changed;
 
         #endregion
 
@@ -108,7 +120,7 @@ namespace ContinuousRunner.Impl
 
         private IEnumerable<TestSuite> GetSuites()
         {
-            yield break;
+            return _suiteLoader?.Invoke(this, SyntaxTree);
         }
 
         #endregion

@@ -7,11 +7,12 @@ namespace ContinuousRunner
 {
     public static class SyntaxExtensions
     {
-        public static void Walk<T>(this IEnumerable<SyntaxNode> nodes, Action<T> f) where T : SyntaxNode
+        public static void Walk<T>(this IEnumerable<SyntaxNode> nodes, Action<T> f)
+            where T : SyntaxNode
         {
             foreach (var node in nodes)
             {
-                Walk(node, f);
+                Walk<T>(node, f);
             }
         }
 
@@ -25,7 +26,7 @@ namespace ContinuousRunner
             var matchingType = node as T;
             if (matchingType != null)
             {
-                f(matchingType);
+                f?.Invoke(matchingType);
             }
 
             switch (node.Type)
@@ -249,6 +250,19 @@ namespace ContinuousRunner
                          });
 
             return results.FirstOrDefault();
+        }
+
+        public static IEnumerable<T> Search<T>(this IEnumerable<SyntaxNode> nodes, Func<T, bool> match)
+            where T : SyntaxNode
+        {
+            var result = new List<T>();
+
+            foreach (var node in nodes)
+            {
+                result.AddRange(Search<T>(node, match));
+            }
+
+            return result;
         }
     }
 }
