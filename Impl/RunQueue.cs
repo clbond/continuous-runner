@@ -37,11 +37,13 @@ namespace ContinuousRunner.Impl
                 {
                     set.Add(script);
 
-                    SetTimer();
-
                     if (set.Count >= Constants.MaximumQueueSize)
                     {
                         Task.Run(() => Run());
+                    }
+                    else
+                    {
+                        SetTimer();
                     }
                 });
         }
