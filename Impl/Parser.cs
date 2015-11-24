@@ -9,7 +9,12 @@ namespace ContinuousRunner.Impl
     {
         #region Implementation of IScriptParser
 
-        public SyntaxTree Parse(FileInfo fileInfo)
+        public virtual SyntaxTree Parse(FileInfo fileInfo)
+        {
+            return Parse(GetScript(fileInfo));
+        }
+
+        public virtual SyntaxTree Parse(string script)
         {
             var parser = new Jint.Parser.JavaScriptParser();
 
@@ -17,7 +22,7 @@ namespace ContinuousRunner.Impl
             {
                 return new SyntaxTree
                 {
-                    Root = parser.Parse(GetScript(fileInfo))
+                    Root = parser.Parse(script)
                 };
             }
             catch (Exception ex)

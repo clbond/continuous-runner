@@ -7,5 +7,7 @@ namespace ContinuousRunner
     public interface IParser
     {
         SyntaxTree Parse(FileInfo fileInfo);
+
+        SyntaxTree Parse(string script);
     }
 }

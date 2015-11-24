@@ -1,4 +1,5 @@
-﻿using ContinuousRunner.Frameworks;
+﻿using System.Collections.Generic;
+using ContinuousRunner.Frameworks;
 
 namespace ContinuousRunner
 {
@@ -11,5 +12,11 @@ namespace ContinuousRunner
         /// configuring <see cref="IInstanceContext" />.
         /// </summary>
         Framework DetectFrameworks(IScript script);
+
+        /// <summary>
+        /// Determine what frameworks are probably being used, but use several source files as input instead of a single
+        /// source file. This is more reliable; you should use this overload whenever possible.
+        /// </summary>
+        Framework DetectFrameworks(IEnumerable<IScript> script);
     }
 }

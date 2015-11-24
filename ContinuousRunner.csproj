@@ -72,6 +72,7 @@
     <Compile Include="IInstanceContext.cs" />
     <Compile Include="IModuleReader.cs" />
     <Compile Include="Impl\Cancellable.cs" />
+    <Compile Include="Impl\FrameworkDetector.cs" />
     <Compile Include="Impl\ResultObserver.cs" />
     <Compile Include="Impl\SourceObserver.cs" />
     <Compile Include="Impl\SuiteReader.cs" />
