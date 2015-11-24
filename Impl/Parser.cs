@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace ContinuousRunner.Impl
 {
@@ -16,6 +17,11 @@ namespace ContinuousRunner.Impl
 
         public virtual SyntaxTree Parse(string script)
         {
+            if (script == null)
+            {
+                throw new ArgumentNullException(nameof(script));
+            }
+
             var parser = new Jint.Parser.JavaScriptParser();
 
             try
@@ -27,7 +33,9 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                throw new TestException($"Failed to parse JavaScript file: {fileInfo}", ex);
+                var first = script.Take(256);
+
+                throw new TestException($"Failed to parse JavaScript content ({first}...)", ex);
             }
         }
 
