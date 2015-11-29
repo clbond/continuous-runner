@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Jint.Parser.Ast;
 
@@ -12,12 +13,12 @@ namespace ContinuousRunner.Frameworks.Detectors
 
         public Framework Detect(IScript script)
         {
-            var matches = script.SyntaxTree.Search<CallExpression>(IsRequireWithStringArgument);
-            if (matches.Any())
+            var matches = script.SyntaxTree.Search<CallExpression>(IsRequireCall);
+            if (matches.Any(IsRequireWithStringArgument))
             {
                 return Framework.NodeJs;
             }
-
+            
             return Framework.None;
         }
 
@@ -38,6 +39,7 @@ namespace ContinuousRunner.Frameworks.Detectors
             }
 
             var argument = expr.Arguments.First();
+
             switch (argument.Type)
             {
                 case SyntaxNodes.ArrayExpression: // require(['foo']) is AMD syntax, not NodeJS
@@ -57,13 +59,13 @@ namespace ContinuousRunner.Frameworks.Detectors
             {
                 case SyntaxNodes.Identifier:
                     var identifier = callee.As<Identifier>();
-                    return Constants.FunctionIdentifiers.SuiteFunctions.Contains(identifier.Name);
+                    return string.Equals(identifier.Name, @"require", StringComparison.CurrentCulture);
                 case SyntaxNodes.MemberExpression:
                     var member = callee.As<MemberExpression>();
                     if (member.Property.Type == SyntaxNodes.Identifier)
                     {
                         var property = member.Property.As<Identifier>();
-                        return Constants.FunctionIdentifiers.SuiteFunctions.Contains(property.Name);
+                        return string.Equals(property.Name, @"require", StringComparison.CurrentCulture);
                     }
                     break;
             }

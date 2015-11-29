@@ -1,8 +1,9 @@
 ﻿using Autofac;
-using ContinuousRunner.Frameworks;
 
 namespace ContinuousRunner
 {
+    using Frameworks;
+    using Frameworks.Detectors;
     using Impl;
 
     public class Module : Autofac.Module
@@ -19,6 +20,9 @@ namespace ContinuousRunner
 
             builder.RegisterType<DetectRequire>()
                    .As<IDetector>();
+
+            builder.RegisterType<FrameworkDetector>()
+                   .AsImplementedInterfaces();
 
             builder.RegisterType<ModuleReader>()
                    .AsImplementedInterfaces();

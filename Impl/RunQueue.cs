@@ -15,9 +15,9 @@ namespace ContinuousRunner.Impl
         private readonly ReaderWriterLockedObject<HashSet<IScript>> _waiting =
             new ReaderWriterLockedObject<HashSet<IScript>>(new HashSet<IScript>(), LockRecursionPolicy.SupportsRecursion);
 
-        private Timer _timer;
-
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        private volatile bool _running;
 
         #region Implementation of ITestQueue
 
@@ -37,53 +37,58 @@ namespace ContinuousRunner.Impl
                 {
                     set.Add(script);
 
-                    if (set.Count >= Constants.MaximumQueueSize)
+                    if (_running == false)
                     {
                         Task.Run(() => Run());
-                    }
-                    else
-                    {
-                        SetTimer();
                     }
                 });
         }
 
         public IEnumerable<Task<TestResult>> Run()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
-
             IScript[] scripts = null;
 
-            _waiting.ReadLock(set => scripts = set.ToArray());
+            _running = true;
 
-            if (scripts.Length == 0)
+            var tasks = new List<Task<TestResult>>();
+
+            try
             {
-                yield break;
+                while (true)
+                {
+                    _waiting.ReadLock(set => scripts = set.ToArray());
+
+                    if (scripts.Length == 0)
+                    {
+                        break;
+                    }
+
+                    foreach (var script in scripts)
+                    {
+                        var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
+                        if (scriptTasks.Any() == false)
+                        {
+                            continue;
+                        }
+
+                        _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
+
+                        tasks.AddRange(scriptTasks);
+
+                        _waiting.WriteLock(set => set.Remove(script));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"Uncaught exception while running tests: {ex.ToString()}");
+            }
+            finally
+            {
+                _running = false;
             }
 
-            foreach (var script in scripts)
-            {
-                var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
-                if (scriptTasks.Any() == false)
-                {
-                    continue;
-                }
-
-                _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
-
-                Task.WhenAll(scriptTasks).ContinueWith(t => _waiting.WriteLock(set => set.Remove(script)));
-
-                foreach (var task in scriptTasks)
-                {
-                    yield return task;
-                }
-
-                _waiting.WriteLock(set => set.Remove(script));
-            }
+            return tasks;
         }
 
         #endregion
@@ -92,23 +97,12 @@ namespace ContinuousRunner.Impl
         
         public void Dispose()
         {
-            _timer?.Dispose();
-
             _waiting.Dispose();
         }
         
         #endregion
 
         #region Private methods
-
-        private void SetTimer()
-        {
-            if (_timer == null)
-            {
-                _timer = new Timer(@obj => Task.Run(() => Run()));
-                _timer.Change(Constants.QueueWait, TimeSpan.FromMilliseconds(-1));
-            }
-        }
 
         #endregion
     }

@@ -14,8 +14,6 @@ namespace Tests
 
         public static FileInfo FromString(string content)
         {
-            var mock = new Mock<FileInfo>();
-
             var path = _collection.AddExtension(Convert.ToInt32(_random.Next()).ToString());
 
             var fs = new FileInfo(path);

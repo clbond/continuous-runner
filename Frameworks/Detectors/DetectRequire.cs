@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Jint.Parser.Ast;
 
@@ -27,33 +28,35 @@ namespace ContinuousRunner.Frameworks.Detectors
 
         private static bool IsRequireWithStringArgument(CallExpression expr)
         {
-            if (!IsRequireCall(expr))
+            if (IsRequireCall(expr, @"require"))
             {
-                return false;
+                if (!expr.Arguments.Any())
+                {
+                    return false;
+                }
+
+                // Determine whether this call to require is more likely to be a NodeJS module import, or
+                // an asynchronous import (RequireJS). Both RequireJS and NodeJS use require() but they have
+                // different signatures, and this function is trying to figure out which one is being invoked.
+                var argument = expr.Arguments.First();
+
+                switch (argument.Type)
+                {
+                    case SyntaxNodes.ArrayExpression:
+                        return true;
+                    case SyntaxNodes.Literal:
+                        return false;
+                }
             }
-
-            if (!expr.Arguments.Any())
+            else if (IsRequireCall(expr, @"define"))
             {
-                return false;
-            }
-
-            // Determine whether this call to require is more likely to be a NodeJS module import, or
-            // an asynchronous import (RequireJS). Both RequireJS and NodeJS use require() but they have
-            // different signatures, and this function is trying to figure out which one is being invoked.
-            var argument = expr.Arguments.First();
-
-            switch (argument.Type)
-            {
-                case SyntaxNodes.ArrayExpression:
-                    return true;
-                case SyntaxNodes.Literal:
-                    return true;
+                return true;
             }
 
             return false;
         }
 
-        private static bool IsRequireCall(CallExpression expr)
+        private static bool IsRequireCall(CallExpression expr, string function)
         {
             var callee = expr.Callee;
 
@@ -61,13 +64,13 @@ namespace ContinuousRunner.Frameworks.Detectors
             {
                 case SyntaxNodes.Identifier:
                     var identifier = callee.As<Identifier>();
-                    return Constants.FunctionIdentifiers.SuiteFunctions.Contains(identifier.Name);
+                    return string.Equals(identifier.Name, function, StringComparison.CurrentCulture);
                 case SyntaxNodes.MemberExpression:
                     var member = callee.As<MemberExpression>();
                     if (member.Property.Type == SyntaxNodes.Identifier)
                     {
                         var property = member.Property.As<Identifier>();
-                        return Constants.FunctionIdentifiers.SuiteFunctions.Contains(property.Name);
+                        return string.Equals(property.Name, function, StringComparison.CurrentCulture);
                     }
                     break;
             }
