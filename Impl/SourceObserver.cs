@@ -1,8 +1,9 @@
-﻿using ContinuousRunner.Extensions;
-using NLog;
+﻿using NLog;
 
 namespace ContinuousRunner.Impl
 {
+    using Extensions;
+
     public class SourceObserver : ISourceObserver
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();

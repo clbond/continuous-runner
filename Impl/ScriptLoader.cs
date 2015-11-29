@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Magnum;
-using NLog;
 using System.IO;
-using ContinuousRunner.Data;
+using System.Linq;
+
 using JetBrains.Annotations;
+
+using Magnum;
+
+using NLog;
 
 namespace ContinuousRunner.Impl
 {
+    using Data;
+
     public class ScriptLoader : IScriptLoader
     {
         #region Constructors
@@ -56,7 +60,6 @@ namespace ContinuousRunner.Impl
 
         #endregion
 
-
         #region Implementation of IScriptLoader
 
         public IEnumerable<IScript> GetScripts()
@@ -98,7 +101,7 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                _logger.Debug($"Loading script: {0}", fileInfo.Name);
+                _logger.Info($"Loading script: {0}", fileInfo.Name);
 
                 var script = _sourceSet.GetScript(fileInfo);
                 if (script == null)

@@ -30,12 +30,16 @@ namespace ContinuousRunner
             /// <summary>
             /// The name of the JavaScript function that is used to define a test suite (eg describe())
             /// </summary>
-            public static readonly string[] SuiteFunctions = {@"describe"};
+            public static readonly string[] SuiteFunctions = {@"describe", @"fdescribe"};
 
             /// <summary>
             /// The name of the JavaScript function that is used to define a test
             /// </summary>
-            public static readonly string[] TestFunction = {@"it"};
+            public static readonly string[] TestFunction = {@"it", @"fit"};
+
+            public static readonly string[] RequireFunctions = {"require", "requirejs", "define"};
+
+            public static readonly string[] NodeFunctions ={""};
         }
     }
 }

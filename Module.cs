@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ContinuousRunner.Frameworks;
 
 namespace ContinuousRunner
 {
@@ -9,6 +10,15 @@ namespace ContinuousRunner
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
+
+            builder.RegisterType<DetectJasmine>()
+                   .As<IDetector>();
+
+            builder.RegisterType<DetectNode>()
+                   .As<IDetector>();
+
+            builder.RegisterType<DetectRequire>()
+                   .As<IDetector>();
 
             builder.RegisterType<ModuleReader>()
                    .AsImplementedInterfaces();

@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ContinuousRunner.Data;
 using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Extensions
 {
     public static class SyntaxExtensions
     {
+        public static void Walk<T>(this SyntaxTree syntaxTree, Action<T> f)
+            where T : SyntaxNode
+        {
+            Walk(syntaxTree.Root, f);
+        }
+
         public static void Walk<T>(this IEnumerable<SyntaxNode> nodes, Action<T> f)
             where T : SyntaxNode
         {
@@ -226,7 +233,14 @@ namespace ContinuousRunner.Extensions
             }
         }
 
-        public static IEnumerable<T> Search<T>(this SyntaxNode node, Func<T, bool> match) where T : SyntaxNode
+        public static IEnumerable<T> Search<T>(this SyntaxTree tree, Func<T, bool> match)
+            where T : SyntaxNode
+        {
+            return Search(tree.Root, match);
+        }
+
+        public static IEnumerable<T> Search<T>(this SyntaxNode node, Func<T, bool> match)
+            where T : SyntaxNode
         {
             var results = new List<T>();
 
@@ -241,7 +255,8 @@ namespace ContinuousRunner.Extensions
             return results;
         }
 
-        public static T SearchSingle<T>(this SyntaxNode node, Func<T, bool> match) where T : SyntaxNode
+        public static T SearchSingle<T>(this SyntaxNode node, Func<T, bool> match)
+            where T : SyntaxNode
         {
             var results = new List<T>();
 
