@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
@@ -52,6 +53,18 @@ namespace ContinuousRunner.Impl
         public IEnumerable<TestSuite> Suites => _suites.Value;
 
         public IEnumerable<IScript> Requires => _dependencies.Value;
+
+        public string Content { get; set; }
+
+        public string Description => File?.Name ?? @"anonymous script";
+
+        public int TestCount
+        {
+            get
+            {
+                return Suites.Sum(suite => suite.Tests.Count);
+            }
+        }
 
         public SyntaxTree SyntaxTree
         {

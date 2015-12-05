@@ -2,7 +2,7 @@
 using ContinuousRunner.Impl;
 using Moq;
 
-namespace Tests
+namespace ContinuousRunner.Tests
 {
     public static class ScriptMock
     {

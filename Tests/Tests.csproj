@@ -6,8 +6,8 @@
     <ProjectGuid>{773DCE24-B92B-4301-9FF1-291BF551A353}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tests</RootNamespace>
-    <AssemblyName>Tests</AssemblyName>
+    <RootNamespace>ContinuousRunner.Tests</RootNamespace>
+    <AssemblyName>ContinuousRunner.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -26,6 +26,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -63,14 +64,25 @@
     <Compile Include="FileMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptMock.cs" />
+    <Compile Include="ScriptRunnerTests.cs" />
+    <Compile Include="TestInstance.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ClearScript\ClearScript\ClearScript.csproj">
+      <Project>{d2382d2c-6576-4d96-b6cd-057c4f6bed96}</Project>
+      <Name>ClearScript</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClearScript\ClearScript\V8\ClearScriptV8\64\ClearScriptV8-64.vcxproj">
+      <Project>{cdcf4eea-1ca4-412e-8c77-78893a67a577}</Project>
+      <Name>ClearScriptV8-64</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ContinuousRunner.csproj">
       <Project>{7337d0d8-505f-4a3d-ab7c-cbbce60d065e}</Project>
       <Name>ContinuousRunner</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Container.cs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Choose>

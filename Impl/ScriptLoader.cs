@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using ContinuousRunner.Extractors;
 using JetBrains.Annotations;
 
 using Magnum;
@@ -80,17 +80,21 @@ namespace ContinuousRunner.Impl
 
         public IScript Load(FileInfo script)
         {
-            Func<IScript, SyntaxTree> loader = s => _parser.Parse(s.File);
+            string content;
+            using (var readStream = script.OpenRead())
+            {
+                using (var sr = new StreamReader(readStream))
+                {
+                    content = sr.ReadToEnd();
+                }
+            }
 
-            Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
+            return LoadScript(content, script);
+        }
 
-            Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.Get(s);
-
-            return new Script(loader, moduleLoader, suiteLoader)
-                   {
-                       File = script,
-                       SyntaxTree = _parser.Parse(script)
-                   };
+        public IScript Load(string content)
+        {
+            return LoadScript(content, null);
         }
 
         #endregion
@@ -123,6 +127,27 @@ namespace ContinuousRunner.Impl
 
                 return null;
             }
+        }
+
+        private IScript LoadScript(string content, FileInfo fileInfo)
+        {
+            Func<IScript, SyntaxTree> loader = s => _parser.Parse(content);
+
+            Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
+
+            Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.GetTests(s);
+
+            var syntaxTree = fileInfo != null
+                                 ? _parser.Parse(fileInfo)
+                                 : _parser.Parse(content);
+
+            return new Script(loader, moduleLoader, suiteLoader)
+            {
+                File = fileInfo,
+                Content = content,
+                SyntaxTree = syntaxTree
+            };
+
         }
 
         #endregion

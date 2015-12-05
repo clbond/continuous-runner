@@ -115,6 +115,11 @@ namespace ContinuousRunner.Impl
 
         private string GetModuleNameFromScript(IScript script)
         {
+            if (script == null || script.File == null)
+            {
+                return null;
+            }
+
             var path = _context.ScriptsRoot.FullName;
 
             if (script.File.FullName.StartsWith(path))

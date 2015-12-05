@@ -4,7 +4,7 @@ using ContinuousRunner.Frameworks;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Tests
+namespace ContinuousRunner.Tests
 {
     [TestClass]
     public class FrameworkDetectorTests
@@ -12,7 +12,7 @@ namespace Tests
         [TestMethod]
         public void TestJasmineDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = Container.CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -32,7 +32,7 @@ namespace Tests
         [TestMethod]
         public void TestRequireJsDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = Container.CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -49,7 +49,7 @@ namespace Tests
         [TestMethod]
         public void TestNodeJsDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = Container.CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -66,7 +66,7 @@ namespace Tests
         [TestMethod]
         public void TestCombinedScriptDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = Container.CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -86,15 +86,6 @@ namespace Tests
                 Assert.IsTrue(frameworks.HasFlag(Framework.NodeJs));
                 Assert.IsTrue(frameworks.HasFlag(Framework.RequireJs));
             }
-        }
-
-        private static IContainer CreateContainer()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterModule<ContinuousRunner.Module>();
-
-            return builder.Build();
         }
     }
 }

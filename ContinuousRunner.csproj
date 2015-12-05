@@ -19,7 +19,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>full</DebugType>
@@ -37,10 +37,6 @@
     <Reference Include="Autofac">
       <HintPath>packages\Autofac.3.5.2\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Autofac.dll</HintPath>
     </Reference>
-    <Reference Include="ClearScript, Version=5.4.3.0, Culture=neutral, PublicKeyToken=935d0c957da47c73, processorArchitecture=MSIL">
-      <HintPath>packages\ClearScript.V8.5.4.3\lib\net40\ClearScript.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>packages\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -52,6 +48,7 @@
       <HintPath>packages\Magnum.2.1.3\lib\NET40\Magnum.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -71,6 +68,9 @@
     <Compile Include="Frameworks\Detectors\DetectRequire.cs" />
     <Compile Include="Frameworks\Framework.cs" />
     <Compile Include="Frameworks\Detectors\DetectJasmine.cs" />
+    <Compile Include="Frameworks\IMockLibrary.cs" />
+    <Compile Include="Frameworks\Jasmine\JasmineImpl.cs" />
+    <Compile Include="Frameworks\RequireJs\RequireImpl.cs" />
     <Compile Include="ICancellable.cs" />
     <Compile Include="Frameworks\IFrameworkDetector.cs" />
     <Compile Include="IInstanceContext.cs" />
@@ -78,14 +78,15 @@
     <Compile Include="Impl\Cancellable.cs" />
     <Compile Include="Frameworks\FrameworkDetector.cs" />
     <Compile Include="Impl\ResultObserver.cs" />
+    <Compile Include="Impl\ScriptRunner.cs" />
     <Compile Include="Impl\SourceObserver.cs" />
-    <Compile Include="Impl\SuiteReader.cs" />
     <Compile Include="Impl\Test.cs" />
     <Compile Include="IReferenceResolver.cs" />
     <Compile Include="IResultObserver.cs" />
     <Compile Include="IResultWriter.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IRunQueue.cs" />
+    <Compile Include="IScriptRunner.cs" />
     <Compile Include="ISourceMutator.cs" />
     <Compile Include="ISourceObserver.cs" />
     <Compile Include="IResultFactory.cs" />
@@ -96,7 +97,10 @@
     <Compile Include="Impl\ResultWriter.cs" />
     <Compile Include="Impl\Parser.cs" />
     <Compile Include="Extensions\SyntaxExtensions.cs" />
-    <Compile Include="ISuiteReader.cs" />
+    <Compile Include="JavaScriptGenerator.cs" />
+    <Compile Include="Extractors\ISuiteReader.cs" />
+    <Compile Include="Extractors\SuiteReader.cs" />
+    <Compile Include="Extractors\DefinitionShim.cs" />
     <Compile Include="SourceChangedHandler.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="Impl\RunQueue.cs" />
@@ -147,7 +151,16 @@
     <Content Include="Exports\CallbackManager.h" />
     <Content Include="Exports\VersionSymbols.h" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="ClearScript\ClearScript\ClearScript.csproj">
+      <Project>{d2382d2c-6576-4d96-b6cd-057c4f6bed96}</Project>
+      <Name>ClearScript</Name>
+    </ProjectReference>
+    <ProjectReference Include="ClearScript\ClearScript\V8\ClearScriptV8\64\ClearScriptV8-64.vcxproj">
+      <Project>{cdcf4eea-1ca4-412e-8c77-78893a67a577}</Project>
+      <Name>ClearScriptV8-64</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>

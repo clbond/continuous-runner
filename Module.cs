@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using ContinuousRunner.Extractors;
 
 namespace ContinuousRunner
 {
@@ -33,7 +34,7 @@ namespace ContinuousRunner
 
             builder.RegisterType<ScriptLoader>()
                    .AsImplementedInterfaces();
-
+            
             builder.RegisterType<Parser>()
                    .AsImplementedInterfaces();
 
@@ -60,6 +61,9 @@ namespace ContinuousRunner
 
             builder.RegisterType<RunQueue>()
                    .SingleInstance()
+                   .AsImplementedInterfaces();
+
+            builder.RegisterType<ScriptRunner>()
                    .AsImplementedInterfaces();
 
             builder.RegisterType<SuiteReader>()

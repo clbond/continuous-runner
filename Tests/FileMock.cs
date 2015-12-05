@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using Moq;
 
-namespace Tests
+namespace ContinuousRunner.Tests
 {
     public static class FileMock
     {

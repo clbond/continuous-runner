@@ -34,6 +34,21 @@ namespace ContinuousRunner
         IEnumerable<IScript> Requires { get; } 
 
         /// <summary>
+        /// Raw JavaScript content of this script
+        /// </summary>
+        string Content { get; }
+
+        /// <summary>
+        /// A simple description of this script for display purposes
+        /// </summary>
+        string Description { get; }
+
+        /// <summary>
+        /// The number of tests defined in this script (may change on reload)
+        /// </summary>
+        int TestCount { get; }
+
+        /// <summary>
         /// Reload the contents of this script since it has changed on disk
         /// </summary>
         void Reload();

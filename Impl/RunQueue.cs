@@ -19,6 +19,13 @@ namespace ContinuousRunner.Impl
 
         private volatile bool _running;
 
+        private readonly IScriptRunner _runner;
+
+        public RunQueue(IScriptRunner runner)
+        {
+            _runner = runner;
+        }
+
         #region Implementation of ITestQueue
 
         public void Push(IScript script)
@@ -65,13 +72,9 @@ namespace ContinuousRunner.Impl
 
                     foreach (var script in scripts)
                     {
-                        var scriptTasks = script.Suites.SelectMany(s => s.Tests).Select(t => t.Run()).ToList();
-                        if (scriptTasks.Any() == false)
-                        {
-                            continue;
-                        }
+                        var scriptTasks = _runner.Run(script).ToList();
 
-                        _logger.Info($"Running {scriptTasks.Count} tests from {script.File.Name}");
+                        _logger.Info($"Running {script.TestCount} tests from {script.Description}");
 
                         tasks.AddRange(scriptTasks);
 
