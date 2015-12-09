@@ -12,7 +12,7 @@ namespace ContinuousRunner.Tests
             
             builder.RegisterInstance(instanceContext).As<IInstanceContext>();
 
-            builder.RegisterModule<Module>();
+            builder.RegisterModule<ContinuousRunnerModule>();
 
             return builder.Build();
         }

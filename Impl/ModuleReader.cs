@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 using ContinuousRunner.Extensions;
 
-using JetBrains.Annotations;
-
 using Jint.Parser.Ast;
-
-using Magnum;
 
 namespace ContinuousRunner.Impl
 {
@@ -18,33 +15,15 @@ namespace ContinuousRunner.Impl
 
     public class ModuleReader : IModuleReader
     {
-        #region Constructors
-
-        public ModuleReader(
-            [NotNull] IInstanceContext instanceContext,
-            [NotNull] IReferenceTree referenceTree,
-            [NotNull] IReferenceResolver referenceResolver)
-        {
-            Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            _context = instanceContext;
-
-            Guard.AgainstNull(referenceTree, nameof(referenceTree));
-            _referenceTree = referenceTree;
-
-            Guard.AgainstNull(instanceContext, nameof(referenceResolver));
-            _referenceResolver = referenceResolver;
-        }
-
-        #endregion
-
         #region Private members
 
+        [Import]
         private readonly IInstanceContext _context;
-
-        private readonly IReferenceTree _referenceTree;
-
+        
+        [Import]
         private readonly IReferenceResolver _referenceResolver;
 
+        [Import]
         private readonly Regex _fileExpression = new Regex(".(js|ts)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         #endregion
@@ -106,12 +85,12 @@ namespace ContinuousRunner.Impl
 
         private IEnumerable<string> GetDependencies(IScript script, CallExpression define)
         {
-            return ExtractReferencesFromArgument(script,
-                                                 define?.Arguments.FirstOrDefault(
-                                                     a => a.Type == SyntaxNodes.ArrayExpression));
+            var referencesExpr = define?.Arguments.FirstOrDefault(a => a.Type == SyntaxNodes.ArrayExpression);
+
+            return ExtractReferencesFromArgument(script, referencesExpr);
         }
 
-        private IEnumerable<string> ExtractReferencesFromArgument(IScript script, Expression expression)
+        private IEnumerable<string> ExtractReferencesFromArgument(IScript script, SyntaxNode expression)
         {
             if (expression == null)
             {
@@ -126,14 +105,14 @@ namespace ContinuousRunner.Impl
                         .Where(referencedScript => referencedScript != null);
         }
 
-        private string GetAbsoluteReference(IScript sourceReference, Expression required)
+        private string GetAbsoluteReference(IScript sourceReference, SyntaxNode required)
         {
             return _referenceResolver.Resolve(sourceReference, required.As<Literal>().Value as string);
         }
 
         private string GetModuleNameFromScript(IScript script)
         {
-            if (script == null || script.File == null)
+            if (script?.File == null)
             {
                 return null;
             }

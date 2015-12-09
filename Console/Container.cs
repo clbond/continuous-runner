@@ -10,7 +10,7 @@ namespace ContinuousRunner.Console
 
             builder.RegisterInstance(options).As<IInstanceContext>();
 
-            builder.RegisterModule<ContinuousRunner.Module>();
+            builder.RegisterModule<ContinuousRunnerModule>();
 
             return builder.Build();
         }

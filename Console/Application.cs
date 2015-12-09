@@ -10,10 +10,10 @@ namespace ContinuousRunner.Console
 {
     public class Application
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         public static void Main(string[] args)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
             try
             {
                 var options = CommandLineOptions.FromArgs(args);
@@ -23,12 +23,12 @@ namespace ContinuousRunner.Console
                     var loader = container.Resolve<IScriptLoader>();
 
                     var queue = container.Resolve<IRunQueue>();
-                    
-                    _logger.Info("Loading scripts");
+
+                    logger.Info("Loading scripts");
 
                     foreach (var script in loader.GetScripts())
                     {
-                        _logger.Info("Loaded: {0}", script.File.Name);
+                        logger.Info("Loaded: {0}", script.File.Name);
 
                         queue.Push(script);
                     }
@@ -37,12 +37,12 @@ namespace ContinuousRunner.Console
 
                     var watchHandle = watcher.Watch();
 
-                    var cancelling = false;
+                    logger.Info("Entering run loop; press any key to abort");
 
-                    while (!cancelling)
+                    var input = System.Console.OpenStandardInput();
+
+                    while (input.Length == 0)
                     {
-                        _logger.Info("Running tests");
-
                         var queued = queue.Run().ToArray();
                         if (queued.Any())
                         {
@@ -50,22 +50,17 @@ namespace ContinuousRunner.Console
 
                             results.Wait();
 
-                            _logger.Info("Test run complete");
+                            foreach (var tr in results.Result)
+                            {
+                                logger.Info(tr.ToString());
+                            }
                         }
                         else
                         {
-                            _logger.Info("No tests in queue");
-                        }
-                        var key = System.Console.ReadKey();
-                        switch (key.KeyChar)
-                        {
-                            case 'q':
-                            case 'Q':
-                                cancelling = true;
-                                break;
+                            logger.Info("No tests in queue");
                         }
 
-                        Thread.Sleep(50.Milliseconds());
+                        Thread.Sleep(500.Milliseconds());
                     }
 
                     watchHandle.Cancel();
@@ -73,7 +68,7 @@ namespace ContinuousRunner.Console
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Bootstrap of continuous runner failed: {ex.Message}");
+                logger.Error(ex, $"Bootstrap of continuous runner failed: {ex.Message}");
             }
         }
     }

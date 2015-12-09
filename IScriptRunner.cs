@@ -7,10 +7,10 @@ namespace ContinuousRunner
 
     public interface IScriptRunner
     {
-        IEnumerable<Task<TestResult>> Run(IScript script);
+        IEnumerable<Task<TestResult>> RunAsync(IScript script);
 
-        IEnumerable<Task<TestResult>> Run(IScript script, TestSuite suite);
+        IEnumerable<Task<TestResult>> RunAsync(IScript script, TestSuite suite);
 
-        Task<TestResult> Run(IScript script, ITest test);
+        Task<TestResult> RunAsync(IScript script, ITest test);
     }
 }

@@ -1,18 +1,17 @@
 ﻿using System;
+
 using ContinuousRunner.Data;
 
 namespace ContinuousRunner.Impl
 {
     public class Test : ITest
     {
-        private readonly IScript _script;
+        private WeakReference _parentSuite;
 
-        public Test(IScript script, string definitionCode)
+        public Test(IScript script, TestSuite suite, string definitionCode)
         {
             Id = Guid.NewGuid();
-
-            _script = script;
-
+            
             RawCode = definitionCode;
         }
 
@@ -24,10 +23,25 @@ namespace ContinuousRunner.Impl
 
         public string RawCode { get; set; }
 
-        public TestSuite Suite { get; set; }
-
         public TestResult Result { get; set; }
-        
+
+        public TestSuite Suite
+        {
+            get
+            {
+                if (_parentSuite.IsAlive == false)
+                {
+                    throw new TestException("Parent suite has been disposed");
+                }
+
+                return _parentSuite.Target as TestSuite;
+            }
+            set
+            {
+                _parentSuite = new WeakReference(value);
+            }
+        }
+
         #endregion
     }
 }

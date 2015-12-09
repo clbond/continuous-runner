@@ -1,9 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
+
 using ContinuousRunner.Frameworks.Jasmine;
 using ContinuousRunner.Frameworks.RequireJs;
+
 using Microsoft.ClearScript.V8;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -12,26 +16,21 @@ namespace ContinuousRunner.Impl
 
     public class ScriptRunner : IScriptRunner
     {
-        public readonly IInstanceContext _instanceContext;
-
-        public ScriptRunner(IInstanceContext instanceContext)
-        {
-            _instanceContext = instanceContext;
-        }
-
+        [Import] public readonly IInstanceContext _instanceContext;
+        
         #region Implementation of IScriptRunner
 
-        public IEnumerable<Task<TestResult>> Run(IScript script)
+        public IEnumerable<Task<TestResult>> RunAsync(IScript script)
         {
             return script.Suites.SelectMany(s => s.Tests.Select(t => ExecuteTest(script, t)));
         }
 
-        public IEnumerable<Task<TestResult>> Run(IScript script, TestSuite suite)
+        public IEnumerable<Task<TestResult>> RunAsync(IScript script, TestSuite suite)
         {
             return suite.Tests.Select(t => ExecuteTest(script, t));
         }
 
-        public Task<TestResult> Run(IScript script, ITest test)
+        public Task<TestResult> RunAsync(IScript script, ITest test)
         {
             return ExecuteTest(script, test);
         }

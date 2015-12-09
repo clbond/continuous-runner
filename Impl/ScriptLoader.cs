@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using ContinuousRunner.Extractors;
-using JetBrains.Annotations;
 
-using Magnum;
+using ContinuousRunner.Extractors;
 
 using NLog;
 
@@ -15,53 +14,14 @@ namespace ContinuousRunner.Impl
 
     public class ScriptLoader : IScriptLoader
     {
-        #region Constructors
-
-        public ScriptLoader(
-            [NotNull] IInstanceContext instanceContext,
-            [NotNull] IModuleReader moduleReader,
-            [NotNull] IParser parser,
-            [NotNull] IPublisher publisher,
-            [NotNull] IScriptCollection scriptCollection,
-            [NotNull] IReferenceTree sourceSet,
-            [NotNull] ISuiteReader suiteReader)
-        {
-            Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            Guard.AgainstNull(moduleReader, nameof(moduleReader));
-            Guard.AgainstNull(parser, nameof(parser));
-            Guard.AgainstNull(publisher, nameof(publisher));
-            Guard.AgainstNull(scriptCollection, nameof(scriptCollection));
-            Guard.AgainstNull(sourceSet, nameof(sourceSet));
-            Guard.AgainstNull(suiteReader, nameof(suiteReader));
-
-            _instanceContext = instanceContext;
-            _moduleReader = moduleReader;
-            _parser = parser;
-            _publisher = publisher;
-            _scriptCollection = scriptCollection;
-            _sourceSet = sourceSet;
-            _suiteReader = suiteReader;
-        }
-
-        #endregion
-
         #region Private members
 
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        private readonly IInstanceContext _instanceContext;
-
-        private readonly IModuleReader _moduleReader;
-
-        private readonly IParser _parser;
-
-        private readonly IScriptCollection _scriptCollection;
-
-        private readonly IReferenceTree _sourceSet;
-
-        private readonly IPublisher _publisher;
-
-        private readonly ISuiteReader _suiteReader;
+        [Import] private readonly IInstanceContext _instanceContext;
+        [Import] private readonly IModuleReader _moduleReader;
+        [Import] private readonly IParser _parser;
+        [Import] private readonly IScriptCollection _scriptCollection;
+        [Import] private readonly IPublisher _publisher;
+        [Import] private readonly ISuiteReader _suiteReader;
 
         #endregion
 
@@ -86,6 +46,7 @@ namespace ContinuousRunner.Impl
         public IScript Load(FileInfo script)
         {
             string content;
+
             using (var readStream = script.OpenRead())
             {
                 using (var sr = new StreamReader(readStream))
@@ -108,9 +69,11 @@ namespace ContinuousRunner.Impl
 
         private IScript TryLoad(FileInfo fileInfo)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
             try
             {
-                _logger.Info($"Loading script: {0}", fileInfo.Name);
+                logger.Info($"Loading script: {0}", fileInfo.Name);
 
                 var script = _scriptCollection.FindFile(fileInfo);
                 if (script == null)
@@ -133,7 +96,7 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
+                logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
 
                 return null;
             }
@@ -148,15 +111,15 @@ namespace ContinuousRunner.Impl
             Func<IScript, ExpressionTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.GetTests(s);
 
             var expressionTree = fileInfo != null
-                                 ? _parser.Parse(fileInfo)
-                                 : _parser.Parse(content);
+                                     ? _parser.Parse(fileInfo)
+                                     : _parser.Parse(content);
 
             return new Script(_publisher, loader, moduleLoader, suiteLoader)
-            {
-                File = fileInfo,
-                Content = content,
-                ExpressionTree = expressionTree
-            };
+                   {
+                       File = fileInfo,
+                       Content = content,
+                       ExpressionTree = expressionTree
+                   };
 
         }
 

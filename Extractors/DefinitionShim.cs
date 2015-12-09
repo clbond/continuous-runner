@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-using NLog;
-
 namespace ContinuousRunner.Extractors
 {
     using Data;
@@ -14,9 +12,7 @@ namespace ContinuousRunner.Extractors
         public IScript Script { get; set; }
 
         public readonly IList<TestSuite> Suites = new List<TestSuite>();
-
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
+        
         private TestSuite _currentSuite;
 
         public void AddSuite(string description, string definition)
@@ -35,7 +31,7 @@ namespace ContinuousRunner.Extractors
         public void AddTest(string description, string definition)
         {
             _currentSuite?.Tests.Add(
-                new Test(Script, definition)
+                new Test(Script, _currentSuite, definition)
                 {
                     Id = Guid.NewGuid(),
                     Name = description,

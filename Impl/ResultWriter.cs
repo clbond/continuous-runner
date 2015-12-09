@@ -7,19 +7,19 @@ namespace ContinuousRunner.Impl
 
     public class ResultWriter : IResultWriter
     {
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         #region Implementation of IResultWriter
 
         public void Write(IEnumerable<TestSuite> testSuites)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
             foreach (var suite in testSuites)
             {
-                _logger.Info(suite.Name);
+                logger.Info(suite.Name);
 
                 foreach (var test in suite.Tests)
                 {
-                    _logger.Info("  {0} > {1}", test.Name, test.Result);
+                    logger.Info("  {0} > {1}", test.Name, test.Result);
                 }
             }
         }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Magnum.Threading;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -12,19 +15,15 @@ namespace ContinuousRunner.Impl
 
     public class RunQueue : IRunQueue
     {
+        [Import]
+        private readonly IScriptRunner _runner;
+
         private readonly ReaderWriterLockedObject<HashSet<IScript>> _waiting =
             new ReaderWriterLockedObject<HashSet<IScript>>(new HashSet<IScript>(), LockRecursionPolicy.SupportsRecursion);
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private volatile bool _running;
-
-        private readonly IScriptRunner _runner;
-
-        public RunQueue(IScriptRunner runner)
-        {
-            _runner = runner;
-        }
 
         #region Implementation of ITestQueue
 
@@ -72,7 +71,7 @@ namespace ContinuousRunner.Impl
 
                     foreach (var script in scripts)
                     {
-                        var scriptTasks = _runner.Run(script).ToList();
+                        var scriptTasks = _runner.RunAsync(script).ToList();
 
                         _logger.Info($"Running {script.TestCount} tests from {script.Description}");
 

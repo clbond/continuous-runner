@@ -24,7 +24,7 @@ namespace ContinuousRunner.Tests
 
                 var runner = container.Resolve<IScriptRunner>();
 
-                var result = runner.Run(script).ToArray();
+                var result = runner.RunAsync(script).ToArray();
 
                 var success = Task.WaitAll(result.Cast<Task>().ToArray(), Constants.TestTimeout);
                 if (success == false)

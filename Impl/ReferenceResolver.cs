@@ -1,24 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
-using Magnum;
+using System.ComponentModel.Composition;
 
 namespace ContinuousRunner.Impl
 {
     public class ReferenceResolver : IReferenceResolver
     {
-        #region Constructors
-
-        public ReferenceResolver([NotNull] IInstanceContext instanceContext)
-        {
-            Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            _instanceContext = instanceContext;
-        }
-
-        #endregion
-
         #region Private members
 
+        [Import]
         private readonly IInstanceContext _instanceContext;
 
         #endregion
