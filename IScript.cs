@@ -16,7 +16,7 @@ namespace ContinuousRunner
         /// <summary>
         /// An abstract syntax tree of a parsed JavaScript file
         /// </summary>
-        SyntaxTree SyntaxTree { get; }
+        ExpressionTree ExpressionTree { get; }
 
         /// <summary>
         /// The module definition extracted from the JavaScript code (define() statement details)
@@ -27,12 +27,7 @@ namespace ContinuousRunner
         /// Get a collection of test suites defined in this script
         /// </summary>
         IEnumerable<TestSuite> Suites { get; }
-
-        /// <summary>
-        /// Get a collection of scripts that this one references as dependencies
-        /// </summary>
-        IEnumerable<IScript> Requires { get; } 
-
+        
         /// <summary>
         /// Raw JavaScript content of this script
         /// </summary>

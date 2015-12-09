@@ -38,8 +38,6 @@ namespace ContinuousRunner
             public static readonly string[] TestFunction = {@"it", @"fit"};
 
             public static readonly string[] RequireFunctions = {"require", "requirejs", "define"};
-
-            public static readonly string[] NodeFunctions ={""};
         }
     }
 }

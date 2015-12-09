@@ -1,35 +1,44 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ContinuousRunner.Impl
 {
     public class ScriptCollection : IScriptCollection
     {
+        private readonly ISet<IScript> _scripts = new HashSet<IScript>(new ScriptComparer());
+
         #region Implementation of IScriptCollection
 
         public IEnumerable<IScript> GetChangedScripts()
         {
-            throw new System.NotImplementedException();
+            return Enumerable.Empty<IScript>();
         }
 
         public IEnumerable<IScript> GetScripts()
         {
-            throw new System.NotImplementedException();
+            return Enumerable.Empty<IScript>();
         }
 
         public void Add(IScript script)
         {
-            throw new System.NotImplementedException();
+            _scripts.Add(script);
         }
 
         public void Remove(IScript script)
         {
-            throw new System.NotImplementedException();
+            _scripts.Remove(script);
         }
 
         public IScript Find(Func<IScript, bool> matcher)
         {
-            throw new NotImplementedException();
+            return _scripts.SingleOrDefault(matcher);
+        }
+
+        public IScript FindFile(FileInfo fileInfo)
+        {
+            return _scripts.FirstOrDefault(s => s.File?.FullName == fileInfo.FullName);
         }
 
         #endregion

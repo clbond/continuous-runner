@@ -96,7 +96,7 @@ namespace ContinuousRunner.Impl
                 if (existingScript != null)
                 {
                     _publisher.Publish(
-                        new ScriptsChangedEvent
+                        new SourceChangedEvent
                         {
                             Operation = Operation.Remove,
                             Script = existingScript
@@ -107,7 +107,7 @@ namespace ContinuousRunner.Impl
                 if (newScript != null)
                 {
                     _publisher.Publish(
-                        new ScriptsChangedEvent
+                        new SourceChangedEvent
                         {
                             Operation = Operation.Add,
                             Script = newScript
@@ -135,7 +135,7 @@ namespace ContinuousRunner.Impl
                 if (existingScript != null)
                 {
                     _publisher.Publish(
-                        new ScriptsChangedEvent
+                        new SourceChangedEvent
                         {
                             Operation = Operation.Remove,
                             Script = existingScript
@@ -156,7 +156,7 @@ namespace ContinuousRunner.Impl
                 if (script != null)
                 {
                     _publisher.Publish(
-                        new ScriptsChangedEvent
+                        new SourceChangedEvent
                         {
                             Operation = Operation.Add,
                             Script = script

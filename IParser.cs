@@ -6,8 +6,8 @@ namespace ContinuousRunner
 
     public interface IParser
     {
-        SyntaxTree Parse(FileInfo fileInfo);
+        ExpressionTree Parse(FileInfo fileInfo);
 
-        SyntaxTree Parse(string script);
+        ExpressionTree Parse(string script);
     }
 }

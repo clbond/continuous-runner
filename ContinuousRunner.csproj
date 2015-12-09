@@ -80,8 +80,11 @@
     <Compile Include="IModuleReader.cs" />
     <Compile Include="Impl\Cancellable.cs" />
     <Compile Include="Frameworks\FrameworkDetector.cs" />
+    <Compile Include="Impl\Disposable.cs" />
+    <Compile Include="Impl\ReferenceTree.cs" />
     <Compile Include="Impl\ResultObserver.cs" />
     <Compile Include="Impl\ScriptCollection.cs" />
+    <Compile Include="Impl\ScriptComparer.cs" />
     <Compile Include="Impl\ScriptRunner.cs" />
     <Compile Include="Impl\Test.cs" />
     <Compile Include="IPublisher.cs" />
@@ -105,20 +108,20 @@
     <Compile Include="Extractors\DefinitionShim.cs" />
     <Compile Include="Operation.cs" />
     <Compile Include="Publisher.cs" />
-    <Compile Include="ScriptsChangedEvent.cs" />
+    <Compile Include="SourceChangedEvent.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="Impl\RunQueue.cs" />
     <Compile Include="Impl\ResultFactory.cs" />
     <Compile Include="Impl\Watcher.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="ISourceSet.cs" />
+    <Compile Include="IReferenceTree.cs" />
     <Compile Include="IWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Impl\ScriptLoader.cs" />
     <Compile Include="IScriptLoader.cs" />
     <Compile Include="IScript.cs" />
-    <Compile Include="Data\SyntaxTree.cs" />
+    <Compile Include="Data\ExpressionTree.cs" />
     <Compile Include="Data\TestResult.cs" />
     <Compile Include="Data\TestStatus.cs" />
     <Compile Include="ITest.cs" />
@@ -149,8 +152,7 @@
     <TypeScriptCompile Include="Runner\typings\winston\winston.d.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Exports\CallbackManager.h" />
-    <Content Include="Exports\VersionSymbols.h" />
+    <Folder Include="Events\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

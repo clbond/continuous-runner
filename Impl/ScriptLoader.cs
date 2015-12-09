@@ -22,13 +22,15 @@ namespace ContinuousRunner.Impl
             [NotNull] IModuleReader moduleReader,
             [NotNull] IParser parser,
             [NotNull] IPublisher publisher,
-            [NotNull] ISourceSet sourceSet,
+            [NotNull] IScriptCollection scriptCollection,
+            [NotNull] IReferenceTree sourceSet,
             [NotNull] ISuiteReader suiteReader)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             Guard.AgainstNull(moduleReader, nameof(moduleReader));
             Guard.AgainstNull(parser, nameof(parser));
             Guard.AgainstNull(publisher, nameof(publisher));
+            Guard.AgainstNull(scriptCollection, nameof(scriptCollection));
             Guard.AgainstNull(sourceSet, nameof(sourceSet));
             Guard.AgainstNull(suiteReader, nameof(suiteReader));
 
@@ -36,6 +38,7 @@ namespace ContinuousRunner.Impl
             _moduleReader = moduleReader;
             _parser = parser;
             _publisher = publisher;
+            _scriptCollection = scriptCollection;
             _sourceSet = sourceSet;
             _suiteReader = suiteReader;
         }
@@ -52,7 +55,9 @@ namespace ContinuousRunner.Impl
 
         private readonly IParser _parser;
 
-        private readonly ISourceSet _sourceSet;
+        private readonly IScriptCollection _scriptCollection;
+
+        private readonly IReferenceTree _sourceSet;
 
         private readonly IPublisher _publisher;
 
@@ -107,7 +112,7 @@ namespace ContinuousRunner.Impl
             {
                 _logger.Info($"Loading script: {0}", fileInfo.Name);
 
-                var script = _sourceSet.GetScript(fileInfo);
+                var script = _scriptCollection.FindFile(fileInfo);
                 if (script == null)
                 {
                     script = Load(fileInfo);
@@ -118,7 +123,7 @@ namespace ContinuousRunner.Impl
                 }
 
                 _publisher.Publish(
-                    new ScriptsChangedEvent
+                    new SourceChangedEvent
                     {
                         Operation = ContinuousRunner.Operation.Add,
                         Script = script
@@ -136,13 +141,13 @@ namespace ContinuousRunner.Impl
 
         private IScript LoadScript(string content, FileInfo fileInfo)
         {
-            Func<IScript, SyntaxTree> loader = s => _parser.Parse(content);
+            Func<IScript, ExpressionTree> loader = s => _parser.Parse(content);
 
-            Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
+            Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
 
-            Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.GetTests(s);
+            Func<IScript, ExpressionTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.GetTests(s);
 
-            var syntaxTree = fileInfo != null
+            var expressionTree = fileInfo != null
                                  ? _parser.Parse(fileInfo)
                                  : _parser.Parse(content);
 
@@ -150,7 +155,7 @@ namespace ContinuousRunner.Impl
             {
                 File = fileInfo,
                 Content = content,
-                SyntaxTree = syntaxTree
+                ExpressionTree = expressionTree
             };
 
         }

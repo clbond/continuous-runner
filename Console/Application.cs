@@ -33,18 +33,6 @@ namespace ContinuousRunner.Console
                         queue.Push(script);
                     }
 
-                    var sourceSet = container.Resolve<ISourceSet>();
-
-                    foreach (var suite in sourceSet.GetSuites())
-                    {
-                        _logger.Info($"Suite: {suite.Name}");
-
-                        foreach (var test in suite.Tests)
-                        {
-                            _logger.Info($"  > {test.Name}");
-                        }
-                    }
-
                     var watcher = container.Resolve<IWatcher>();
 
                     var watchHandle = watcher.Watch();

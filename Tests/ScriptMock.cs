@@ -1,5 +1,5 @@
-﻿using ContinuousRunner;
-using ContinuousRunner.Impl;
+﻿using ContinuousRunner.Impl;
+
 using Moq;
 
 namespace ContinuousRunner.Tests
@@ -13,7 +13,7 @@ namespace ContinuousRunner.Tests
             var script = new Mock<IScript>();
 
             script.SetupGet(s => s.File).Returns(FileMock.FromString(content));
-            script.SetupGet(s => s.SyntaxTree).Returns(parser.Parse(content));
+            script.SetupGet(s => s.ExpressionTree).Returns(parser.Parse(content));
 
             return script.Object;
         }

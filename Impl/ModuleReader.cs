@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using ContinuousRunner.Extensions;
-using ContinuousRunner.Frameworks;
+
 using JetBrains.Annotations;
+
 using Jint.Parser.Ast;
+
 using Magnum;
 
 namespace ContinuousRunner.Impl
@@ -19,14 +22,14 @@ namespace ContinuousRunner.Impl
 
         public ModuleReader(
             [NotNull] IInstanceContext instanceContext,
-            [NotNull] ISourceSet sourceSet,
+            [NotNull] IReferenceTree referenceTree,
             [NotNull] IReferenceResolver referenceResolver)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             _context = instanceContext;
 
-            Guard.AgainstNull(sourceSet, nameof(sourceSet));
-            _SourceSet = sourceSet;
+            Guard.AgainstNull(referenceTree, nameof(referenceTree));
+            _referenceTree = referenceTree;
 
             Guard.AgainstNull(instanceContext, nameof(referenceResolver));
             _referenceResolver = referenceResolver;
@@ -38,7 +41,7 @@ namespace ContinuousRunner.Impl
 
         private readonly IInstanceContext _context;
 
-        private readonly ISourceSet _SourceSet;
+        private readonly IReferenceTree _referenceTree;
 
         private readonly IReferenceResolver _referenceResolver;
 
@@ -52,12 +55,21 @@ namespace ContinuousRunner.Impl
         {
             var define = GetDefinitionExpression(script);
 
-            return new ModuleDefinition(@ref => _SourceSet.GetScriptFromModuleReference(@ref))
+            var references = GetDirectReferences(script, define);
+
+            return new ModuleDefinition
                    {
-                       ModuleReferences = GetDependencies(script, define).ToList(),
+                       References = references,
                        Expression = GetDefinitionReturnExpression(define),
                        ModuleName = GetModuleNameFromScript(script)
                    };
+        }
+
+        private IList<IScript> GetDirectReferences(IScript script, CallExpression callExpression)
+        {
+            var dependencies = GetDependencies(script, callExpression).ToArray();
+
+            return new List<IScript>();
         }
 
         #endregion
@@ -66,7 +78,7 @@ namespace ContinuousRunner.Impl
 
         private static CallExpression GetDefinitionExpression(IScript script)
         {
-            return script.SyntaxTree?.Root?.SearchSingle<CallExpression>(IsDefineStatement);
+            return script.ExpressionTree?.Root?.SearchSingle<CallExpression>(IsDefineStatement);
         }
 
         private static bool IsDefineStatement(CallExpression functionExpr)
@@ -81,9 +93,15 @@ namespace ContinuousRunner.Impl
             return identifier?.Name == "define";
         }
 
-        private static Expression GetDefinitionReturnExpression(CallExpression define)
+        private static ExpressionTree GetDefinitionReturnExpression(CallExpression define)
         {
-            return define?.Arguments.LastOrDefault();
+            var expr = define?.Arguments.LastOrDefault();
+            if (expr != null)
+            {
+                return new ExpressionTree(expr);
+            }
+
+            return null;
         }
 
         private IEnumerable<string> GetDependencies(IScript script, CallExpression define)

@@ -20,7 +20,7 @@ namespace ContinuousRunner.Tests
 
                 var script = loader.Load(content);
                 Assert.IsNotNull(script);
-                Assert.IsNotNull(script.SyntaxTree);
+                Assert.IsNotNull(script.ExpressionTree);
 
                 var runner = container.Resolve<IScriptRunner>();
 

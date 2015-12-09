@@ -25,26 +25,26 @@ namespace ContinuousRunner.Impl
 
         #region Implementation of IReferenceResolver
 
-        public string Resolve(IScript script, string require)
+        public string Resolve(IScript script, string module)
         {
-            if (string.IsNullOrEmpty(require))
+            if (string.IsNullOrEmpty(module))
             {
                 return null;
             }
 
-            if (!require.StartsWith("./", StringComparison.Ordinal))
+            if (!module.StartsWith("./", StringComparison.Ordinal))
             {
-                return require;
+                return module;
             }
 
-            var segments = require.Split(new[] {'.', '/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+            var segments = module.Split(new[] {'.', '/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
 
             var qualifiers = new List<string> {_instanceContext.ModuleNamespace};
 
             var path = script.File.Directory;
             if (path == null)
             {
-                throw new TestException($"Cannot resolve module reference: {require}");
+                throw new TestException($"Cannot resolve module reference: {module}");
             }
 
             while (path != null && path.FullName != _instanceContext.ScriptsRoot.FullName)

@@ -8,10 +8,10 @@ namespace ContinuousRunner.Extensions
 {
     public static class SyntaxExtensions
     {
-        public static void Walk<T>(this SyntaxTree syntaxTree, Action<T> f)
+        public static void Walk<T>(this ExpressionTree expressionTree, Action<T> f)
             where T : SyntaxNode
         {
-            Walk(syntaxTree.Root, f);
+            Walk(expressionTree.Root, f);
         }
 
         public static void Walk<T>(this IEnumerable<SyntaxNode> nodes, Action<T> f)
@@ -233,7 +233,7 @@ namespace ContinuousRunner.Extensions
             }
         }
 
-        public static IEnumerable<T> Search<T>(this SyntaxTree tree, Func<T, bool> match)
+        public static IEnumerable<T> Search<T>(this ExpressionTree tree, Func<T, bool> match)
             where T : SyntaxNode
         {
             return Search(tree.Root, match);
@@ -244,13 +244,13 @@ namespace ContinuousRunner.Extensions
         {
             var results = new List<T>();
 
-            node.Walk<T>(s =>
-                         {
-                             if (match(s))
-                             {
-                                 results.Add(s);
-                             }
-                         });
+            node.Walk<T>(
+                s => {
+                    if (match(s))
+                    {
+                        results.Add(s);
+                    }
+                });
 
             return results;
         }

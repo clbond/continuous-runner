@@ -15,9 +15,9 @@ namespace ContinuousRunner.Impl
 
         public Script(
             [NotNull] IPublisher publisher,
-            [NotNull] Func<IScript, SyntaxTree> reloader,
-            [NotNull] Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader,
-            [NotNull] Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader)
+            [NotNull] Func<IScript, ExpressionTree> reloader,
+            [NotNull] Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader,
+            [NotNull] Func<IScript, ExpressionTree, IEnumerable<TestSuite>> suiteLoader)
         {
             _publisher = publisher;
 
@@ -36,17 +36,15 @@ namespace ContinuousRunner.Impl
 
         private readonly IPublisher _publisher;
 
-        private readonly Func<IScript, SyntaxTree> _reloader;
+        private readonly Func<IScript, ExpressionTree> _reloader;
 
-        private readonly Func<IScript, SyntaxTree, ModuleDefinition> _moduleLoader;
+        private readonly Func<IScript, ExpressionTree, ModuleDefinition> _moduleLoader;
 
-        private readonly Func<IScript, SyntaxTree, IEnumerable<TestSuite>> _suiteLoader;
+        private readonly Func<IScript, ExpressionTree, IEnumerable<TestSuite>> _suiteLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
-
-        private Lazy<IEnumerable<IScript>> _dependencies;
-
-        private SyntaxTree _syntaxTree;
+        
+        private ExpressionTree _expressionTree;
 
         #endregion
 
@@ -57,9 +55,7 @@ namespace ContinuousRunner.Impl
         public ModuleDefinition Module { get; private set; }
 
         public IEnumerable<TestSuite> Suites => _suites.Value;
-
-        public IEnumerable<IScript> Requires => _dependencies.Value;
-
+        
         public string Content { get; set; }
 
         public string Description => File?.Name ?? @"anonymous script";
@@ -72,22 +68,22 @@ namespace ContinuousRunner.Impl
             }
         }
 
-        public SyntaxTree SyntaxTree
+        public ExpressionTree ExpressionTree
         {
             get
             {
-                if (_syntaxTree == null)
+                if (_expressionTree == null)
                 {
-                    SyntaxTree = _reloader?.Invoke(this);
+                    ExpressionTree = _reloader?.Invoke(this);
                 }
 
-                return _syntaxTree;
+                return _expressionTree;
             }
             set
             {
                 Reset();
 
-                _syntaxTree = value;
+                _expressionTree = value;
 
                 // When our syntax tree changes -- i.e., when the file has been loaded, or it has been
                 // changed and the change detected by the file watcher -- then we need to search through
@@ -97,7 +93,7 @@ namespace ContinuousRunner.Impl
 
                 // Notify observers that the source file has chnaged
                 _publisher.Publish(
-                    new ScriptsChangedEvent
+                    new SourceChangedEvent
                     {
                         Operation = ContinuousRunner.Operation.Change,
                         Script = this
@@ -107,9 +103,9 @@ namespace ContinuousRunner.Impl
         
         public void Reload()
         {
-            SyntaxTree = _reloader?.Invoke(this);
+            ExpressionTree = _reloader?.Invoke(this);
 
-            if (SyntaxTree == null)
+            if (ExpressionTree == null)
             {
                 throw new TestException($"Reload failed: reloader delegate returned null");
             }
@@ -131,18 +127,11 @@ namespace ContinuousRunner.Impl
         private void Reset()
         {
             _suites = new Lazy<IEnumerable<TestSuite>>(GetSuites);
-
-            _dependencies = new Lazy<IEnumerable<IScript>>(GetDependencies);
-        }
-
-        private IEnumerable<IScript> GetDependencies()
-        {
-            return Module.GetDependencies();
         }
 
         private IEnumerable<TestSuite> GetSuites()
         {
-            return _suiteLoader?.Invoke(this, SyntaxTree);
+            return _suiteLoader?.Invoke(this, ExpressionTree);
         }
 
         #endregion

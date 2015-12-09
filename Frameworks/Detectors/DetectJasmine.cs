@@ -12,7 +12,7 @@ namespace ContinuousRunner.Frameworks.Detectors
 
         public Framework Detect(IScript script)
         {
-            var matches = script.SyntaxTree.Search<CallExpression>(IsJasmineInvocation);
+            var matches = script.ExpressionTree.Search<CallExpression>(IsJasmineInvocation);
             if (matches.Any())
             {
                 return Framework.Jasmine;

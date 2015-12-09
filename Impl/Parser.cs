@@ -10,12 +10,12 @@ namespace ContinuousRunner.Impl
     {
         #region Implementation of IScriptParser
 
-        public virtual SyntaxTree Parse(FileInfo fileInfo)
+        public virtual ExpressionTree Parse(FileInfo fileInfo)
         {
             return Parse(GetScript(fileInfo));
         }
 
-        public virtual SyntaxTree Parse(string script)
+        public virtual ExpressionTree Parse(string script)
         {
             if (script == null)
             {
@@ -26,10 +26,7 @@ namespace ContinuousRunner.Impl
 
             try
             {
-                return new SyntaxTree
-                {
-                    Root = parser.Parse(script)
-                };
+                return new ExpressionTree(parser.Parse(script));
             }
             catch (Exception ex)
             {

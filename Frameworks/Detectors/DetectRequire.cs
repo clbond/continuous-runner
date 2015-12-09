@@ -13,7 +13,7 @@ namespace ContinuousRunner.Frameworks.Detectors
 
         public Framework Detect(IScript script)
         {
-            var matches = script.SyntaxTree.Search<CallExpression>(IsRequireWithStringArgument);
+            var matches = script.ExpressionTree.Search<CallExpression>(IsRequireWithStringArgument);
             if (matches.Any())
             {
                 return Framework.RequireJs;
