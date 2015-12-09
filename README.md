@@ -8,7 +8,7 @@ This project is broken into several pieces:
   * Console runner for testing and debugging
 
 ### Continuous Runner library
-In essence, it is a C# application library that will allow you to continuously run JavaScript unit tests in a background thread. Each time a test changes, it and all its dependencies are marked as having changed and any tests that reference those files are re-run automatically in the background. The goal is to get continuous feedback on JavaScript unit test health as you edit your code, without having to continually keep re-running the tests yourself.
+In essence, it is a C# application library that will allow you to continuously run JavaScript unit tests in a background thread. Each time a test changes, it and all its dependencies, as well as files that depend -- directly or indirectly -- on the changed file, are marked as requiring a re-run. The goal is to get continuous feedback on JavaScript unit test health as you edit your code, without having to continually keep re-running the tests yourself. The second you change a line that breaks something, the extension will tell you and allow you to step through the test in question inside the VS debugger.
 
 ### Visual Studio editor extension
 Then we have the Visual Studio Add-in element of the project, VsIntegration. This adds support for the Continuous Runner right inside of Visual Studio, including:
