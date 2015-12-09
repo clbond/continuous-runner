@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
+
 using JetBrains.Annotations;
+
 using Magnum;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -12,18 +15,18 @@ namespace ContinuousRunner.Impl
 
         public Watcher(
             [NotNull] IInstanceContext instanceContext,
-            [NotNull] ISourceMutator mutator,
-            [NotNull] ISourceSet sourceSet,
+            [NotNull] IPublisher publisher,
+            [NotNull] IScriptCollection scriptCollection,
             [NotNull] IScriptLoader scriptLoader)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             _instanceContext = instanceContext;
 
-            Guard.AgainstNull(mutator, nameof(mutator));
-            _mutator = mutator;
+            Guard.AgainstNull(publisher, nameof(publisher));
+            _publisher = publisher;
 
-            Guard.AgainstNull(sourceSet, nameof(sourceSet));
-            _sourceSet = sourceSet;
+            Guard.AgainstNull(scriptCollection, nameof(scriptCollection));
+            _scriptCollection = scriptCollection;
 
             Guard.AgainstNull(scriptLoader, nameof(scriptLoader));
             _scriptLoader = scriptLoader;
@@ -33,20 +36,18 @@ namespace ContinuousRunner.Impl
 
         #region Private members
 
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         private readonly IInstanceContext _instanceContext;
 
-        private readonly ISourceSet _sourceSet;
+        private readonly IScriptCollection _scriptCollection;
 
         private readonly IScriptLoader _scriptLoader;
 
-        private readonly ISourceMutator _mutator;
+        private readonly IPublisher _publisher;
 
         #endregion
 
         #region Implementation of IBackgroundRunner
-        
+
         public ICancellable Watch(DirectoryInfo scriptPath)
         {
             var watcher = new FileSystemWatcher(scriptPath.FullName);
@@ -79,37 +80,71 @@ namespace ContinuousRunner.Impl
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
             try
             {
-                _mutator.Remove(new FileInfo(e.OldFullPath));
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Cannot remove file from source set: {e.OldFullPath}");
+                logger.Error(ex, $"Cannot remove file from source set: {e.OldFullPath}");
             }
 
             try
             {
-                var script = _scriptLoader.Load(new FileInfo(e.FullPath));
+                var existingScript = _scriptCollection.Find(s => s.File.FullName == e.OldFullPath);
+                if (existingScript != null)
+                {
+                    _publisher.Publish(
+                        new ScriptsChangedEvent
+                        {
+                            Operation = Operation.Remove,
+                            Script = existingScript
+                        });
+                }
 
-                _mutator.Add(script);
+                var newScript = _scriptLoader.Load(new FileInfo(e.FullPath));
+                if (newScript != null)
+                {
+                    _publisher.Publish(
+                        new ScriptsChangedEvent
+                        {
+                            Operation = Operation.Add,
+                            Script = newScript
+                        });
+                }
+                else
+                {
+                    logger.Error($"Failed to load script: {e.FullPath} (unknown error)");
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex,
-                              $"Failed to load script file (file rename operation): {e.FullPath} (from {e.OldFullPath})");
+                logger.Error(ex,
+                             $"Failed to load script file (file rename operation): {e.FullPath} (from {e.OldFullPath})");
             }
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
             try
             {
-                _mutator.Remove(new FileInfo(e.FullPath));
+                var existingScript = _scriptCollection.Find(s => s.File.FullName == e.FullPath);
+                if (existingScript != null)
+                {
+                    _publisher.Publish(
+                        new ScriptsChangedEvent
+                        {
+                            Operation = Operation.Remove,
+                            Script = existingScript
+                        });
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Cannot remove source file from dependency mapper");
+                logger.Error(ex, "Cannot remove source file from dependency mapper");
             }
         }
 
@@ -118,12 +153,21 @@ namespace ContinuousRunner.Impl
             try
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
-
-                _mutator.Add(script);
+                if (script != null)
+                {
+                    _publisher.Publish(
+                        new ScriptsChangedEvent
+                        {
+                            Operation = Operation.Add,
+                            Script = script
+                        });
+                }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script file (file create operation): {e.FullPath}");
+                var logger = LogManager.GetCurrentClassLogger();
+
+                logger.Error(ex, $"Failed to load script file (file create operation): {e.FullPath}");
             }
         }
 
@@ -131,23 +175,15 @@ namespace ContinuousRunner.Impl
         {
             try
             {
-                var script = _sourceSet.GetScript(new FileInfo(e.FullPath));
-                if (script != null)
-                {
-                    script.Reload();
+                var script = _scriptCollection.Find(s => s.File.FullName == e.FullPath);
 
-                    _mutator.Changed(script);
-                }
-                else
-                {
-                    script = _scriptLoader.Load(new FileInfo(e.FullPath));
-
-                    _mutator.Add(script);
-                }
+                script?.Reload();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Failed to load script file (file change operation): {e.FullPath}");
+                var logger = LogManager.GetCurrentClassLogger();
+
+                logger.Error(ex, $"Failed to load script file (file change operation): {e.FullPath}");
             }
         }
 
@@ -155,7 +191,9 @@ namespace ContinuousRunner.Impl
         {
             var exception = e.GetException();
 
-            _logger.Error(exception, $"Error while watching for filesystem changes: {exception.Message}");
+            var logger = LogManager.GetCurrentClassLogger();
+
+            logger.Error(exception, $"Error while watching for filesystem changes: {exception.Message}");
         }
 
         #endregion

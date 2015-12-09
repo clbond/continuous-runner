@@ -23,10 +23,6 @@ namespace ContinuousRunner.Console
                     var loader = container.Resolve<IScriptLoader>();
 
                     var queue = container.Resolve<IRunQueue>();
-
-                    var resultObserver = container.Resolve<IResultObserver>();
-
-                    resultObserver.OnResultChanged += e => _logger.Info($"Test result changed: {e}");
                     
                     _logger.Info("Loading scripts");
 

@@ -21,21 +21,21 @@ namespace ContinuousRunner.Impl
             [NotNull] IInstanceContext instanceContext,
             [NotNull] IModuleReader moduleReader,
             [NotNull] IParser parser,
-            [NotNull] ISourceMutator sourceMutator,
+            [NotNull] IPublisher publisher,
             [NotNull] ISourceSet sourceSet,
             [NotNull] ISuiteReader suiteReader)
         {
             Guard.AgainstNull(instanceContext, nameof(instanceContext));
             Guard.AgainstNull(moduleReader, nameof(moduleReader));
             Guard.AgainstNull(parser, nameof(parser));
-            Guard.AgainstNull(sourceMutator, nameof(sourceMutator));
+            Guard.AgainstNull(publisher, nameof(publisher));
             Guard.AgainstNull(sourceSet, nameof(sourceSet));
             Guard.AgainstNull(suiteReader, nameof(suiteReader));
 
             _instanceContext = instanceContext;
             _moduleReader = moduleReader;
             _parser = parser;
-            _sourceMutator = sourceMutator;
+            _publisher = publisher;
             _sourceSet = sourceSet;
             _suiteReader = suiteReader;
         }
@@ -54,7 +54,7 @@ namespace ContinuousRunner.Impl
 
         private readonly ISourceSet _sourceSet;
 
-        private readonly ISourceMutator _sourceMutator;
+        private readonly IPublisher _publisher;
 
         private readonly ISuiteReader _suiteReader;
 
@@ -117,7 +117,12 @@ namespace ContinuousRunner.Impl
                     script.Reload();
                 }
 
-                _sourceMutator.Add(script);
+                _publisher.Publish(
+                    new ScriptsChangedEvent
+                    {
+                        Operation = ContinuousRunner.Operation.Add,
+                        Script = script
+                    });
 
                 return script;
             }
@@ -141,7 +146,7 @@ namespace ContinuousRunner.Impl
                                  ? _parser.Parse(fileInfo)
                                  : _parser.Parse(content);
 
-            return new Script(loader, moduleLoader, suiteLoader)
+            return new Script(_publisher, loader, moduleLoader, suiteLoader)
             {
                 File = fileInfo,
                 Content = content,

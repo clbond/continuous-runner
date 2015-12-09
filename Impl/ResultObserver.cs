@@ -1,28 +1,19 @@
-﻿using ContinuousRunner.Extensions;
+﻿using ContinuousRunner.Data;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    public class ResultObserver : IResultObserver
+    public class ResultObserver : ISubscription<TestResult>
     {
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        
+        #region Implementation of ISubscription<in TestResult>
 
-        #region Implementation of IResultObserver
-
-        public void ResultChanged(TestResultChanged changedEvent)
+        public void Handle(TestResult @event)
         {
-            _logger.Info($"Test result changed: {changedEvent}");
-
-            var exceptions = OnResultChanged.SafeInvoke(changedEvent);
-
-            foreach (var exception in exceptions)
-            {
-                _logger.Error(exception,
-                              $"Error while processing test result state change: {changedEvent}: {exception.Message}");
-            }
+            throw new System.NotImplementedException();
         }
-
-        public event TestResultChangedHandler OnResultChanged;
 
         #endregion
     }

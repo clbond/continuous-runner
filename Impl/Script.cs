@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
@@ -13,10 +14,13 @@ namespace ContinuousRunner.Impl
         #region Constructors
 
         public Script(
+            [NotNull] IPublisher publisher,
             [NotNull] Func<IScript, SyntaxTree> reloader,
             [NotNull] Func<IScript, SyntaxTree, ModuleDefinition> moduleLoader,
             [NotNull] Func<IScript, SyntaxTree, IEnumerable<TestSuite>> suiteLoader)
         {
+            _publisher = publisher;
+
             _reloader = reloader;
 
             _moduleLoader = moduleLoader;
@@ -29,6 +33,8 @@ namespace ContinuousRunner.Impl
         #endregion
 
         #region Private members
+
+        private readonly IPublisher _publisher;
 
         private readonly Func<IScript, SyntaxTree> _reloader;
 
@@ -89,8 +95,13 @@ namespace ContinuousRunner.Impl
                 // this file are so that we can construct a dependency tree.
                 Module = _moduleLoader?.Invoke(this, value);
 
-                // Let observers know that we have changed
-                Changed?.Invoke(this);
+                // Notify observers that the source file has chnaged
+                _publisher.Publish(
+                    new ScriptsChangedEvent
+                    {
+                        Operation = ContinuousRunner.Operation.Change,
+                        Script = this
+                    });
             }
         }
         
@@ -103,9 +114,7 @@ namespace ContinuousRunner.Impl
                 throw new TestException($"Reload failed: reloader delegate returned null");
             }
         }
-
-        public event SourceChangedHandler Changed;
-
+        
         #endregion
 
         #region Implementation of IComparable<in IScript>

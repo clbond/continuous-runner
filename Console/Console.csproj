@@ -76,14 +76,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClearScript\ClearScript\ClearScript.csproj">
-      <Project>{d2382d2c-6576-4d96-b6cd-057c4f6bed96}</Project>
-      <Name>ClearScript</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ClearScript\ClearScript\V8\ClearScriptV8\64\ClearScriptV8-64.vcxproj">
-      <Project>{cdcf4eea-1ca4-412e-8c77-78893a67a577}</Project>
-      <Name>ClearScriptV8-64</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ContinuousRunner.csproj">
       <Project>{7337d0d8-505f-4a3d-ab7c-cbbce60d065e}</Project>
       <Name>ContinuousRunner</Name>

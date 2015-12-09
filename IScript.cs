@@ -52,10 +52,5 @@ namespace ContinuousRunner
         /// Reload the contents of this script since it has changed on disk
         /// </summary>
         void Reload();
-
-        /// <summary>
-        /// An event that will be emitted when this script gets reloaded
-        /// </summary>
-        event SourceChangedHandler Changed;
     }
 }

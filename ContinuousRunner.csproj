@@ -37,6 +37,9 @@
     <Reference Include="Autofac">
       <HintPath>packages\Autofac.3.5.2\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\Autofac.dll</HintPath>
     </Reference>
+    <Reference Include="ClearScript">
+      <HintPath>packages\ClearScript.V8.5.4.3\lib\net40\ClearScript.dll</HintPath>
+    </Reference>
     <Reference Include="JetBrains.Annotations, Version=10.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>packages\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
@@ -78,17 +81,16 @@
     <Compile Include="Impl\Cancellable.cs" />
     <Compile Include="Frameworks\FrameworkDetector.cs" />
     <Compile Include="Impl\ResultObserver.cs" />
+    <Compile Include="Impl\ScriptCollection.cs" />
     <Compile Include="Impl\ScriptRunner.cs" />
-    <Compile Include="Impl\SourceObserver.cs" />
     <Compile Include="Impl\Test.cs" />
+    <Compile Include="IPublisher.cs" />
     <Compile Include="IReferenceResolver.cs" />
-    <Compile Include="IResultObserver.cs" />
     <Compile Include="IResultWriter.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IRunQueue.cs" />
+    <Compile Include="IScriptCollection.cs" />
     <Compile Include="IScriptRunner.cs" />
-    <Compile Include="ISourceMutator.cs" />
-    <Compile Include="ISourceObserver.cs" />
     <Compile Include="IResultFactory.cs" />
     <Compile Include="Data\ModuleDefinition.cs" />
     <Compile Include="Impl\ModuleReader.cs" />
@@ -97,18 +99,19 @@
     <Compile Include="Impl\ResultWriter.cs" />
     <Compile Include="Impl\Parser.cs" />
     <Compile Include="Extensions\SyntaxExtensions.cs" />
-    <Compile Include="JavaScriptGenerator.cs" />
+    <Compile Include="ISubscription.cs" />
     <Compile Include="Extractors\ISuiteReader.cs" />
     <Compile Include="Extractors\SuiteReader.cs" />
     <Compile Include="Extractors\DefinitionShim.cs" />
-    <Compile Include="SourceChangedHandler.cs" />
+    <Compile Include="Operation.cs" />
+    <Compile Include="Publisher.cs" />
+    <Compile Include="ScriptsChangedEvent.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="Impl\RunQueue.cs" />
     <Compile Include="Impl\ResultFactory.cs" />
     <Compile Include="Impl\Watcher.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ISourceSet.cs" />
-    <Compile Include="Impl\SourceSet.cs" />
     <Compile Include="IWatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Module.cs" />
@@ -121,8 +124,6 @@
     <Compile Include="ITest.cs" />
     <Compile Include="Data\TestSuite.cs" />
     <Compile Include="Impl\Script.cs" />
-    <Compile Include="TestResultChanged.cs" />
-    <Compile Include="TestResultChangedHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Licenses\ClearScript.main.license" />
@@ -150,16 +151,6 @@
   <ItemGroup>
     <Content Include="Exports\CallbackManager.h" />
     <Content Include="Exports\VersionSymbols.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="ClearScript\ClearScript\ClearScript.csproj">
-      <Project>{d2382d2c-6576-4d96-b6cd-057c4f6bed96}</Project>
-      <Name>ClearScript</Name>
-    </ProjectReference>
-    <ProjectReference Include="ClearScript\ClearScript\V8\ClearScriptV8\64\ClearScriptV8-64.vcxproj">
-      <Project>{cdcf4eea-1ca4-412e-8c77-78893a67a577}</Project>
-      <Name>ClearScriptV8-64</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
