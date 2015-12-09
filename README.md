@@ -16,6 +16,7 @@ Then we have the Visual Studio Add-in element of the project, VsIntegration. Thi
  * UI for showing the current status of all JavaScript unit-tests
  * Editor integration that shows you exactly what change broke exactly what tests
  * UI for manually running tests, viewing run logs
+ * Support for using the Visual Studio debugger facility to debug JavaScript unit tests right from inside the IDE -- including all the standard debugging features such as Watch, Locals, Call Stack, etc.
  
 ### Console runner
 This is a simple console frontend for Continuous Runner. Its primary use is for development and debugging of ContinuousRunner outside of Visual Studio.
