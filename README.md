@@ -1,5 +1,5 @@
 # continuous-runner
-Continuous background JavaScript test runner with Visual Studio integration
+Continuous background JavaScript test runner with Visual Studio integration (early stage, very incomplete)
 
 ## Projects
 This project is broken into several pieces:
