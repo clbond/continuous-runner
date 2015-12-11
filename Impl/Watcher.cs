@@ -1,9 +1,7 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
-
-using JetBrains.Annotations;
-
-using Magnum;
+using System.Linq;
 
 using NLog;
 
@@ -11,41 +9,11 @@ namespace ContinuousRunner.Impl
 {
     public class Watcher : IWatcher
     {
-        #region Constructors
-
-        public Watcher(
-            [NotNull] IInstanceContext instanceContext,
-            [NotNull] IPublisher publisher,
-            [NotNull] IScriptCollection scriptCollection,
-            [NotNull] IScriptLoader scriptLoader)
-        {
-            Guard.AgainstNull(instanceContext, nameof(instanceContext));
-            _instanceContext = instanceContext;
-
-            Guard.AgainstNull(publisher, nameof(publisher));
-            _publisher = publisher;
-
-            Guard.AgainstNull(scriptCollection, nameof(scriptCollection));
-            _scriptCollection = scriptCollection;
-
-            Guard.AgainstNull(scriptLoader, nameof(scriptLoader));
-            _scriptLoader = scriptLoader;
-        }
-
-        #endregion
-
-        #region Private members
-
-        private readonly IInstanceContext _instanceContext;
-
-        private readonly IScriptCollection _scriptCollection;
-
-        private readonly IScriptLoader _scriptLoader;
-
-        private readonly IPublisher _publisher;
-
-        #endregion
-
+        [Import] private readonly IInstanceContext _instanceContext;
+        [Import] private readonly IPublisher _publisher;
+        [Import] private readonly IScriptCollection _scriptCollection;
+        [Import] private readonly IScriptLoader _scriptLoader;
+        
         #region Implementation of IBackgroundRunner
 
         public ICancellable Watch(DirectoryInfo scriptPath)
@@ -56,7 +24,6 @@ namespace ContinuousRunner.Impl
 
             watcher.Path = scriptPath.FullName;
             watcher.EnableRaisingEvents = true;
-            watcher.Filter = Constants.FilenameFilter; // .ts, .js probably
 
             watcher.Error += OnError;
             watcher.Changed += OnChanged;
@@ -80,6 +47,11 @@ namespace ContinuousRunner.Impl
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
+            if (!IsScript(e.OldFullPath) && !IsScript(e.FullPath))
+            {
+                return;
+            }
+
             var logger = LogManager.GetCurrentClassLogger();
 
             try
@@ -92,7 +64,7 @@ namespace ContinuousRunner.Impl
 
             try
             {
-                var existingScript = _scriptCollection.Find(s => s.File.FullName == e.OldFullPath);
+                var existingScript = _scriptCollection.FindScript(s => s.File.FullName == e.OldFullPath);
                 if (existingScript != null)
                 {
                     _publisher.Publish(
@@ -127,11 +99,16 @@ namespace ContinuousRunner.Impl
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
+            if (!IsScript(e.FullPath))
+            {
+                return;
+            }
+
             var logger = LogManager.GetCurrentClassLogger();
 
             try
             {
-                var existingScript = _scriptCollection.Find(s => s.File.FullName == e.FullPath);
+                var existingScript = _scriptCollection.FindScript(s => s.File.FullName == e.FullPath);
                 if (existingScript != null)
                 {
                     _publisher.Publish(
@@ -150,6 +127,11 @@ namespace ContinuousRunner.Impl
 
         private void OnCreated(object sender, FileSystemEventArgs e)
         {
+            if (!IsScript(e.FullPath))
+            {
+                return;
+            }
+
             try
             {
                 var script = _scriptLoader.Load(new FileInfo(e.FullPath));
@@ -173,9 +155,14 @@ namespace ContinuousRunner.Impl
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            if (!IsScript(e.FullPath))
+            {
+                return;
+            }
+
             try
             {
-                var script = _scriptCollection.Find(s => s.File.FullName == e.FullPath);
+                var script = _scriptCollection.FindScript(s => s.File.FullName == e.FullPath);
 
                 script?.Reload();
             }
@@ -194,6 +181,23 @@ namespace ContinuousRunner.Impl
             var logger = LogManager.GetCurrentClassLogger();
 
             logger.Error(exception, $"Error while watching for filesystem changes: {exception.Message}");
+        }
+
+        private static bool IsScript(string path)
+        {
+            Func<string, bool> isScript =
+                ext => Constants.FileExtensions.TypeScript.Any(
+                           t => string.Equals(ext, t, StringComparison.InvariantCultureIgnoreCase)) ||
+                       Constants.FileExtensions.JavaScript.Any(
+                           j => string.Equals(ext, j, StringComparison.InvariantCultureIgnoreCase));
+
+
+            return isScript(Path.GetExtension(path));
+        }
+
+        private static bool IsScript(FileInfo fileInfo)
+        {
+            return IsScript(fileInfo.FullName);
         }
 
         #endregion

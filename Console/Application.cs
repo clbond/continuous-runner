@@ -20,13 +20,13 @@ namespace ContinuousRunner.Console
 
                 using (var container = Container.Build(options))
                 {
-                    var loader = container.Resolve<IScriptLoader>();
+                    var collection = container.Resolve<IScriptCollection>();
 
                     var queue = container.Resolve<IRunQueue>();
 
                     logger.Info("Loading scripts");
 
-                    foreach (var script in loader.GetScripts())
+                    foreach (var script in collection.GetScripts())
                     {
                         logger.Info("Loaded: {0}", script.File.Name);
 

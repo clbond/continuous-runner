@@ -5,9 +5,6 @@ namespace ContinuousRunner.Frameworks
     [Flags]
     public enum Framework
     {
-        /// <summary>
-        /// No framework detected
-        /// </summary>
         None = 0x0,
 
         /// <summary>
@@ -16,13 +13,23 @@ namespace ContinuousRunner.Frameworks
         Jasmine = 0x1,
 
         /// <summary>
-        /// NodeJS application
+        /// Does this script make use of NodeJS facilities? (require('module'), etc.)
         /// </summary>
         NodeJs = 0x2,
 
         /// <summary>
-        /// 
+        /// Does this script make use of RequireJS facilities (define(), require([]), etc.)?
         /// </summary>
-        RequireJs = 0x4
+        RequireJs = 0x4,
+
+        /// <summary>
+        /// Is this script written in JavaScript?
+        /// </summary>
+        JavaScript = 0x8,
+
+        /// <summary>
+        /// Does this script use TypeScript that needs to be transformed into JS in order to execute?
+        /// </summary>
+        TypeScript = 0x16
     }
 }

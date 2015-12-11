@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
 
 using ContinuousRunner.Extractors;
 
@@ -16,32 +15,24 @@ namespace ContinuousRunner.Impl
     {
         #region Private members
 
-        [Import] private readonly IInstanceContext _instanceContext;
-        [Import] private readonly IModuleReader _moduleReader;
-        [Import] private readonly IParser _parser;
-        [Import] private readonly IScriptCollection _scriptCollection;
-        [Import] private readonly IPublisher _publisher;
-        [Import] private readonly ISuiteReader _suiteReader;
+        [Import]
+        private readonly IModuleReader _moduleReader;
+
+        [Import]
+        private readonly IParser _parser;
+
+        [Import]
+        private readonly IScriptCollection _scriptCollection;
+
+        [Import]
+        private readonly IPublisher _publisher;
+
+        [Import]
+        private readonly ISuiteReader _suiteReader;
 
         #endregion
 
         #region Implementation of IScriptLoader
-
-        public IEnumerable<IScript> GetScripts()
-        {
-            var files = _instanceContext.ScriptsRoot.GetFiles(Constants.FilenameFilter, SearchOption.AllDirectories);
-
-            return files.Select(TryLoad).Where(script => script != null);
-        }
-
-        public IEnumerable<IScript> GetTestScripts()
-        {
-            var files = _instanceContext.ScriptsRoot.GetFiles(Constants.FilenameFilter, SearchOption.AllDirectories);
-
-            files = files.Where(f => Constants.SearchExpression.IsMatch(f.Name)).ToArray();
-
-            return files.Select(TryLoad).Where(s => s != null);
-        }
 
         public IScript Load(FileInfo script)
         {
@@ -58,16 +49,7 @@ namespace ContinuousRunner.Impl
             return LoadScript(content, script);
         }
 
-        public IScript Load(string content)
-        {
-            return LoadScript(content, null);
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private IScript TryLoad(FileInfo fileInfo)
+        public IScript TryLoad(FileInfo fileInfo)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
@@ -75,7 +57,7 @@ namespace ContinuousRunner.Impl
             {
                 logger.Info($"Loading script: {0}", fileInfo.Name);
 
-                var script = _scriptCollection.FindFile(fileInfo);
+                var script = _scriptCollection.GetScriptFromFile(fileInfo);
                 if (script == null)
                 {
                     script = Load(fileInfo);
@@ -88,7 +70,7 @@ namespace ContinuousRunner.Impl
                 _publisher.Publish(
                     new SourceChangedEvent
                     {
-                        Operation = ContinuousRunner.Operation.Add,
+                        Operation = Operation.Add,
                         Script = script
                     });
 
@@ -101,6 +83,15 @@ namespace ContinuousRunner.Impl
                 return null;
             }
         }
+
+        public IScript Load(string content)
+        {
+            return LoadScript(content, null);
+        }
+
+        #endregion
+
+        #region Private methods
 
         private IScript LoadScript(string content, FileInfo fileInfo)
         {
@@ -122,7 +113,7 @@ namespace ContinuousRunner.Impl
                    };
 
         }
-
+        
         #endregion
     }
 }
