@@ -8,9 +8,9 @@ namespace ContinuousRunner.Tests
         {
             var builder = new ContainerBuilder();
 
-            var instanceContext = new TestInstance();
-            
-            builder.RegisterInstance(instanceContext).As<IInstanceContext>();
+            builder.RegisterType<TestInstance>()
+                   .SingleInstance()
+                   .As<IInstanceContext>();
 
             builder.RegisterModule<ContinuousRunnerModule>();
 

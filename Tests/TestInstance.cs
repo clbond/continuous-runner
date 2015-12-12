@@ -6,9 +6,15 @@ namespace ContinuousRunner.Tests
     {
         #region Implementation of IInstanceContext
 
-        public DirectoryInfo ScriptsRoot => new DirectoryInfo(Path.GetTempPath());
+        public DirectoryInfo ScriptsRoot
+        {
+            get { return new DirectoryInfo(Path.GetTempPath()); }
+        }
 
-        public string ModuleNamespace => @"Test";
+        public string ModuleNamespace
+        {
+            get { return string.Empty; }
+        }
 
         #endregion
     }

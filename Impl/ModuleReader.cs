@@ -30,11 +30,11 @@ namespace ContinuousRunner.Impl
 
         #region Implementation of IModuleReader
 
-        public ModuleDefinition Get(IScript script)
+        public ModuleDefinition Get(IScript script, Func<string, IScript> referenceLoader)
         {
             var define = GetDefinitionExpression(script);
 
-            var references = GetDirectReferences(script, define);
+            var references = GetDirectReferences(script, define, referenceLoader);
 
             return new ModuleDefinition
                    {
@@ -44,11 +44,11 @@ namespace ContinuousRunner.Impl
                    };
         }
 
-        private IList<IScript> GetDirectReferences(IScript script, CallExpression callExpression)
+        private IList<IScript> GetDirectReferences(IScript script, CallExpression callExpression, Func<string, IScript> referenceLoader)
         {
-            var dependencies = GetDependencies(script, callExpression).ToArray();
+            var dependencies = GetDependencies(script, callExpression);
 
-            return new List<IScript>();
+            return dependencies.Select(referenceLoader).ToList();
         }
 
         #endregion

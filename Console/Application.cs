@@ -26,7 +26,9 @@ namespace ContinuousRunner.Console
 
                     logger.Info("Loading scripts");
 
-                    foreach (var script in collection.GetScripts())
+                    var loader = container.Resolve<IScriptLoader>();
+
+                    foreach (var script in collection.GetScripts(fi => loader.Load(fi)))
                     {
                         logger.Info("Loaded: {0}", script.File.Name);
 

@@ -9,16 +9,19 @@ namespace ContinuousRunner.Impl
     public class CachedScripts : ICachedScripts
     {
         [Import] private readonly IHasher _hasher;
-
-        [Import] private readonly IScriptLoader _loader;
-
+        
         private readonly IDictionary<FileInfo, Tuple<Guid, IScript>> _cachedScripts =
             new Dictionary<FileInfo, Tuple<Guid, IScript>>();
 
         #region Implementation of ICachedScripts
 
-        public IScript Get(FileInfo fileInfo)
+        public IScript Get(FileInfo fileInfo, Func<FileInfo, IScript> load)
         {
+            if (load == null)
+            {
+                throw new ArgumentNullException(nameof(load));
+            }
+
             var newHash = _hasher.GetHash(fileInfo);
 
             if (_cachedScripts.ContainsKey(fileInfo))
@@ -31,7 +34,7 @@ namespace ContinuousRunner.Impl
                 }
             }
 
-            var loaded = _loader.Load(fileInfo);
+            var loaded = load(fileInfo);
 
             _cachedScripts[fileInfo] = Tuple.Create(newHash, loaded);
 

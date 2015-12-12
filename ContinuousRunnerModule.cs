@@ -11,13 +11,18 @@ namespace ContinuousRunner
         {
             base.Load(builder);
 
-            builder.RegisterAssemblyTypes(Assembly.GetExecutingAssembly())
-                   .AsImplementedInterfaces()
-                   .Except<Definer>()
-                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
+            builder.RegisterType<Publisher>()
+                   .As<IPublisher>();
 
             builder.Register((c, p) => new Definer(p.TypedAs<IScript>()))
-                   .AsSelf()
+                   .As<Definer>()
+                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
+
+            builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
+                   .Except<Definer>()
+                   .Except<Publisher>()
+                   .Except<IPublisher>()
+                   .AsImplementedInterfaces()
                    .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
         }
     }

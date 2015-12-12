@@ -10,14 +10,12 @@ namespace ContinuousRunner.Impl
     public class ScriptCollection : IScriptCollection
     {
         [Import] private readonly IInstanceContext _instanceContext;
-
-        [Import] private readonly ICachedScripts _cachedScripts;
-
+        
         private readonly ISet<IScript> _collection = new HashSet<IScript>(new ScriptComparer()); 
 
         #region Implementation of IScriptCollection
-
-        public IEnumerable<IScript> GetScripts()
+        
+        public IEnumerable<IScript> GetScripts(Func<FileInfo, IScript> loader)
         {
             Func<string, bool> isScript =
                 ext => Constants.FileExtensions.TypeScript.Any(
@@ -27,21 +25,21 @@ namespace ContinuousRunner.Impl
 
             var files = _instanceContext.ScriptsRoot.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => isScript(f.Extension));
 
-            return files.Select(_cachedScripts.Get).Where(script => script != null);
+            return files.Select(loader).Where(script => script != null);
         }
 
-        public IEnumerable<IScript> GetTestScripts()
+        public IEnumerable<IScript> GetTestScripts(Func<FileInfo, IScript> loader)
         {
             var testExpr = new Regex("(spec|tests|test).js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             var files = _instanceContext.ScriptsRoot.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => testExpr.IsMatch(f.Name));
-
-            return files.Select(_cachedScripts.Get).Where(s => s != null);
+            
+            return files.Select(loader).Where(script => script != null);
         }
 
-        public IEnumerable<IScript> GetProductScripts()
+        public IEnumerable<IScript> GetProductScripts(Func<FileInfo, IScript> loader)
         {
-            return GetScripts().Except(GetTestScripts());
+            return GetScripts(loader).Except(GetTestScripts(loader));
         }
 
         public void Add(IScript script)
@@ -63,22 +61,7 @@ namespace ContinuousRunner.Impl
         {
             throw new NotImplementedException();
         }
-
-        public IScript GetScriptFromFile(FileInfo fileInfo)
-        {
-            var existing = _collection.FirstOrDefault(s => s.File?.FullName == fileInfo.FullName);
-            if (existing != null)
-            {
-                return existing;
-            }
-
-            var loaded = _cachedScripts.Get(fileInfo);
-
-            _collection.Add(loaded);
-
-            return loaded;
-        }
-
+        
         #endregion
     }
 }

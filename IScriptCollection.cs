@@ -9,17 +9,17 @@ namespace ContinuousRunner
         /// <summary>
         /// Get a collection of all known scripts
         /// </summary>
-        IEnumerable<IScript> GetScripts();
+        IEnumerable<IScript> GetScripts(Func<FileInfo, IScript> loader);
 
         /// <summary>
         /// Get a collection of all known test scripts
         /// </summary>
-        IEnumerable<IScript> GetTestScripts();
+        IEnumerable<IScript> GetTestScripts(Func<FileInfo, IScript> loader);
 
         /// <summary>
         /// Get the complete set of product scripts, minus the collection returned by <see cref="GetTestScripts"/>
         /// </summary>
-        IEnumerable<IScript> GetProductScripts();
+        IEnumerable<IScript> GetProductScripts(Func<FileInfo, IScript> loader);
 
         /// <summary>
         /// Add a new script to the collection
@@ -41,10 +41,5 @@ namespace ContinuousRunner
         /// Find a matching test script from this collection
         /// </summary>
         IScript FindTestScript(Func<IScript, bool> matcher);
-
-        /// <summary>
-        /// Find a <see cref="IScript"/> reference using a file, <paramref name="fileInfo"/>
-        /// </summary>
-        IScript GetScriptFromFile(FileInfo fileInfo);
     }
 }

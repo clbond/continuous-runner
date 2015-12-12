@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-
+using System.Linq;
 using ContinuousRunner.Extractors;
 
 using NLog;
@@ -15,20 +15,19 @@ namespace ContinuousRunner.Impl
     {
         #region Private members
 
-        [Import]
-        private readonly IModuleReader _moduleReader;
+        [Import] private readonly IInstanceContext _instanceContext;
 
-        [Import]
-        private readonly IParser _parser;
+        [Import] private readonly ICachedScripts _cachedScripts;
 
-        [Import]
-        private readonly IScriptCollection _scriptCollection;
+        [Import] private readonly IModuleReader _moduleReader;
 
-        [Import]
-        private readonly IPublisher _publisher;
+        [Import] private readonly IParser _parser;
+        
+        [Import] private readonly IPublisher _publisher;
 
-        [Import]
-        private readonly ISuiteReader _suiteReader;
+        [Import] private readonly ISuiteReader _suiteReader;
+
+        [Import] private readonly IReferenceResolver _referenceResolver;
 
         #endregion
 
@@ -36,48 +35,19 @@ namespace ContinuousRunner.Impl
 
         public IScript Load(FileInfo script)
         {
-            string content;
-
-            using (var readStream = script.OpenRead())
-            {
-                using (var sr = new StreamReader(readStream))
-                {
-                    content = sr.ReadToEnd();
-                }
-            }
-
-            return LoadScript(content, script);
+            return _cachedScripts.Get(script, LoadFile);
         }
 
         public IScript TryLoad(FileInfo fileInfo)
         {
-            var logger = LogManager.GetCurrentClassLogger();
-
             try
             {
-                logger.Info($"Loading script: {0}", fileInfo.Name);
-
-                var script = _scriptCollection.GetScriptFromFile(fileInfo);
-                if (script == null)
-                {
-                    script = Load(fileInfo);
-                }
-                else
-                {
-                    script.Reload();
-                }
-
-                _publisher.Publish(
-                    new SourceChangedEvent
-                    {
-                        Operation = Operation.Add,
-                        Script = script
-                    });
-
-                return script;
+                return Load(fileInfo);
             }
             catch (Exception ex)
             {
+                var logger = LogManager.GetCurrentClassLogger();
+
                 logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
 
                 return null;
@@ -86,6 +56,10 @@ namespace ContinuousRunner.Impl
 
         public IScript Load(string content)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            logger.Debug($"Loading script: [{content}]");
+
             return LoadScript(content, null);
         }
 
@@ -97,7 +71,8 @@ namespace ContinuousRunner.Impl
         {
             Func<IScript, ExpressionTree> loader = s => _parser.Parse(content);
 
-            Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
+            Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader =
+                (s, tree) => _moduleReader.Get(s, m => LoadModule(s, m));
 
             Func<IScript, ExpressionTree, Definer> suiteLoader = (s, tree) => _suiteReader.Define(s);
 
@@ -113,7 +88,54 @@ namespace ContinuousRunner.Impl
                    };
 
         }
-        
+        private IScript LoadFile(FileInfo fileInfo)
+        {
+            string content;
+
+            using (var readStream = fileInfo.OpenRead())
+            {
+                using (var sr = new StreamReader(readStream))
+                {
+                    content = sr.ReadToEnd();
+                }
+            }
+
+            return LoadScript(content, fileInfo);
+        }
+
+        private IScript LoadModule(IScript fromScript, string moduleReference)
+        {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var absoluteReference = _referenceResolver.Resolve(fromScript, moduleReference);
+            if (absoluteReference == null)
+            {
+                logger.Error($"Unable to resolve reference: {fromScript} -> {moduleReference}");
+                return null;
+            }
+
+            var fileInfo = ModuleReferenceToFile(absoluteReference);
+            if (fileInfo.Exists == false)
+            {
+                logger.Error(
+                    $"Resolved reference, but referenced file does not exist: {fromScript} -> {moduleReference} -> {fileInfo}");
+                return null;
+            }
+
+            return TryLoad(fileInfo);
+        }
+
+        private FileInfo ModuleReferenceToFile(string @ref)
+        {
+            var root = _instanceContext.ScriptsRoot.FullName;
+
+            var components = @ref.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var path = Path.Combine(new List<string> { root }.Concat(components).ToArray());
+
+            return new FileInfo(path);
+        }
+
         #endregion
     }
 }
