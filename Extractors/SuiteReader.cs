@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
+
+using Autofac;
 
 using Microsoft.ClearScript.V8;
 
@@ -8,32 +11,32 @@ namespace ContinuousRunner.Extractors
 
     public class SuiteReader : ISuiteReader
     {
-        #region Implementation of IScriptRunner
+        [Import] private IComponentContext _componentContext;
 
-        public IEnumerable<TestSuite> GetTests(IScript script)
+        #region Implementation of ISuiteReader
+
+        public Definer Define(IScript script)
         {
             using (var engine = new V8ScriptEngine())
             {
-                const string addSuite =
+                var definer = _componentContext.Resolve<Definer>(new TypedParameter(typeof (IScript), script));
+
+                engine.AddHostObject(nameof(definer), definer);
+
+                engine.Execute(
                     @"function describe(description, callback) {
-                        testCollection.AddSuite(description, callback.toString());
+                        definer.AddSuite(description, callback.toString());
                         callback();
-                      }";
+                      }");
 
-                const string addTest =
+                engine.Execute(
                     @"function it(description, callback) {
-                        testCollection.AddTest(description, callback.toString());
-                      }";
-
-                var collection = new TestCollection {Script = script};
-
-                engine.AddHostObject("testCollection", collection);
-                engine.Execute(addSuite);
-                engine.Execute(addTest);
+                        definer.AddTest(description, callback.toString());
+                      }");
 
                 engine.Execute(script.Content);
 
-                return collection.Suites;
+                return definer;
             }
         }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using ContinuousRunner.Extractors;
 using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
@@ -17,7 +17,7 @@ namespace ContinuousRunner.Impl
             [NotNull] IPublisher publisher,
             [NotNull] Func<IScript, ExpressionTree> reloader,
             [NotNull] Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader,
-            [NotNull] Func<IScript, ExpressionTree, IEnumerable<TestSuite>> suiteLoader)
+            [NotNull] Func<IScript, ExpressionTree, Definer> suiteLoader)
         {
             _publisher = publisher;
 
@@ -40,7 +40,7 @@ namespace ContinuousRunner.Impl
 
         private readonly Func<IScript, ExpressionTree, ModuleDefinition> _moduleLoader;
 
-        private readonly Func<IScript, ExpressionTree, IEnumerable<TestSuite>> _suiteLoader;
+        private readonly Func<IScript, ExpressionTree, Definer> _suiteLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
         
@@ -131,7 +131,13 @@ namespace ContinuousRunner.Impl
 
         private IEnumerable<TestSuite> GetSuites()
         {
-            return _suiteLoader?.Invoke(this, ExpressionTree);
+            var definer = _suiteLoader?.Invoke(this, ExpressionTree);
+            if (definer != null)
+            {
+                return definer.GetSuites();
+            }
+
+            return Enumerable.Empty<TestSuite>();
         }
 
         #endregion

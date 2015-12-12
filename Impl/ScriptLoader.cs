@@ -99,7 +99,7 @@ namespace ContinuousRunner.Impl
 
             Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader = (s, tree) => _moduleReader.Get(s);
 
-            Func<IScript, ExpressionTree, IEnumerable<TestSuite>> suiteLoader = (s, tree) => _suiteReader.GetTests(s);
+            Func<IScript, ExpressionTree, Definer> suiteLoader = (s, tree) => _suiteReader.Define(s);
 
             var expressionTree = fileInfo != null
                                      ? _parser.Parse(fileInfo)

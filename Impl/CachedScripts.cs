@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 
 namespace ContinuousRunner.Impl
 {
@@ -35,6 +36,28 @@ namespace ContinuousRunner.Impl
             _cachedScripts[fileInfo] = Tuple.Create(newHash, loaded);
 
             return loaded;
+        }
+
+        public void Remove(FileInfo fileInfo)
+        {
+            _cachedScripts.Remove(fileInfo);
+        }
+
+        public void Remove(IScript script)
+        {
+            if (script.File != null)
+            {
+                Remove(script.File);
+            }
+            else
+            {
+                var keys = _cachedScripts.Where(s => s.Value.Item2 == script).Select(kvp => kvp.Key).ToArray();
+
+                foreach (var key in keys)
+                {
+                    Remove(key);
+                }
+            }
         }
 
         #endregion

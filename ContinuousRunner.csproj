@@ -82,12 +82,14 @@
     <Compile Include="ICachedScripts.cs" />
     <Compile Include="ICancellable.cs" />
     <Compile Include="Frameworks\IFrameworkDetector.cs" />
+    <Compile Include="IDeterministicIdentifier.cs" />
     <Compile Include="IHasher.cs" />
     <Compile Include="IInstanceContext.cs" />
     <Compile Include="IModuleReader.cs" />
     <Compile Include="Impl\CachedScripts.cs" />
     <Compile Include="Impl\Cancellable.cs" />
     <Compile Include="Frameworks\FrameworkDetector.cs" />
+    <Compile Include="Impl\DeterministicIdentifier.cs" />
     <Compile Include="Impl\Disposable.cs" />
     <Compile Include="Impl\Hasher.cs" />
     <Compile Include="Impl\ReferenceTree.cs" />
@@ -113,7 +115,7 @@
     <Compile Include="ISubscription.cs" />
     <Compile Include="Extractors\ISuiteReader.cs" />
     <Compile Include="Extractors\SuiteReader.cs" />
-    <Compile Include="Extractors\DefinitionShim.cs" />
+    <Compile Include="Extractors\Definer.cs" />
     <Compile Include="Operation.cs" />
     <Compile Include="PropertyInjector.cs" />
     <Compile Include="Publisher.cs" />

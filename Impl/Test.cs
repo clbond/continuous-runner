@@ -6,13 +6,9 @@ namespace ContinuousRunner.Impl
 {
     public class Test : ITest
     {
-        private WeakReference _parentSuite;
-
-        public Test(IScript script, TestSuite suite, string definitionCode)
+        public Test()
         {
             Id = Guid.NewGuid();
-            
-            RawCode = definitionCode;
         }
 
         #region Implementation of ITest
@@ -29,11 +25,6 @@ namespace ContinuousRunner.Impl
         {
             get
             {
-                if (_parentSuite.IsAlive == false)
-                {
-                    throw new TestException("Parent suite has been disposed");
-                }
-
                 return _parentSuite.Target as TestSuite;
             }
             set
@@ -41,6 +32,12 @@ namespace ContinuousRunner.Impl
                 _parentSuite = new WeakReference(value);
             }
         }
+
+        #endregion
+
+        #region Private members
+
+        private WeakReference _parentSuite;
 
         #endregion
     }

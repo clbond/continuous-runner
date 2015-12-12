@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace ContinuousRunner.Extractors
+﻿namespace ContinuousRunner.Extractors
 {
-    using Data;
-
     public interface ISuiteReader
     {
-        IEnumerable<TestSuite> GetTests(IScript script);
+        Definer Define(IScript script);
     }
 }
