@@ -22,14 +22,15 @@ namespace ContinuousRunner.Extractors
             _script = script;
         }
 
-        public void AddSuite(string description)
+        public void AddSuite(string description, string definition)
         {
             _suites.Add(
                 new TestSuite
                 {
                     Name = description,
                     ParentScript = _script,
-                    Tests = new List<ITest>()
+                    Tests = new List<ITest>(),
+                    RawCode = definition
                 });
         }
 

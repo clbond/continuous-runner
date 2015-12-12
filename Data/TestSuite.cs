@@ -9,6 +9,8 @@ namespace ContinuousRunner.Data
 
         public string Name { get; set; }
 
+        public string RawCode { get; set; }
+
         public IList<ITest> Tests { get; set; }
 
         public IScript ParentScript

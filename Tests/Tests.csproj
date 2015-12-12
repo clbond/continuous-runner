@@ -41,9 +41,11 @@
       <HintPath>..\packages\Autofac.3.5.2\lib\net40\Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Moq, Version=4.2.1510.2205, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
-      <HintPath>..\packages\Moq.4.2.1510\lib\net40\Moq.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="ClearScript">
+      <HintPath>..\packages\ClearScript.V8.5.4.3\lib\net40\ClearScript.dll</HintPath>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
