@@ -90,6 +90,10 @@ namespace ContinuousRunner.Impl
         }
         private IScript LoadFile(FileInfo fileInfo)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            logger.Debug($"Loading script file: {fileInfo.Name}");
+
             string content;
 
             using (var readStream = fileInfo.OpenRead())
