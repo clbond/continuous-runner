@@ -129,11 +129,18 @@ namespace ContinuousRunner.Impl
         {
             var root = _instanceContext.ScriptsRoot.FullName;
 
-            var components = @ref.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            var components = @ref.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
 
+            // The script root folder is equivalent to the module root namespace, so it should be skipped when combining
+            var rootReference = components.FirstOrDefault();
+            if (rootReference == _instanceContext.ModuleNamespace)
+            {
+                components = components.Skip(1).ToArray();
+            }
+            
             var path = Path.Combine(new List<string> { root }.Concat(components).ToArray());
 
-            return new FileInfo(path);
+            return new FileInfo($"{path}.js");
         }
 
         #endregion

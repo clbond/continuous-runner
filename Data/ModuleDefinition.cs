@@ -6,7 +6,7 @@ namespace ContinuousRunner.Data
     {
         public string ModuleName { get; set; }
         
-        public IList<IScript> References { get; set; }
+        public IEnumerable<IScript> References { get; set; }
 
         public ExpressionTree Expression { get; set; }
     }

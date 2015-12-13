@@ -42,6 +42,7 @@ namespace ContinuousRunner.Tests
                        {
                            Assembly.GetExecutingAssembly().Location,
                            @"..",
+                           @"..",
                            @".."
                        };
 

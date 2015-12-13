@@ -10,8 +10,7 @@ namespace ContinuousRunner.Impl
     {
         [Import] private readonly IHasher _hasher;
         
-        private readonly IDictionary<FileInfo, Tuple<Guid, IScript>> _cachedScripts =
-            new Dictionary<FileInfo, Tuple<Guid, IScript>>();
+        private readonly IDictionary<string, Tuple<Guid, IScript>> _cachedScripts = new Dictionary<string, Tuple<Guid, IScript>>();
 
         #region Implementation of ICachedScripts
 
@@ -24,9 +23,9 @@ namespace ContinuousRunner.Impl
 
             var newHash = _hasher.GetHash(fileInfo);
 
-            if (_cachedScripts.ContainsKey(fileInfo))
+            if (_cachedScripts.ContainsKey(fileInfo.FullName))
             {
-                var tuple = _cachedScripts[fileInfo];
+                var tuple = _cachedScripts[fileInfo.FullName];
 
                 if (newHash == tuple.Item1)
                 {
@@ -36,14 +35,14 @@ namespace ContinuousRunner.Impl
 
             var loaded = load(fileInfo);
 
-            _cachedScripts[fileInfo] = Tuple.Create(newHash, loaded);
+            _cachedScripts[fileInfo.FullName] = Tuple.Create(newHash, loaded);
 
             return loaded;
         }
 
         public void Remove(FileInfo fileInfo)
         {
-            _cachedScripts.Remove(fileInfo);
+            _cachedScripts.Remove(fileInfo.FullName);
         }
 
         public void Remove(IScript script)
@@ -58,7 +57,7 @@ namespace ContinuousRunner.Impl
 
                 foreach (var key in keys)
                 {
-                    Remove(key);
+                    Remove(new FileInfo(key));
                 }
             }
         }

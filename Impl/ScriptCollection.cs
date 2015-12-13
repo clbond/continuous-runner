@@ -23,7 +23,7 @@ namespace ContinuousRunner.Impl
                        Constants.FileExtensions.JavaScript.Any(
                            j => string.Equals(ext, j, StringComparison.InvariantCultureIgnoreCase));
 
-            var files = _instanceContext.ScriptsRoot.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => isScript(f.Extension));
+            var files = _instanceContext.ScriptsRoot.GetFiles("*", SearchOption.AllDirectories).Where(f => isScript(f.Extension));
 
             return files.Select(loader).Where(script => script != null);
         }
@@ -32,7 +32,7 @@ namespace ContinuousRunner.Impl
         {
             var testExpr = new Regex("(spec|tests|test).js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            var files = _instanceContext.ScriptsRoot.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => testExpr.IsMatch(f.Name));
+            var files = _instanceContext.ScriptsRoot.GetFiles("*", SearchOption.AllDirectories).Where(f => testExpr.IsMatch(f.Name));
             
             return files.Select(loader).Where(script => script != null);
         }
