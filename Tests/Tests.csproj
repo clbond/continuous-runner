@@ -66,8 +66,9 @@
     <Compile Include="FileMock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptMock.cs" />
-    <Compile Include="ScriptRunnerTests.cs" />
+    <Compile Include="ScriptTests.cs" />
     <Compile Include="TestInstance.cs" />
+    <Compile Include="TestProjects\Basic\BasicProjectTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContinuousRunner.csproj">
@@ -78,6 +79,12 @@
   <ItemGroup>
     <Compile Include="Container.cs" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="TestProjects\Basic\Scripts\File1.js" />
+    <Content Include="TestProjects\Basic\Scripts\File2.js" />
+    <Content Include="TestProjects\Basic\Scripts\Tests.js" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

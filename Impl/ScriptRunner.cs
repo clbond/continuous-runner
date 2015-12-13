@@ -53,11 +53,7 @@ namespace ContinuousRunner.Impl
 
                 logger.Info($"Executing script: {test.Name}");
 
-         //       var run = $"{test.RawCode}();";
-
-                var run = @"var x = 0;";
-
-                engine.Evaluate(run);
+                var r = engine.Evaluate(script.Module.ModuleName, false, test.RawCode);
 
                 return Task.FromResult(new TestResult {Status = TestStatus.Failed});
             }

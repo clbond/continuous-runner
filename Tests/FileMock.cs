@@ -1,6 +1,8 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Moq;
 
@@ -26,6 +28,26 @@ namespace ContinuousRunner.Tests
             }
 
             return fs;
+        }
+
+        /// <summary>
+        /// Get a reference to a test file (T FileInfo) or a test directory (T DirectoryInfo).
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="components"></param>
+        /// <returns></returns>
+        public static T TestFile<T>(params string[] components) where T : FileSystemInfo
+        {
+            var path = new List<string>
+                       {
+                           Assembly.GetExecutingAssembly().Location,
+                           @"..",
+                           @".."
+                       };
+
+            path.AddRange(components);
+
+            return (T) Activator.CreateInstance(typeof(T), Path.Combine(path.ToArray()));
         }
     }
 }

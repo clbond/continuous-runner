@@ -5,16 +5,23 @@ using System.Threading.Tasks;
 using Autofac;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 
 namespace ContinuousRunner.Tests
 {
     [TestClass]
-    public class ScriptRunnerTests
+    public class ScriptTests
     {
         [TestMethod]
         public void TestBasicTestDefinition()
         {
-            using (var container = Container.CreateContainer())
+            var instanceContext = new Mock<IInstanceContext>();
+            instanceContext.SetupGet(i => i.ScriptsRoot).Returns(new DirectoryInfo(Path.GetTempPath()));
+            instanceContext.SetupGet(i => i.ModuleNamespace).Returns(string.Empty);
+
+            Action<ContainerBuilder> build = cb => cb.Register(c => instanceContext.Object).As<IInstanceContext>();
+
+            using (var container = Container.CreateContainer(build))
             {
                 const string content = @"describe('Foo', function () { it('Bar', function () { debugger; }); });";
 
