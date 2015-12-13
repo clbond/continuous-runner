@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+﻿using Autofac;
+using Autofac.Core;
 
-using Autofac;
-using ContinuousRunner.Extractors;
 using ContinuousRunner.Impl;
 
 namespace ContinuousRunner
@@ -11,27 +10,37 @@ namespace ContinuousRunner
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
-
+            
             builder.RegisterType<Publisher>()
-                   .As<IPublisher>();
+                   .As<IPublisher>()
+                   .OnActivated(ActivateInject);
 
-            builder.Register((c, p) => new Definer(p.TypedAs<IScript>()))
-                   .As<Definer>()
-                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
+            builder.Register((c, p) => new TestCollection(p.TypedAs<IScript>()))
+                   .As<ITestCollection>()
+                   .OnActivated(ActivateInject);
 
             builder.RegisterType<CachedScripts>()
                    .As<ICachedScripts>()
                    .SingleInstance()
-                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
+                   .OnActivated(ActivateInject);
 
-            builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
-                   .Except<Definer>()
-                   .Except<Publisher>()
-                   .Except<IPublisher>()
-                   .Except<CachedScripts>()
-                   .Except<ICachedScripts>()
+            builder.RegisterType<RunQueue>()
                    .AsImplementedInterfaces()
-                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
+                   .SingleInstance()
+                   .OnActivated(ActivateInject);
+                
+            builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
+                   .Except<TestCollection>()
+                   .Except<Publisher>()
+                   .Except<CachedScripts>()
+                   .Except<RunQueue>()
+                   .AsImplementedInterfaces()
+                   .OnActivated(ActivateInject);
+        }
+
+        private static void ActivateInject<T>(IActivatedEventArgs<T> args)
+        {
+            PropertyInjector.InjectProperties(args.Context, args.Instance);
         }
     }
 }

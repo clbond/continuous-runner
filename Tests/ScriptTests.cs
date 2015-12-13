@@ -17,29 +17,35 @@ namespace ContinuousRunner.Tests
         {
             var instanceContext = new Mock<IInstanceContext>();
             instanceContext.SetupGet(i => i.ScriptsRoot).Returns(new DirectoryInfo(Path.GetTempPath()));
-            instanceContext.SetupGet(i => i.ModuleNamespace).Returns(string.Empty);
+            instanceContext.SetupGet(i => i.ModuleNamespace).Returns(nameof(Tests));
 
             Action<ContainerBuilder> build = cb => cb.Register(c => instanceContext.Object).As<IInstanceContext>();
 
             using (var container = Container.CreateContainer(build))
             {
-                const string content = @"describe('Foo', function () { it('Bar', function () { debugger; }); });";
+                const string content =
+                    @"define([], function () {
+                        describe('Foo', function () {
+                          it('Bar', function () {
+                            debugger;
+                          });
+                        });
+                      });";
+
+                var fileInfo = FileMock.FromString(content);
 
                 var loader = container.Resolve<IScriptLoader>();
 
-                var script = loader.Load(content);
+                var script = loader.Load(fileInfo);
                 Assert.IsNotNull(script);
                 Assert.IsNotNull(script.ExpressionTree);
 
-                var runner = container.Resolve<IScriptRunner>();
+                Assert.IsNotNull(script.Module);
 
-                var result = runner.RunAsync(script).ToArray();
+                var module = script.Module;
 
-                var success = Task.WaitAll(result.Cast<Task>().ToArray(), Constants.TestTimeout);
-                if (success == false)
-                {
-                    throw new TestException("Timed out while waiting for script execution result");
-                }
+                Assert.AreEqual($"{nameof(Tests)}/{Path.GetFileNameWithoutExtension(fileInfo.Name)}", module.ModuleName);
+
             }
         }
     }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using ContinuousRunner.Extractors;
 
 using NLog;
 
@@ -25,7 +24,7 @@ namespace ContinuousRunner.Impl
         
         [Import] private readonly IPublisher _publisher;
 
-        [Import] private readonly ISuiteReader _suiteReader;
+        [Import] private readonly ITestCollectionReader _suiteReader;
 
         [Import] private readonly IReferenceResolver _referenceResolver;
 
@@ -74,7 +73,7 @@ namespace ContinuousRunner.Impl
             Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader =
                 (s, tree) => _moduleReader.Get(s, m => LoadModule(s, m));
 
-            Func<IScript, ExpressionTree, Definer> suiteLoader = (s, tree) => _suiteReader.Define(s);
+            Func<IScript, ExpressionTree, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
 
             var expressionTree = fileInfo != null
                                      ? _parser.Parse(fileInfo)

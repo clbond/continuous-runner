@@ -7,16 +7,12 @@ using Autofac.Core;
 
 namespace ContinuousRunner
 {
-
     public static class PropertyInjector
     {
         public static void InjectProperties(IComponentContext context, object instance)
         {
-            var bindings = BindingFlags.Instance |
-                           BindingFlags.Public |
-                           BindingFlags.NonPublic;
-
-            var properties = instance.GetType().GetFields(bindings);
+            var properties = instance.GetType().GetFields(
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             foreach (var fieldInfo in properties)
             {

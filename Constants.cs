@@ -8,9 +8,12 @@ namespace ContinuousRunner
     {
         public static readonly TimeSpan TestTimeout = 5.Minutes(); // timeout of complete test run
 
-        public const uint MaximumQueueSize = 8;
-
         public static readonly TimeSpan QueueWait = 150.Milliseconds();
+
+        /// <summary>
+        /// The number of preloaded scripts to keep in memory in support of the test runner
+        /// </summary>
+        public const int ScriptCacheSize = 16;
 
         public static class FileExtensions
         {

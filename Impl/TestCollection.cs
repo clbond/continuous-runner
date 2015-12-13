@@ -3,11 +3,10 @@ using System.ComponentModel.Composition;
 using System.Linq;
 
 using ContinuousRunner.Data;
-using ContinuousRunner.Impl;
 
-namespace ContinuousRunner.Extractors
+namespace ContinuousRunner.Impl
 {
-    public class Definer
+    public class TestCollection : ITestCollection
     {
         [Import] private readonly IDeterministicIdentifier _deterministicIdentifier;
 
@@ -17,7 +16,7 @@ namespace ContinuousRunner.Extractors
         
         private readonly IList<TestSuite> _suites = new List<TestSuite>(); 
 
-        public Definer(IScript script)
+        public TestCollection(IScript script)
         {
             _script = script;
         }

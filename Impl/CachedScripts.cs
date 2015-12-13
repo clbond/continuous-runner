@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using Magnum.Extensions;
+using NLog;
 
 namespace ContinuousRunner.Impl
 {
     public class CachedScripts : ICachedScripts
     {
         [Import] private readonly IHasher _hasher;
-        
-        private readonly IDictionary<string, Tuple<Guid, IScript>> _cachedScripts = new Dictionary<string, Tuple<Guid, IScript>>();
+
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger(); 
+
+        private readonly IDictionary<string, CachedScriptItem> _cache = new Dictionary<string, CachedScriptItem>();
 
         #region Implementation of ICachedScripts
 
@@ -21,28 +25,82 @@ namespace ContinuousRunner.Impl
                 throw new ArgumentNullException(nameof(load));
             }
 
-            var newHash = _hasher.GetHash(fileInfo);
-
-            if (_cachedScripts.ContainsKey(fileInfo.FullName))
+            try
             {
-                var tuple = _cachedScripts[fileInfo.FullName];
+                var hash = _hasher.GetHash(fileInfo);
 
-                if (newHash == tuple.Item1)
+                if (_cache.ContainsKey(fileInfo.FullName))
                 {
-                    return tuple.Item2;
+                    var scriptItem = _cache[fileInfo.FullName];
+                    if (scriptItem.Hash == hash)
+                    {
+                        scriptItem.Accessed = DateTime.Now;
+
+                        return scriptItem.Script;
+                    }
+                    else
+                    {
+                        _logger.Debug(
+                            $"Script {fileInfo.Name} is stale (hash: {scriptItem.Hash} vs {hash}); removing");
+                    }
                 }
+
+                var loaded = load(fileInfo);
+
+                var cachedItem = new CachedScriptItem
+                                 {
+                                     Script = loaded,
+                                     Accessed = DateTime.Now,
+                                     Hash = hash
+                                 };
+
+                _cache[fileInfo.FullName] = cachedItem;
+
+                _logger.Debug($"Inserted script into cache: {fileInfo.Name}: hash {hash}");
+
+                return loaded;
+            }
+            finally
+            {
+                RemoveStale();
+            }
+        }
+
+        private void RemoveStale()
+        {
+            if (_cache.Count < Constants.ScriptCacheSize)
+            {
+                return;
             }
 
-            var loaded = load(fileInfo);
+            // Get the items that have not been used or referenced in a while and remove them from the cache.
+            // The goal is to keep the cache at a maximum size, with the most recently-used scripts always
+            // being retained, and the ones that have not been referenced in a while get removed.
+            var matching =
+                _cache.Select(kvp => Tuple.Create(kvp.Key, kvp.Value.Accessed))
+                      .OrderByDescending(t => t.Item2)
+                      .Skip(Constants.ScriptCacheSize)
+                      .Select(kvp => kvp.Item1)
+                      .ToArray();
 
-            _cachedScripts[fileInfo.FullName] = Tuple.Create(newHash, loaded);
+            if (matching.Length > 0)
+            {
+                _logger.Debug($"Removing {matching.Length} stale items from script cache");
 
-            return loaded;
+                matching.Each(k => _cache.Remove(k));
+            }
         }
 
         public void Remove(FileInfo fileInfo)
         {
-            _cachedScripts.Remove(fileInfo.FullName);
+            try
+            {
+                _cache.Remove(fileInfo.FullName);
+            }
+            finally
+            {
+                RemoveStale();
+            }
         }
 
         public void Remove(IScript script)
@@ -53,12 +111,9 @@ namespace ContinuousRunner.Impl
             }
             else
             {
-                var keys = _cachedScripts.Where(s => s.Value.Item2 == script).Select(kvp => kvp.Key).ToArray();
+                var keys = _cache.Where(s => s.Value.Script == script).Select(kvp => kvp.Key).ToArray();
 
-                foreach (var key in keys)
-                {
-                    Remove(new FileInfo(key));
-                }
+                keys.Each(k => Remove(new FileInfo(k)));
             }
         }
 

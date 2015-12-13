@@ -1,25 +1,22 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 
 using Autofac;
 
 using Microsoft.ClearScript.V8;
 
-namespace ContinuousRunner.Extractors
+namespace ContinuousRunner.Impl
 {
-    using Data;
-
-    public class SuiteReader : ISuiteReader
+    public class TestCollectionReader : ITestCollectionReader
     {
         [Import] private IComponentContext _componentContext;
 
         #region Implementation of ISuiteReader
 
-        public Definer Define(IScript script)
+        public ITestCollection DefineTests(IScript script)
         {
             using (var engine = new V8ScriptEngine())
             {
-                var definer = _componentContext.Resolve<Definer>(new TypedParameter(typeof (IScript), script));
+                var definer = _componentContext.Resolve<ITestCollection>(new TypedParameter(typeof (IScript), script));
 
                 engine.AddHostObject(nameof(definer), definer);
 
