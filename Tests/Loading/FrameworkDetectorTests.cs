@@ -1,18 +1,22 @@
 ﻿using Autofac;
-
 using ContinuousRunner.Frameworks;
+using ContinuousRunner.Tests.Mock;
+using FluentAssertions;
+using Xunit;
+using Xunit.Abstractions;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-namespace ContinuousRunner.Tests
+namespace ContinuousRunner.Tests.Loading
 {
-    [TestClass]
-    public class FrameworkDetectorTests
+    public class FrameworkDetectorTests : BaseTest
     {
-        [TestMethod]
+        public FrameworkDetectorTests(ITestOutputHelper helper)
+            : base(helper)
+        {}
+
+        [Fact]
         public void TestJasmineDetection()
         {
-            using (var container = Container.CreateContainer())
+            using (var container = CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -21,52 +25,52 @@ namespace ContinuousRunner.Tests
                     it('Test item', function () {});
                   });";
 
-                var script = ScriptMock.Get(jasmineScript);
+                var script = MockScript.Get(jasmineScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                Assert.AreEqual(Framework.Jasmine, frameworks);
+                frameworks.Should().Be(Framework.Jasmine);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRequireJsDetection()
         {
-            using (var container = Container.CreateContainer())
+            using (var container = CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
                 const string requireScript = @"define();";
 
-                var script = ScriptMock.Get(requireScript);
+                var script = MockScript.Get(requireScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                Assert.AreEqual(Framework.RequireJs, frameworks);
+                frameworks.Should().Be(Framework.RequireJs);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestNodeJsDetection()
         {
-            using (var container = Container.CreateContainer())
+            using (var container = CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
                 const string nodeScript = @"var path = require('path');";
 
-                var script = ScriptMock.Get(nodeScript);
+                var script = MockScript.Get(nodeScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                Assert.AreEqual(Framework.NodeJs, frameworks);
+                frameworks.Should().Be(Framework.NodeJs);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestCombinedScriptDetection()
         {
-            using (var container = Container.CreateContainer())
+            using (var container = CreateContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -78,13 +82,13 @@ namespace ContinuousRunner.Tests
                         });
                       });";
 
-                var script = ScriptMock.Get(combinedScript);
+                var script = MockScript.Get(combinedScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                Assert.IsTrue(frameworks.HasFlag(Framework.Jasmine));
-                Assert.IsTrue(frameworks.HasFlag(Framework.NodeJs));
-                Assert.IsTrue(frameworks.HasFlag(Framework.RequireJs));
+                frameworks.Should().HaveFlag(Framework.Jasmine);
+                frameworks.Should().HaveFlag(Framework.NodeJs);
+                frameworks.Should().HaveFlag(Framework.RequireJs);
             }
         }
     }

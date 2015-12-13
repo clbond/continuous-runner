@@ -2,9 +2,9 @@
 
 using Moq;
 
-namespace ContinuousRunner.Tests
+namespace ContinuousRunner.Tests.Mock
 {
-    public static class ScriptMock
+    public class MockScript
     {
         public static IScript Get(string content)
         {
@@ -12,7 +12,7 @@ namespace ContinuousRunner.Tests
 
             var script = new Mock<IScript>();
 
-            script.SetupGet(s => s.File).Returns(FileMock.FromString(content));
+            script.SetupGet(s => s.File).Returns(MockFile.FromString(content));
             script.SetupGet(s => s.ExpressionTree).Returns(parser.Parse(content));
 
             return script.Object;

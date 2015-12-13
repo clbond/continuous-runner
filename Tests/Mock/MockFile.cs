@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Text;
 using Moq;
 
-namespace ContinuousRunner.Tests
+namespace ContinuousRunner.Tests.Mock
 {
-    public static class FileMock
+    public static class MockFile
     {
         private static readonly TempFileCollection _collection = new TempFileCollection();
 
@@ -38,17 +38,18 @@ namespace ContinuousRunner.Tests
         /// <returns></returns>
         public static T TestFile<T>(params string[] components) where T : FileSystemInfo
         {
+            var executingFrom = AppDomain.CurrentDomain.BaseDirectory;
+
             var path = new List<string>
                        {
-                           Assembly.GetExecutingAssembly().Location,
-                           @"..",
+                           executingFrom,
                            @"..",
                            @".."
                        };
 
             path.AddRange(components);
 
-            return (T) Activator.CreateInstance(typeof(T), Path.Combine(path.ToArray()));
+            return (T)Activator.CreateInstance(typeof(T), Path.Combine(path.ToArray()));
         }
     }
 }
