@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using ContinuousRunner.Frameworks;
 
 namespace ContinuousRunner
 {
@@ -42,6 +43,11 @@ namespace ContinuousRunner
         /// The number of tests defined in this script (may change on reload)
         /// </summary>
         int TestCount { get; }
+
+        /// <summary>
+        /// What frameworks does this script use? (eg., RequireJS)
+        /// </summary>
+        Framework Frameworks { get; }
 
         /// <summary>
         /// Reload the contents of this script since it has changed on disk

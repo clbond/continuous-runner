@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using ContinuousRunner.Frameworks;
 using JetBrains.Annotations;
 
 namespace ContinuousRunner.Impl
@@ -17,7 +17,8 @@ namespace ContinuousRunner.Impl
             [NotNull] IPublisher publisher,
             [NotNull] Func<IScript, ExpressionTree> reloader,
             [NotNull] Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader,
-            [NotNull] Func<IScript, ExpressionTree, ITestCollection> suiteLoader)
+            [NotNull] Func<IScript, ExpressionTree, ITestCollection> suiteLoader,
+            [NotNull] Func<IScript, Framework> frameworkLoader)
         {
             _publisher = publisher;
 
@@ -26,6 +27,8 @@ namespace ContinuousRunner.Impl
             _moduleLoader = moduleLoader;
 
             _suiteLoader = suiteLoader;
+
+            _frameworkLoader = frameworkLoader;
 
             Reset();
         }
@@ -43,8 +46,12 @@ namespace ContinuousRunner.Impl
         private readonly Func<IScript, ExpressionTree, ITestCollection> _suiteLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
-        
+
+        private Lazy<Framework> _frameworks;
+
         private ExpressionTree _expressionTree;
+
+        private Func<IScript, Framework> _frameworkLoader;
 
         #endregion
 
@@ -67,6 +74,8 @@ namespace ContinuousRunner.Impl
                 return Suites.Sum(suite => suite.Tests.Count);
             }
         }
+
+        public Framework Frameworks => _frameworks.Value;
 
         public ExpressionTree ExpressionTree
         {
@@ -155,8 +164,10 @@ namespace ContinuousRunner.Impl
         private void Reset()
         {
             _suites = new Lazy<IEnumerable<TestSuite>>(GetSuites);
-        }
 
+            _frameworks = new Lazy<Framework>(() => _frameworkLoader.Invoke(this));
+        }
+        
         private IEnumerable<TestSuite> GetSuites()
         {
             var definer = _suiteLoader?.Invoke(this, ExpressionTree);

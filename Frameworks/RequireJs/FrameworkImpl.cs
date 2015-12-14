@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
+using System.ComponentModel.Composition;
 using System.IO;
 
 using Microsoft.ClearScript.V8;
@@ -11,13 +11,8 @@ namespace ContinuousRunner.Frameworks.RequireJs
     {
         private readonly Dictionary<string, object> _defines = new Dictionary<string, object>();
 
-        private readonly IInstanceContext _instanceContext;
-
-        public FrameworkImpl(IInstanceContext instanceContext)
-        {
-            _instanceContext = instanceContext;
-        }
-
+        [Import] private readonly IInstanceContext _instanceContext;
+        
         public Framework Framework => Framework.RequireJs;
 
         public void Install(V8ScriptEngine engine)

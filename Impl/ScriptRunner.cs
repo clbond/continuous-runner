@@ -2,7 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
-
+using ContinuousRunner.Frameworks;
 using ContinuousRunner.Frameworks.Jasmine;
 using ContinuousRunner.Frameworks.RequireJs;
 
@@ -16,7 +16,9 @@ namespace ContinuousRunner.Impl
 
     public class ScriptRunner : IScriptRunner
     {
-        [Import] public readonly IInstanceContext _instanceContext;
+        [Import] private readonly IFrameworkDetector _frameworkDetector;
+
+        [Import] private readonly IInstanceContext _instanceContext;
         
         #region Implementation of IScriptRunner
 
@@ -43,9 +45,11 @@ namespace ContinuousRunner.Impl
         {
             var logger = LogManager.GetCurrentClassLogger();
 
+            var frameworks = _frameworkDetector.DetectFrameworks(script);
+
             using (var engine = new V8ScriptEngine())
             {
-                var requireImpl = new Frameworks.RequireJs.FrameworkImpl(_instanceContext);
+                var requireImpl = new Frameworks.RequireJs.FrameworkImpl();
                 requireImpl.Install(engine);
 
                 var jasmineImpl = new Frameworks.Jasmine.FrameworkImpl();

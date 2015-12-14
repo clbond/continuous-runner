@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-
+using ContinuousRunner.Frameworks;
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -15,17 +15,12 @@ namespace ContinuousRunner.Impl
         #region Private members
 
         [Import] private readonly IInstanceContext _instanceContext;
-
         [Import] private readonly ICachedScripts _cachedScripts;
-
+        [Import] private readonly IFrameworkDetector _frameworkDetector;
         [Import] private readonly IModuleReader _moduleReader;
-
-        [Import] private readonly IParser _parser;
-        
+        [Import] private readonly IParser _parser;      
         [Import] private readonly IPublisher _publisher;
-
         [Import] private readonly ITestCollectionReader _suiteReader;
-
         [Import] private readonly IReferenceResolver _referenceResolver;
 
         #endregion
@@ -75,11 +70,13 @@ namespace ContinuousRunner.Impl
 
             Func<IScript, ExpressionTree, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
 
+            Func<IScript, Framework> frameworkLoader = script => _frameworkDetector.DetectFrameworks(script);
+
             var expressionTree = fileInfo != null
                                      ? _parser.Parse(fileInfo)
                                      : _parser.Parse(content);
 
-            return new Script(_publisher, loader, moduleLoader, suiteLoader)
+            return new Script(_publisher, loader, moduleLoader, suiteLoader, frameworkLoader)
                    {
                        File = fileInfo,
                        Content = content,
