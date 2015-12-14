@@ -18,7 +18,7 @@ namespace ContinuousRunner.Tests.Loading
         [Fact]
         public void LoadSimpleRequireJsAndJasmineScript()
         {
-            using (var container = CreateTypicalContainer(MockFile.TestFile<DirectoryInfo>()))
+            using (var container = CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>()))
             {
                 const string content =
                     @"define([], function () {
@@ -29,7 +29,7 @@ namespace ContinuousRunner.Tests.Loading
                         });
                       });";
 
-                var fileInfo = MockFile.FromString(content);
+                var fileInfo = container.Resolve<IMockFile>().FromString("js", content);
 
                 var loader = container.Resolve<IScriptLoader>();
 

@@ -1,22 +1,30 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.IO;
-using System.Reflection;
 using System.Text;
-using Moq;
 
 namespace ContinuousRunner.Tests.Mock
 {
-    public static class MockFile
+    public class MockFile : IMockFile
     {
-        private static readonly TempFileCollection _collection = new TempFileCollection();
+        [Import] private readonly IInstanceContext _instanceContext;
 
-        private static readonly Random _random = new Random();
+        private readonly TempFileCollection _collection;
 
-        public static FileInfo FromString(string content)
+        private readonly Random _random = new Random();
+
+        public MockFile(IInstanceContext instanceContext)
         {
-            var path = _collection.AddExtension(Convert.ToInt32(_random.Next()).ToString());
+            _instanceContext = instanceContext;
+
+            _collection = new TempFileCollection(_instanceContext.ScriptsRoot.FullName, true);
+        }
+
+        public FileInfo FromString(string extension, string content)
+        {
+            var path = _collection.AddExtension($"{Convert.ToInt32(_random.Next())}.{extension}");
 
             var fs = new FileInfo(path);
 
@@ -36,7 +44,19 @@ namespace ContinuousRunner.Tests.Mock
         /// <typeparam name="T"></typeparam>
         /// <param name="components"></param>
         /// <returns></returns>
-        public static T TestFile<T>(params string[] components) where T : FileSystemInfo
+        public T TestFile<T>(params string[] components) where T : FileSystemInfo
+        {
+            var path = new List<string>
+                       {
+                           _instanceContext.ScriptsRoot.FullName
+                       };
+
+            path.AddRange(components);
+
+            return (T) Activator.CreateInstance(typeof (T), Path.Combine(path.ToArray()));
+        }
+
+        public static T TempFile<T>(params string[] components) where T : FileSystemInfo
         {
             var executingFrom = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -49,7 +69,7 @@ namespace ContinuousRunner.Tests.Mock
 
             path.AddRange(components);
 
-            return (T)Activator.CreateInstance(typeof(T), Path.Combine(path.ToArray()));
+            return (T) Activator.CreateInstance(typeof (T), Path.Combine(path.ToArray()));
         }
     }
 }

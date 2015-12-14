@@ -16,7 +16,7 @@ namespace ContinuousRunner.Tests.Loading
         [Fact]
         public void TestJasmineDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = CreateTypicalContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -25,52 +25,52 @@ namespace ContinuousRunner.Tests.Loading
                     it('Test item', function () {});
                   });";
 
-                var script = MockScript.Get(jasmineScript);
+                var script = container.Resolve<IMockScript>().Get(jasmineScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                frameworks.Should().Be(Framework.Jasmine);
+                frameworks.Should().Be(Framework.Jasmine | Framework.JavaScript);
             }
         }
 
         [Fact]
         public void TestRequireJsDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = CreateTypicalContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
                 const string requireScript = @"define();";
 
-                var script = MockScript.Get(requireScript);
+                var script = container.Resolve<IMockScript>().Get(requireScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                frameworks.Should().Be(Framework.RequireJs);
+                frameworks.Should().Be(Framework.RequireJs | Framework.JavaScript);
             }
         }
 
         [Fact]
         public void TestNodeJsDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = CreateTypicalContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
                 const string nodeScript = @"var path = require('path');";
 
-                var script = MockScript.Get(nodeScript);
+                var script = container.Resolve<IMockScript>().Get(nodeScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
-                frameworks.Should().Be(Framework.NodeJs);
+                frameworks.Should().Be(Framework.NodeJs | Framework.JavaScript);
             }
         }
 
         [Fact]
         public void TestCombinedScriptDetection()
         {
-            using (var container = CreateContainer())
+            using (var container = CreateTypicalContainer())
             {
                 var detector = container.Resolve<IFrameworkDetector>();
 
@@ -82,10 +82,11 @@ namespace ContinuousRunner.Tests.Loading
                         });
                       });";
 
-                var script = MockScript.Get(combinedScript);
+                var script = container.Resolve<IMockScript>().Get(combinedScript);
 
                 var frameworks = detector.DetectFrameworks(script);
 
+                frameworks.Should().HaveFlag(Framework.JavaScript);
                 frameworks.Should().HaveFlag(Framework.Jasmine);
                 frameworks.Should().HaveFlag(Framework.NodeJs);
                 frameworks.Should().HaveFlag(Framework.RequireJs);

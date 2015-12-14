@@ -23,8 +23,9 @@ namespace ContinuousRunner.Frameworks
         /// <summary>
         /// Install the appropriate frameworks (<paramref name="framework"/> flags) into a V8 script context.
         /// </summary>
+        /// <param name="script">The script we are preparing to execute in this V8 context</param>
         /// <param name="framework">The frameworks to install into the V8 script context</param>
         /// <param name="engine">An existing V8 script context</param>
-        void InstallFrameworks(Framework framework, V8ScriptEngine engine);
+        void InstallFrameworks(IScript script, Framework framework, V8ScriptEngine engine);
     }
 }

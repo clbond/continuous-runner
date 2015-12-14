@@ -1,17 +1,20 @@
-﻿using ContinuousRunner.Impl;
+﻿using System.ComponentModel.Composition;
+using ContinuousRunner.Impl;
 
 using Moq;
 
 namespace ContinuousRunner.Tests.Mock
 {
-    public class MockScript
+    public class MockScript : IMockScript
     {
-        public static IScript Get(string content)
+        [Import] private readonly IMockFile _mockFile;
+
+        public IScript Get(string content)
         {
             var parser = new Parser();
 
             var script = new Mock<IScript>();
-            script.SetupGet(s => s.File).Returns(MockFile.FromString(content));
+            script.SetupGet(s => s.File).Returns(_mockFile.FromString("js", content));
             script.SetupGet(s => s.ExpressionTree).Returns(parser.Parse(content));
             script.Name = content;
 

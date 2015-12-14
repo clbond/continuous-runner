@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.Composition;
-
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Linq;
+using ContinuousRunner.Frameworks;
 using Microsoft.ClearScript.V8;
 
 namespace ContinuousRunner.Impl
@@ -8,7 +10,9 @@ namespace ContinuousRunner.Impl
 
     public class TestCollectionReader : ITestCollectionReader
     {
-        [Import] private IJasmineReflection _reflector;
+        [Import] private readonly IJasmineReflection _reflector;
+
+        [Import] private readonly IEnumerable<IFramework> _frameworks;
 
         #region Implementation of ISuiteReader
 
@@ -17,7 +21,12 @@ namespace ContinuousRunner.Impl
             using (var engine = new V8ScriptEngine())
             {
                 var collection = _reflector.Reflect(script, engine);
-                
+
+                foreach (var framework in _frameworks.Where(framework => framework.Framework != Framework.Jasmine)) // reflector is jasmine impl
+                {
+                    framework.Install(script, engine);
+                }
+
                 engine.Execute(script.Content);
 
                 return collection;

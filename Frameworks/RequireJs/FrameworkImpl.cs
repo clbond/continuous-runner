@@ -12,16 +12,18 @@ namespace ContinuousRunner.Frameworks.RequireJs
         private readonly Dictionary<string, object> _defines = new Dictionary<string, object>();
 
         [Import] private readonly IInstanceContext _instanceContext;
+
+        [Import] private readonly IReferenceResolver _referenceResolver;
         
         public Framework Framework => Framework.RequireJs;
 
-        public void Install(V8ScriptEngine engine)
+        public void Install(IScript script, V8ScriptEngine engine)
         {
-            var root = _instanceContext.ScriptsRoot.FullName;
+            var fromModule = script.Module.ModuleName;
 
-            Func<string[], object> require = req => Require(engine, root, req);
+            Func<object, object> require = req => Require(engine, fromModule, req);
 
-            Action<string, object, object> define = (module, deps, @object) => Define(engine, root, module, deps, @object);
+            Action<object, object, object> define = (module, deps, @obj) => Define(engine, fromModule, module, deps, @obj);
 
             dynamic shimImpl = new {define, require};
 
@@ -29,19 +31,22 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             engine.Execute(
                 @"var require = function (names, callback) {
-                      var loaded = shimImpl.require(names);
-                      if (callback) {
-                        callback.apply(null, loaded);
-                      }
+                    var loaded = shimImpl.require(names);
+  
+                    if (typeof callback === 'function') {
+                      callback.apply(null, loaded);
+                    }
+
+                    return loaded;
                   };");
 
             engine.Execute(
               @"var define = function (name, deps, body) {
                   // Shift to handle anonymous definitions
-                  if (typeof deps === 'function') {
+                  if (typeof name !== 'string') {
                       body = deps;
                       deps = name;
-                      name = '';
+                      name = null;
                   }
  
                   // 'resolve' the dependencies in place
@@ -49,7 +54,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
                   for (var i = 0; i < deps.length; i++)
                       deps[i] = require(deps[i]);
 
-                  shimImpl.define(name, body.apply(null, deps));
+                  shimImpl.define(name, deps, body && body.toString());
+
+                  if (typeof body === 'function') {
+                    body.apply(null, deps);
+                  }
                 };
 
                 define['amd'] = true;");
@@ -67,7 +76,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         private string ToAbsolutePath(string modulePath, string moduleName)
         {
-            throw new NotImplementedException();
+            return _referenceResolver.Resolve(modulePath, moduleName);
         }
 
         public void Define(V8ScriptEngine engine, string fromModule, object moduleName, object deps, object obj)
@@ -98,10 +107,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 deps = new string[0];
             }
 
-            foreach (var dependency in (string[])deps)
-            {
-                
-            }
+            Require(engine, moduleName as string, deps);
 
             Register(engine, fromModule, moduleName as string, v8 => obj);
         }
@@ -114,18 +120,17 @@ namespace ContinuousRunner.Frameworks.RequireJs
             {
                 var p = ToAbsolutePath(fromModule, (string) dependencies);
 
-                var local = GetLocalFile(p);
+                var local = _referenceResolver.ModuleReferenceToFile(p);
                 if (local != null)
                 {
                     Register(engine, fromModule, p, v8 => LoadScript(v8, local));
 
                     return _defines.ContainsKey(p) ? _defines[p] : null;
                 }
-                else
-                {
-                    return null;
-                }
+
+                return null;
             }
+
             foreach (var dependency in (string[])dependencies)
             {
                 object definition;
@@ -135,7 +140,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 }
                 else
                 {
-                    var local = GetLocalFile(ToAbsolutePath(fromModule, dependency));
+                    var local = _referenceResolver.ModuleReferenceToFile(ToAbsolutePath(fromModule, dependency));
                     if (local != null)
                     {
                         Register(engine, fromModule, dependency, v8 => LoadScript(v8, local));
@@ -151,27 +156,17 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return results.ToArray();
         }
 
-        private object LoadScript(V8ScriptEngine v8, string file)
+        private static object LoadScript(V8ScriptEngine v8, FileInfo fileInfo)
         {
-            var fileInfo = new FileInfo(file);
-            if (fileInfo.Exists == false)
-            {
-                throw new ArgumentException("File does not exist", nameof(file));
-            }
-
             using (var stream = fileInfo.OpenRead())
             {
                 using (var sr = new StreamReader(stream))
                 {
                     var content = sr.ReadToEnd();
+
                     return v8.Evaluate(content);
                 }
             }
-        }
-
-        private string GetLocalFile(string dependency)
-        {
-            throw new NotImplementedException();
         }
     }
 }

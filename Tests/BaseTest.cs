@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Autofac;
+using ContinuousRunner.Tests.Mock;
 using Magnum.Extensions;
 using Moq;
 using NLog;
@@ -17,7 +18,7 @@ namespace ContinuousRunner.Tests
     {
         private readonly ITestOutputHelper _helper;
 
-        private readonly MemoryTarget _memoryTarget;
+        private MemoryTarget _memoryTarget;
 
         protected BaseTest(ITestOutputHelper helper)
         {
@@ -39,13 +40,17 @@ namespace ContinuousRunner.Tests
             LogManager.EnableLogging();
         }
 
-        protected static IContainer CreateContainer(Action<ContainerBuilder> build = null)
+        private static IContainer CreateContainer(Action<ContainerBuilder> build = null)
         {
             ConfigureLogging();
 
             var builder = new ContainerBuilder();
 
             builder.RegisterModule<ContinuousRunnerModule>();
+
+            builder.RegisterAssemblyTypes(typeof (BaseTest).Assembly)
+                   .AsImplementedInterfaces()
+                   .OnActivated(args => PropertyInjector.InjectProperties(args.Context, args.Instance));
 
             build?.Invoke(builder);
 
@@ -68,6 +73,11 @@ namespace ContinuousRunner.Tests
                 };
 
             return CreateContainer(build);
+        }
+
+        protected static IContainer CreateTypicalContainer(Action<ContainerBuilder> additionalBuild = null)
+        {
+            return CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>(), additionalBuild);
         }
 
         [SuppressMessage("Usage", "CC0022:Should dispose object", Justification = "NLog oddness")]
@@ -107,11 +117,15 @@ namespace ContinuousRunner.Tests
 
         #region Implementation of IDisposable
 
-        public virtual void Dispose()
+        void IDisposable.Dispose()
         {
-            LogManager.Flush();
+            if (_memoryTarget != null)
+            {
+                LogManager.Flush();
 
-            _memoryTarget.Logs.Each(l => _helper.WriteLine(l));
+                _memoryTarget.Logs.Each(l => _helper.WriteLine(l));
+                _memoryTarget = null;
+            }
         }
 
         #endregion

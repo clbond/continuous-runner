@@ -20,6 +20,17 @@ namespace ContinuousRunner
         /// </summary>
         /// <param name="content">JavaScript or TypeScript content</param>
         IScript Load(string content);
+
+        /// <summary>
+        /// Load a script based on a module reference string ('Namespace/Foo/Bar'). The reference,
+        /// <paramref name="relativeReference"/>, can be relative to the script <paramref name="fromScript"/>.
+        /// </summary>
+        IScript LoadModule(IScript fromScript, string relativeReference);
+
+        /// <summary>
+        /// Load a script based on an absolute (not relative) module reference string
+        /// </summary>
+        IScript LoadModule(string absoluteReference);
     }
 }
 

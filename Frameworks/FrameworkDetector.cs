@@ -35,11 +35,11 @@ namespace ContinuousRunner.Frameworks
             return scripts.Select(DetectFrameworks).Aggregate(Framework.None, (current, resolved) => current | resolved);
         }
 
-        public void InstallFrameworks(Framework framework, V8ScriptEngine engine)
+        public void InstallFrameworks(IScript script, Framework framework, V8ScriptEngine engine)
         {
             foreach (var impl in _frameworks.Where(impl => framework.HasFlag(impl.Framework)))
             {
-                impl.Install(engine);
+                impl.Install(script, engine);
             }
         }
 

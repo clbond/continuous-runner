@@ -20,7 +20,7 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
         [Fact]
         public void TestLoadScripts()
         {
-            var root = MockFile.TestFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
+            var root = MockFile.TempFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
 
             var logger = LogManager.GetCurrentClassLogger();
 

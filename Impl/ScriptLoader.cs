@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
 using ContinuousRunner.Frameworks;
 using NLog;
 
@@ -13,8 +11,7 @@ namespace ContinuousRunner.Impl
     public class ScriptLoader : IScriptLoader
     {
         #region Private members
-
-        [Import] private readonly IInstanceContext _instanceContext;
+        
         [Import] private readonly ICachedScripts _cachedScripts;
         [Import] private readonly IFrameworkDetector _frameworkDetector;
         [Import] private readonly IModuleReader _moduleReader;
@@ -22,6 +19,8 @@ namespace ContinuousRunner.Impl
         [Import] private readonly IPublisher _publisher;
         [Import] private readonly ITestCollectionReader _suiteReader;
         [Import] private readonly IReferenceResolver _referenceResolver;
+
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         #endregion
 
@@ -34,15 +33,15 @@ namespace ContinuousRunner.Impl
 
         public IScript TryLoad(FileInfo fileInfo)
         {
+            // ReSharper disable once CatchAllClause
+
             try
             {
                 return Load(fileInfo);
             }
             catch (Exception ex)
             {
-                var logger = LogManager.GetCurrentClassLogger();
-
-                logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
+                _logger.Error(ex, $"Failed to load script: {fileInfo.FullName}");
 
                 return null;
             }
@@ -55,6 +54,35 @@ namespace ContinuousRunner.Impl
             logger.Debug($"Loading script: [{content}]");
 
             return LoadScript(content, null);
+        }
+
+        public IScript LoadModule(IScript fromScript, string relativeReference)
+        {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var absoluteReference = _referenceResolver.Resolve(fromScript, relativeReference);
+            if (absoluteReference == null)
+            {
+                logger.Error($"Unable to resolve reference: {fromScript} -> {relativeReference}");
+                return null;
+            }
+
+            return LoadModule(absoluteReference);
+        }
+
+        public IScript LoadModule(string absoluteReference)
+        {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var fileInfo = _referenceResolver.ModuleReferenceToFile(absoluteReference);
+            if (fileInfo.Exists == false)
+            {
+                logger.Error($"Referenced file does not exist: {absoluteReference} -> {fileInfo}");
+
+                return null;
+            }
+
+            return TryLoad(fileInfo);
         }
 
         #endregion
@@ -101,46 +129,6 @@ namespace ContinuousRunner.Impl
             }
 
             return LoadScript(content, fileInfo);
-        }
-
-        private IScript LoadModule(IScript fromScript, string moduleReference)
-        {
-            var logger = LogManager.GetCurrentClassLogger();
-
-            var absoluteReference = _referenceResolver.Resolve(fromScript, moduleReference);
-            if (absoluteReference == null)
-            {
-                logger.Error($"Unable to resolve reference: {fromScript} -> {moduleReference}");
-                return null;
-            }
-
-            var fileInfo = ModuleReferenceToFile(absoluteReference);
-            if (fileInfo.Exists == false)
-            {
-                logger.Error(
-                    $"Resolved reference, but referenced file does not exist: {fromScript} -> {moduleReference} -> {fileInfo}");
-                return null;
-            }
-
-            return TryLoad(fileInfo);
-        }
-
-        private FileInfo ModuleReferenceToFile(string @ref)
-        {
-            var root = _instanceContext.ScriptsRoot.FullName;
-
-            var components = @ref.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
-
-            // The script root folder is equivalent to the module root namespace, so it should be skipped when combining
-            var rootReference = components.FirstOrDefault();
-            if (rootReference == _instanceContext.ModuleNamespace)
-            {
-                components = components.Skip(1).ToArray();
-            }
-            
-            var path = Path.Combine(new List<string> { root }.Concat(components).ToArray());
-
-            return new FileInfo($"{path}.js");
         }
 
         #endregion
