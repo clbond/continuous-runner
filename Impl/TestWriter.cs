@@ -19,7 +19,7 @@ namespace ContinuousRunner.Impl
 
                 foreach (var test in suite.Tests)
                 {
-                    logger.Info("  {0} > {1}", test.Name, test.Result);
+                    logger.Info($"  {test.Name} > {test.Result}");
                 }
             }
         }

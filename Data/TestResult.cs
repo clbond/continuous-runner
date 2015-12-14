@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ContinuousRunner.Data
 {
     public class TestResult
     {
+        public TestResult()
+        {
+            Logs = new List<Tuple<DateTime, string>>();
+        }
+
         /// <summary>
         /// The overall status of whether the test succeeded or failed
         /// </summary>
@@ -16,6 +22,21 @@ namespace ContinuousRunner.Data
         /// </summary>
         /// <value>The logs.</value>
         public IList<Tuple<DateTime, string>> Logs { get; set; }
+
+        #region System.Object overrides
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            var serializedLogs = string.Join(Environment.NewLine, Logs.Select(l => l.Item2));
+
+            return $"{Status} -> {{{serializedLogs}}}";
+        }
+
+        #endregion
+
+        #endregion
     }
 }
 
