@@ -1,4 +1,4 @@
-﻿using Microsoft.ClearScript.V8;
+﻿using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Frameworks
 {
@@ -6,6 +6,6 @@ namespace ContinuousRunner.Frameworks
     {
         Framework Framework { get; }
 
-        void Install(IProjectSource source, V8ScriptEngine engine);
+        void Install(IProjectSource source, ScriptEngine engine);
     }
 }

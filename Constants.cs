@@ -20,6 +20,7 @@ namespace ContinuousRunner
             public static readonly string[] JavaScript = {@".js"};
             public static readonly string[] TypeScript = {@".ts"};
             public static readonly string[] CoffeeScript = {@".cs"};
+            public static readonly string[] CSharp = {@".cs"};
         }
 
         public static class FunctionIdentifiers

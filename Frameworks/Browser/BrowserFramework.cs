@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.ClearScript.V8;
+﻿using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Frameworks.Browser
 {
@@ -9,7 +8,7 @@ namespace ContinuousRunner.Frameworks.Browser
 
         public Framework Framework => Framework.None;
 
-        public void Install(IProjectSource source, V8ScriptEngine engine)
+        public void Install(IProjectSource source, ScriptEngine engine)
         {
             if (source is IScript == false)
             {
