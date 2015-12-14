@@ -5,7 +5,7 @@ namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class ResultWriter : IResultWriter
+    public class TestWriter : ITestWriter
     {
         #region Implementation of IResultWriter
 

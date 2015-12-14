@@ -45,10 +45,10 @@ namespace ContinuousRunner.Impl
 
             using (var engine = new V8ScriptEngine())
             {
-                var requireImpl = new RequireImpl(_instanceContext);
+                var requireImpl = new Frameworks.RequireJs.FrameworkImpl(_instanceContext);
                 requireImpl.Install(engine);
 
-                var jasmineImpl = new JasmineImpl();
+                var jasmineImpl = new Frameworks.Jasmine.FrameworkImpl();
                 jasmineImpl.Install(engine);
 
                 logger.Info($"Executing script: {test.Name}");

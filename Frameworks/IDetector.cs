@@ -1,7 +1,10 @@
 ﻿namespace ContinuousRunner.Frameworks
 {
-    public interface IDetector
+    public interface IDetector<out T>
     {
-        Framework Detect(IScript script);
+        /// <summary>
+        /// Apply some static analysis heuristics to the script <paramref name="script"/>
+        /// </summary>
+        T Analyze(IScript script);
     }
 }

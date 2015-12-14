@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Linq;
+
+using Microsoft.ClearScript.V8;
 
 using NLog;
 
@@ -7,40 +11,56 @@ namespace ContinuousRunner.Frameworks
 {
     public class FrameworkDetector : IFrameworkDetector
     {
-        private readonly IEnumerable<IDetector> _detectors;
+        [Import] private readonly IEnumerable<IDetector<Framework>> _detectors;
 
-        public FrameworkDetector(IEnumerable<IDetector> detectors)
-        {
-            _detectors = detectors;
-        }
+        [Import] private readonly IEnumerable<IFramework> _frameworks;
+
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         #region Implementation of IFrameworkDetector
 
         public Framework DetectFrameworks(IScript script)
         {
-            var result = _detectors.Aggregate(Framework.None, (f, detector) => f | detector.Detect(script));
+            var result = _detectors.Aggregate(Framework.None, (f, detector) => f | detector.Analyze(script));
 
-            return ResolveConflicts(result);
+            var resolved = ResolveConflicts(result);
+
+            _logger.Debug($"Framework detect: {script}: {resolved.ToString()}");
+
+            return resolved;
         }
 
         public Framework DetectFrameworks(IEnumerable<IScript> scripts)
         {
-            var result = scripts.Aggregate(Framework.None, (current, script) => current | DetectFrameworks(script));
+            return scripts.Select(DetectFrameworks).Aggregate(Framework.None, (current, resolved) => current | resolved);
+        }
 
-            return ResolveConflicts(result);
+        public void InstallFrameworks(Framework framework, V8ScriptEngine engine)
+        {
+            foreach (var impl in _frameworks.Where(impl => framework.HasFlag(impl.Framework)))
+            {
+                impl.Install(engine);
+            }
         }
 
         #endregion
 
         #region Private methods
 
+        /// <summary>
+        /// A crappy way to detect a situation where we have analyed single script and come up with conflicting answers.
+        /// </summary>
+        /// <param name="result">The product of <seealso cref="DetectFrameworks(IScript)"/></param>
         private static Framework ResolveConflicts(Framework result)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
+            var resultClosure = result;
+
+            Func<Framework[], bool> has = f => f.All(flag => resultClosure.HasFlag(flag));
+
             // If we detected conflicting frameworks, then unset them both because our detector isn't working on this code
-            if (result.HasFlag(Framework.NodeJs) &&
-                result.HasFlag(Framework.RequireJs))
+            if (has(new[] {Framework.NodeJs, Framework.RequireJs}))
             {
                 result &= ~Framework.NodeJs;
                 result &= ~Framework.RequireJs;
@@ -48,12 +68,26 @@ namespace ContinuousRunner.Frameworks
                 logger.Error("Detected conflicting frameworks (RequireJS and NodeJS); unsetting both");
             }
 
-            if (result.HasFlag(Framework.JavaScript) &&
-                result.HasFlag(Framework.TypeScript))
+            if (has(new[] {Framework.JavaScript, Framework.TypeScript}))
             {
                 result &= ~Framework.JavaScript;
 
-                logger.Error("Detected conflicting languages (both TypeScript and JavaScript); unsetting JavaScript");
+                logger.Error(
+                    "Detected conflicting languages (both TypeScript and JavaScript); assuming TypeScript because it can encompass both");
+            }
+
+            if (has(new[] {Framework.JavaScript, Framework.CoffeeScript}))
+            {
+                result &= ~Framework.JavaScript;
+
+                logger.Error("Detected conflicting frameworks (JavaScript and CoffeeScript); unsetting JavaScript");
+            }
+
+            if (has(new[] {Framework.CoffeeScript, Framework.TypeScript}))
+            {
+                result &= ~Framework.TypeScript;
+
+                logger.Error("Detected conflicting frameworks (JavaScript and CoffeeScript); unsetting TypeScript");
             }
 
             return result;

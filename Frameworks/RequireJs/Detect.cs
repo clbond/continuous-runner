@@ -3,15 +3,15 @@ using System.Linq;
 
 using Jint.Parser.Ast;
 
-namespace ContinuousRunner.Frameworks.Detectors
+namespace ContinuousRunner.Frameworks.RequireJs
 {
     using Extensions;
 
-    public class DetectRequire : IDetector
+    public class Detect : IDetector<Framework>
     {
-        #region Implementation of IDetector
+        #region Implementation of IDetector<Framework>
 
-        public Framework Detect(IScript script)
+        public Framework Analyze(IScript script)
         {
             var matches = script.ExpressionTree.Search<CallExpression>(IsRequireWithStringArgument);
             if (matches.Any())

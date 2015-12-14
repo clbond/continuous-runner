@@ -7,16 +7,18 @@ using Microsoft.ClearScript.V8;
 
 namespace ContinuousRunner.Frameworks.RequireJs
 {
-    public class RequireImpl : IMockLibrary
+    public class FrameworkImpl : IFramework
     {
         private readonly Dictionary<string, object> _defines = new Dictionary<string, object>();
 
         private readonly IInstanceContext _instanceContext;
 
-        public RequireImpl(IInstanceContext instanceContext)
+        public FrameworkImpl(IInstanceContext instanceContext)
         {
             _instanceContext = instanceContext;
         }
+
+        public Framework Framework => Framework.RequireJs;
 
         public void Install(V8ScriptEngine engine)
         {

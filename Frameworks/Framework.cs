@@ -30,6 +30,11 @@ namespace ContinuousRunner.Frameworks
         /// <summary>
         /// Does this script use TypeScript that needs to be transformed into JS in order to execute?
         /// </summary>
-        TypeScript = 0x16
+        TypeScript = 0x16,
+
+        /// <summary>
+        /// Is this script written in CoffeeScript?
+        /// </summary>
+        CoffeeScript = 0x32
     }
 }

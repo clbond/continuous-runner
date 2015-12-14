@@ -11,9 +11,9 @@ namespace ContinuousRunner.Tests.Mock
             var parser = new Parser();
 
             var script = new Mock<IScript>();
-
             script.SetupGet(s => s.File).Returns(MockFile.FromString(content));
             script.SetupGet(s => s.ExpressionTree).Returns(parser.Parse(content));
+            script.Name = content;
 
             return script.Object;
         }

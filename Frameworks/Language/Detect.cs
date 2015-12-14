@@ -2,32 +2,30 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ContinuousRunner.Frameworks.Detectors
+namespace ContinuousRunner.Frameworks.Language
 {
-    public class DetectTypeScript : IDetector
+    public class Detect : IDetector<Framework>
     {
-        #region Implementation of IDetector
+        #region Implementation of IDetector<Framework>
 
-        public Framework Detect(IScript script)
+        public Framework Analyze(IScript script)
         {
             if (script.File != null)
             {
-                Func<string, bool> ts =
-                    ext =>
-                    Constants.FileExtensions.TypeScript.Any(
-                        t => string.Equals(ext, t, StringComparison.InvariantCultureIgnoreCase));
+                Func<string[], string, bool> compare =
+                    (possible, ext) => possible.Any(t => string.Equals(ext, t, StringComparison.InvariantCultureIgnoreCase));
 
-                if (ts(script.File.Extension))
+                if (compare(Constants.FileExtensions.TypeScript, script.File.Extension))
                 {
                     return Framework.TypeScript;
                 }
 
-                Func<string, bool> js =
-                    ext =>
-                    Constants.FileExtensions.JavaScript.Any(
-                        t => string.Equals(ext, t, StringComparison.InvariantCultureIgnoreCase));
+                if (compare(Constants.FileExtensions.CoffeeScript, script.File.Extension))
+                {
+                    return Framework.CoffeeScript;
+                }
 
-                if (js(script.File.Extension))
+                if (compare(Constants.FileExtensions.JavaScript, script.File.Extension))
                 {
                     return Framework.JavaScript;
                 }

@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 
 using ContinuousRunner.Tests.Mock;
+using NLog;
 
 namespace ContinuousRunner.Tests.TestProjects.Basic
 {
@@ -20,6 +21,8 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
         public void TestLoadScripts()
         {
             var root = MockFile.TestFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
+
+            var logger = LogManager.GetCurrentClassLogger();
 
             using (var container = CreateTypicalContainer(root))
             {
@@ -42,6 +45,16 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                 refToF2.Module.ModuleName.Should().Be("Tests/File2");
 
                 var tests = collection.GetTestScripts(load).ToArray();
+
+                var testWriter = container.Resolve<ITestWriter>();
+
+                foreach (var t in tests)
+                {
+                    logger.Info($"Suites and tests in {t}:");
+
+                    testWriter.Write(t.Suites);
+                }
+
                 tests.Count().Should().Be(1);
             }
         }

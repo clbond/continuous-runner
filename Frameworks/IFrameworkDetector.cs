@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Microsoft.ClearScript.V8;
+
 namespace ContinuousRunner.Frameworks
 {
     public interface IFrameworkDetector
@@ -17,5 +19,12 @@ namespace ContinuousRunner.Frameworks
         /// source file. This is more reliable; you should use this overload whenever possible.
         /// </summary>
         Framework DetectFrameworks(IEnumerable<IScript> script);
+
+        /// <summary>
+        /// Install the appropriate frameworks (<paramref name="framework"/> flags) into a V8 script context.
+        /// </summary>
+        /// <param name="framework">The frameworks to install into the V8 script context</param>
+        /// <param name="engine">An existing V8 script context</param>
+        void InstallFrameworks(Framework framework, V8ScriptEngine engine);
     }
 }

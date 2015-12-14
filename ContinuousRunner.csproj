@@ -70,15 +70,17 @@
   <ItemGroup>
     <Compile Include="Data\Assertion.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
-    <Compile Include="Frameworks\Detectors\DetectTypeScript.cs" />
+    <Compile Include="Frameworks\Jasmine\IJasmineReflection.cs" />
+    <Compile Include="Frameworks\Jasmine\JasmineReflection.cs" />
+    <Compile Include="Frameworks\Language\Detect.cs" />
     <Compile Include="Frameworks\IDetector.cs" />
-    <Compile Include="Frameworks\Detectors\DetectNode.cs" />
-    <Compile Include="Frameworks\Detectors\DetectRequire.cs" />
+    <Compile Include="Frameworks\NodeJs\Detect.cs" />
+    <Compile Include="Frameworks\RequireJs\Detect.cs" />
     <Compile Include="Frameworks\Framework.cs" />
-    <Compile Include="Frameworks\Detectors\DetectJasmine.cs" />
-    <Compile Include="Frameworks\IMockLibrary.cs" />
-    <Compile Include="Frameworks\Jasmine\JasmineImpl.cs" />
-    <Compile Include="Frameworks\RequireJs\RequireImpl.cs" />
+    <Compile Include="Frameworks\Jasmine\Detect.cs" />
+    <Compile Include="Frameworks\IFramework.cs" />
+    <Compile Include="Frameworks\Jasmine\FrameworkImpl.cs" />
+    <Compile Include="Frameworks\RequireJs\FrameworkImpl.cs" />
     <Compile Include="ICachedScripts.cs" />
     <Compile Include="ICancellable.cs" />
     <Compile Include="Frameworks\IFrameworkDetector.cs" />
@@ -102,7 +104,7 @@
     <Compile Include="Impl\Test.cs" />
     <Compile Include="IPublisher.cs" />
     <Compile Include="IReferenceResolver.cs" />
-    <Compile Include="IResultWriter.cs" />
+    <Compile Include="ITestWriter.cs" />
     <Compile Include="IParser.cs" />
     <Compile Include="IRunQueue.cs" />
     <Compile Include="IScriptCollection.cs" />
@@ -111,7 +113,7 @@
     <Compile Include="Data\ModuleDefinition.cs" />
     <Compile Include="Impl\ModuleReader.cs" />
     <Compile Include="Impl\ReferenceResolver.cs" />
-    <Compile Include="Impl\ResultWriter.cs" />
+    <Compile Include="Impl\TestWriter.cs" />
     <Compile Include="Impl\Parser.cs" />
     <Compile Include="Extensions\SyntaxExtensions.cs" />
     <Compile Include="ISubscription.cs" />
@@ -151,7 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Events\" />
-    <Folder Include="Frameworks\TypeScript\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

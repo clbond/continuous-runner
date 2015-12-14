@@ -122,6 +122,34 @@ namespace ContinuousRunner.Impl
 
         #endregion
 
+        #region Overrides of System.Object
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            if (!string.IsNullOrEmpty(Description))
+            {
+                return Description;
+            }
+
+            if (File != null)
+            {
+                return File.Name;
+            }
+
+            if (Module != null)
+            {
+                return Module.ModuleName;
+            }
+
+            return @"anonymous script";
+        }
+
+        #endregion
+
+        #endregion
+
         #region Private methods
 
         private void Reset()

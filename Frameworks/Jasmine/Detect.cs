@@ -2,15 +2,15 @@
 
 using Jint.Parser.Ast;
 
-namespace ContinuousRunner.Frameworks.Detectors
+namespace ContinuousRunner.Frameworks.Jasmine
 {
     using Extensions;
 
-    public class DetectJasmine : IDetector
+    public class Detect : IDetector<Framework>
     {
-        #region Implementation of IDetector
+        #region Implementation of IDetector<Framework>
 
-        public Framework Detect(IScript script)
+        public Framework Analyze(IScript script)
         {
             var matches = script.ExpressionTree.Search<CallExpression>(IsJasmineInvocation);
             if (matches.Any())

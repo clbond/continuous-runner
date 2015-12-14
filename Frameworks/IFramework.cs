@@ -2,8 +2,10 @@
 
 namespace ContinuousRunner.Frameworks
 {
-    public interface IMockLibrary
+    public interface IFramework
     {
+        Framework Framework { get; }
+
         void Install(V8ScriptEngine v8);
     }
 }
