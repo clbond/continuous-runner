@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using Microsoft.ClearScript.V8;
+using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Frameworks
 {
@@ -26,6 +26,6 @@ namespace ContinuousRunner.Frameworks
         /// <param name="source">The script we are preparing to execute in this V8 context</param>
         /// <param name="framework">The frameworks to install into the V8 script context</param>
         /// <param name="engine">An existing V8 script context</param>
-        void InstallFrameworks(IProjectSource source, Framework framework, V8ScriptEngine engine);
+        void InstallFrameworks(IProjectSource source, Framework framework, ScriptEngine engine);
     }
 }

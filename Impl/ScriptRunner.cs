@@ -4,7 +4,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Jint.Parser.Ast;
+
+using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
 
 using NLog;
@@ -18,8 +19,8 @@ namespace ContinuousRunner.Impl
     {
         [Import] private readonly IFrameworkDetector _frameworkDetector;
 
-        [Import] private readonly IParser<SyntaxNode> _parser;
-        
+        [Import] private readonly IPublisher _publisher;
+
         #region Implementation of IScriptRunner
 
         public IEnumerable<Task<TestResult>> RunAsync(IScript script)
@@ -41,57 +42,84 @@ namespace ContinuousRunner.Impl
 
         #region Private methods
 
-        private Task<TestResult> RunTestAsync(IScript script, ITest test)
+        private Task<TestResult> RunTestAsync(IProjectSource script, ITest test)
         {
-            var logger = LogManager.GetCurrentClassLogger();
-
             var completionSource = new TaskCompletionSource<TestResult>();
 
-            // ReSharper disable once CatchAllClause
-            ThreadPool.QueueUserWorkItem(
-                state =>
-                {
-                    var engine = new V8ScriptEngine();
-                    try
-                    {
-                        logger.Debug("Installing frameworks into V8 execution context");
-
-                        _frameworkDetector.InstallFrameworks(script, script.Frameworks, engine);
-
-                        logger.Info($"Executing script: {test.Name}");
-
-                        var code = WrapInCallExpression(test.RawCode);
-
-                        engine.Execute($"{{{code}}}");
-
-                        completionSource.SetResult(new TestResult {Status = TestStatus.Failed, Logs = script.Logs});
-                    }
-                    catch (Exception ex)
-                    {
-                        completionSource.SetException(ex);
-                    }
-                    finally
-                    {
-                        engine.Dispose();
-                    }
-                });
+            ThreadPool.QueueUserWorkItem(state => RunTest(completionSource, script, test));
 
             return completionSource.Task;
         }
 
-        private string WrapInCallExpression(string code)
+        private void RunTest(TaskCompletionSource<TestResult> completionSource, IProjectSource source, ITest test)
         {
-            var expr = _parser.TryParse(code);
-            if (expr != null)
-            {
-                if (expr.Root.Type == SyntaxNodes.FunctionDeclaration ||
-                    expr.Root.Type == SyntaxNodes.FunctionExpression)
-                {
-                    return $"({code})();";
-                }
-            }
+            var logger = LogManager.GetCurrentClassLogger();
 
-            return code;
+            var engine = GetEngine();
+            try
+            {
+                logger.Debug("Installing frameworks into V8 execution context");
+
+                _frameworkDetector.InstallFrameworks(source, source.Frameworks, engine);
+
+                logger.Info($"Executing script: {test.Name}");
+
+                var code = $"{{{WrapInCallExpression(test.RawCode)}}}";
+
+                Func<TestStatus, TestResult> transform = status => new TestResult
+                                                                   {
+
+                                                                       Test = test,
+                                                                       Status = status,
+                                                                       Logs = source.Logs
+                                                                   };
+
+                TestResult testResult;
+                try
+                {
+                    engine.Evaluate(code);
+
+                    testResult = transform(TestStatus.Passed);
+                }
+                catch (Exception ex)
+                {
+                    source.Logs.Add(Tuple.Create(DateTime.Now, Severity.Error, $"Uncaught exception: {ex}"));
+
+                    testResult = transform(TestStatus.Failed);
+                }
+
+                test.Result = testResult;
+
+                completionSource.SetResult(testResult);
+
+                _publisher.Publish(testResult);
+            }
+            catch (Exception ex)
+            {
+                completionSource.SetException(ex);
+            }
+            finally
+            {
+                engine.Dispose();
+            }
+        }
+
+        private static string WrapInCallExpression(string code)
+        {
+            return $"({code})();";
+        }
+
+        private static ScriptEngine GetEngine()
+        {
+            return new V8ScriptEngine
+                   {
+                       AllowReflection = true,
+                       DisableTypeRestriction = false,
+                       EnableAutoHostVariables = true,
+                       EnableNullResultWrapping = true,
+                       FormatCode = false,
+                       UseReflectionBindFallback = true
+                   };
         }
     }
 

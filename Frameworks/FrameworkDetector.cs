@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
-using Microsoft.ClearScript.V8;
+using Microsoft.ClearScript;
 
 using NLog;
 
@@ -35,7 +35,7 @@ namespace ContinuousRunner.Frameworks
             return scripts.Select(DetectFrameworks).Aggregate(Framework.None, (current, resolved) => current | resolved);
         }
 
-        public void InstallFrameworks(IProjectSource source, Framework framework, V8ScriptEngine engine)
+        public void InstallFrameworks(IProjectSource source, Framework framework, ScriptEngine engine)
         {
             foreach (var impl in _frameworks.Where(impl => framework.HasFlag(impl.Framework)))
             {

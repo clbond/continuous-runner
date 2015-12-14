@@ -11,6 +11,24 @@ namespace ContinuousRunner.Data
             Logs = new List<Tuple<DateTime, Severity, string>>();
         }
 
+        public ITest Test
+        {
+            get
+            {
+                ITest test;
+                if (_testReference.TryGetTarget(out test))
+                {
+                    return test;
+                }
+
+                throw new ObjectDisposedException("Test has been disposed");
+            }
+            set
+            {
+                _testReference = new WeakReference<ITest>(value);
+            }
+        }
+
         /// <summary>
         /// The overall status of whether the test succeeded or failed
         /// </summary>
@@ -22,19 +40,21 @@ namespace ContinuousRunner.Data
         /// </summary>
         /// <value>The logs.</value>
         public IList<Tuple<DateTime, Severity, string>> Logs { get; set; }
-
-        #region System.Object overrides
-
+        
         #region Overrides of Object
 
         public override string ToString()
         {
-            var serializedLogs = string.Join(Environment.NewLine, Logs.Select(l => l.Item2));
+            var serializedLogs = string.Join(Environment.NewLine, Logs.Select(l => $"{l.Item1}|{l.Item2}|{l.Item3}"));
 
             return $"{Status} -> {{{serializedLogs}}}";
         }
 
         #endregion
+
+        #region Private members
+
+        private WeakReference<ITest> _testReference;
 
         #endregion
     }
