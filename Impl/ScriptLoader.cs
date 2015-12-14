@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
+
 using ContinuousRunner.Frameworks;
+using Jint.Parser.Ast;
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -11,13 +13,19 @@ namespace ContinuousRunner.Impl
     public class ScriptLoader : IScriptLoader
     {
         #region Private members
-        
+
         [Import] private readonly ICachedScripts _cachedScripts;
+
         [Import] private readonly IFrameworkDetector _frameworkDetector;
+
         [Import] private readonly IModuleReader _moduleReader;
-        [Import] private readonly IParser _parser;      
+
+        [Import] private readonly IParser<SyntaxNode> _parser;
+
         [Import] private readonly IPublisher _publisher;
+
         [Import] private readonly ITestCollectionReader _suiteReader;
+
         [Import] private readonly IReferenceResolver _referenceResolver;
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -33,8 +41,6 @@ namespace ContinuousRunner.Impl
 
         public IScript TryLoad(FileInfo fileInfo)
         {
-            // ReSharper disable once CatchAllClause
-
             try
             {
                 return Load(fileInfo);
@@ -91,27 +97,36 @@ namespace ContinuousRunner.Impl
 
         private IScript LoadScript(string content, FileInfo fileInfo)
         {
-            Func<IScript, ExpressionTree> loader = s => _parser.Parse(content);
+            Func<IScript, ExpressionTree<SyntaxNode>> loader = s => _parser.Parse(content);
 
-            Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader =
+            Func<IScript, ExpressionTree<SyntaxNode>, ModuleDefinition> moduleLoader =
                 (s, tree) => _moduleReader.Get(s, m => LoadModule(s, m));
 
-            Func<IScript, ExpressionTree, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
+            Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
 
-            Func<IScript, Framework> frameworkLoader = script => _frameworkDetector.DetectFrameworks(script);
+            Func<IProjectSource, Framework> frameworkLoader = s => _frameworkDetector.DetectFrameworks(s);
 
             var expressionTree = fileInfo != null
                                      ? _parser.Parse(fileInfo)
                                      : _parser.Parse(content);
 
-            return new Script(_publisher, loader, moduleLoader, suiteLoader, frameworkLoader)
-                   {
-                       File = fileInfo,
-                       Content = content,
-                       ExpressionTree = expressionTree
-                   };
+            var script = new Script(_publisher, loader, moduleLoader, suiteLoader, frameworkLoader)
+                         {
+                             File = fileInfo,
+                             Content = content,
+                             ExpressionTree = expressionTree
+                         };
 
+            _publisher.Publish(
+                new SourceChangedEvent
+                {
+                    Operation = Operation.Add,
+                    Script = script
+                });
+
+            return script;
         }
+
         private IScript LoadFile(FileInfo fileInfo)
         {
             var logger = LogManager.GetCurrentClassLogger();

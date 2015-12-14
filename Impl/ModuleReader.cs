@@ -72,12 +72,12 @@ namespace ContinuousRunner.Impl
             return identifier?.Name == "define";
         }
 
-        private static ExpressionTree GetDefinitionReturnExpression(CallExpression define)
+        private static ExpressionTree<SyntaxNode> GetDefinitionReturnExpression(CallExpression define)
         {
             var expr = define?.Arguments.LastOrDefault();
             if (expr != null)
             {
-                return new ExpressionTree(expr);
+                return new ExpressionTree<SyntaxNode>(expr);
             }
 
             return null;

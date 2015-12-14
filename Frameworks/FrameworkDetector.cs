@@ -19,7 +19,7 @@ namespace ContinuousRunner.Frameworks
 
         #region Implementation of IFrameworkDetector
 
-        public Framework DetectFrameworks(IScript script)
+        public Framework DetectFrameworks(IProjectSource script)
         {
             var result = _detectors.Aggregate(Framework.None, (f, detector) => f | detector.Analyze(script));
 
@@ -30,16 +30,16 @@ namespace ContinuousRunner.Frameworks
             return resolved;
         }
 
-        public Framework DetectFrameworks(IEnumerable<IScript> scripts)
+        public Framework DetectFrameworks(IEnumerable<IProjectSource> scripts)
         {
             return scripts.Select(DetectFrameworks).Aggregate(Framework.None, (current, resolved) => current | resolved);
         }
 
-        public void InstallFrameworks(IScript script, Framework framework, V8ScriptEngine engine)
+        public void InstallFrameworks(IProjectSource source, Framework framework, V8ScriptEngine engine)
         {
             foreach (var impl in _frameworks.Where(impl => framework.HasFlag(impl.Framework)))
             {
-                impl.Install(script, engine);
+                impl.Install(source, engine);
             }
         }
 

@@ -35,6 +35,11 @@ namespace ContinuousRunner.Frameworks
         /// <summary>
         /// Is this script written in CoffeeScript?
         /// </summary>
-        CoffeeScript = 0x32
+        CoffeeScript = 0x32,
+
+        /// <summary>
+        /// Is this code CSharp?
+        /// </summary>
+        CSharp = 0x64
     }
 }

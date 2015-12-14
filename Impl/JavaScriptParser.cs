@@ -1,23 +1,23 @@
-﻿// ReSharper disable CatchAllClause
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+
+using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Impl
 {
     using Data;
 
-    public class Parser : IParser
+    public class JavaScriptParser : IParser<SyntaxNode>
     {
         #region Implementation of IScriptParser
 
-        public virtual ExpressionTree Parse(FileInfo fileInfo)
+        public virtual ExpressionTree<SyntaxNode> Parse(FileInfo fileInfo)
         {
             return Parse(GetScript(fileInfo));
         }
 
-        public virtual ExpressionTree Parse(string script)
+        public virtual ExpressionTree<SyntaxNode> Parse(string script)
         {
             if (script == null)
             {
@@ -28,7 +28,7 @@ namespace ContinuousRunner.Impl
 
             try
             {
-                return new ExpressionTree(parser.Parse(script));
+                return new ExpressionTree<SyntaxNode>(parser.Parse(script));
             }
             catch (Exception ex)
             {
@@ -38,7 +38,7 @@ namespace ContinuousRunner.Impl
             }
         }
 
-        public ExpressionTree TryParse(FileInfo fileInfo)
+        public ExpressionTree<SyntaxNode> TryParse(FileInfo fileInfo)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace ContinuousRunner.Impl
             }
         }
 
-        public ExpressionTree TryParse(string script)
+        public ExpressionTree<SyntaxNode> TryParse(string script)
         {
             try
             {

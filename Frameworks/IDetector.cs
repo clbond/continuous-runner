@@ -3,8 +3,8 @@
     public interface IDetector<out T>
     {
         /// <summary>
-        /// Apply some static analysis heuristics to the script <paramref name="script"/>
+        /// Apply some static analysis heuristics to the script <paramref name="source"/>
         /// </summary>
-        T Analyze(IScript script);
+        T Analyze(IProjectSource source);
     }
 }

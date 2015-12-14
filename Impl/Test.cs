@@ -23,13 +23,20 @@ namespace ContinuousRunner.Impl
 
         public TestSuite Suite
         {
+
             get
             {
-                return _parentSuite.Target as TestSuite;
+                TestSuite target;
+                if (_parentSuite.TryGetTarget(out target))
+                {
+                    return target;
+                }
+
+                throw new ObjectDisposedException("Parent suite has been disposed");
             }
             set
             {
-                _parentSuite = new WeakReference(value);
+                _parentSuite = new WeakReference<TestSuite>(value);
             }
         }
 
@@ -37,7 +44,7 @@ namespace ContinuousRunner.Impl
 
         #region Private members
 
-        private WeakReference _parentSuite;
+        private WeakReference<TestSuite> _parentSuite;
 
         #endregion
     }

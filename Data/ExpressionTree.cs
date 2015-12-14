@@ -1,10 +1,10 @@
 ﻿namespace ContinuousRunner.Data
 {
-    public class ExpressionTree
+    public class ExpressionTree<TNode> where TNode : class
     {
-        public Jint.Parser.Ast.SyntaxNode Root { get; set; }
+        public TNode Root { get; set; }
 
-        public ExpressionTree(Jint.Parser.Ast.SyntaxNode expr)
+        public ExpressionTree(TNode expr)
         {
             Root = expr;
         }

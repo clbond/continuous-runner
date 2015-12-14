@@ -15,8 +15,15 @@ namespace ContinuousRunner.Frameworks.RequireJs
         
         public Framework Framework => Framework.RequireJs;
 
-        public void Install(IScript script, V8ScriptEngine engine)
+        public void Install(IProjectSource source, V8ScriptEngine engine)
         {
+            if (source is IScript == false)
+            {
+                return;
+            }
+
+            var script = (IScript) source;
+
             var fromModule = script.Module.ModuleName;
 
             Func<object, object> require = req => Require(engine, fromModule, req);

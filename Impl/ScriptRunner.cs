@@ -18,7 +18,7 @@ namespace ContinuousRunner.Impl
     {
         [Import] private readonly IFrameworkDetector _frameworkDetector;
 
-        [Import] private readonly IParser _parser;
+        [Import] private readonly IParser<SyntaxNode> _parser;
         
         #region Implementation of IScriptRunner
 

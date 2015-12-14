@@ -8,7 +8,7 @@ namespace ContinuousRunner.Extensions
 {
     public static class SyntaxExtensions
     {
-        public static void Walk<T>(this ExpressionTree expressionTree, Action<T> f)
+        public static void Walk<T>(this ExpressionTree<SyntaxNode> expressionTree, Action<T> f)
             where T : SyntaxNode
         {
             Walk(expressionTree.Root, f);
@@ -233,7 +233,7 @@ namespace ContinuousRunner.Extensions
             }
         }
 
-        public static IEnumerable<T> Search<T>(this ExpressionTree tree, Func<T, bool> match)
+        public static IEnumerable<T> Search<T>(this ExpressionTree<SyntaxNode> tree, Func<T, bool> match)
             where T : SyntaxNode
         {
             return Search(tree.Root, match);

@@ -8,8 +8,15 @@ namespace ContinuousRunner.Frameworks.Language
     {
         #region Implementation of IDetector<Framework>
 
-        public Framework Analyze(IScript script)
+        public Framework Analyze(IProjectSource source)
         {
+            if (source is IScript == false)
+            {
+                return Framework.None;
+            }
+
+            var script = (IScript)source;
+
             if (script.File != null)
             {
                 Func<string[], string, bool> compare =

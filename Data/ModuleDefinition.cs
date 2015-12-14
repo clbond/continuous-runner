@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 
+using Jint.Parser.Ast;
+
 namespace ContinuousRunner.Data
 {
     public class ModuleDefinition
@@ -8,6 +10,6 @@ namespace ContinuousRunner.Data
         
         public IEnumerable<IScript> References { get; set; }
 
-        public ExpressionTree Expression { get; set; }
+        public ExpressionTree<SyntaxNode> Expression { get; set; }
     }
 }

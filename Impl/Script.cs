@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using ContinuousRunner.Frameworks;
 using JetBrains.Annotations;
+using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Impl
 {
@@ -15,10 +16,10 @@ namespace ContinuousRunner.Impl
 
         public Script(
             [NotNull] IPublisher publisher,
-            [NotNull] Func<IScript, ExpressionTree> reloader,
-            [NotNull] Func<IScript, ExpressionTree, ModuleDefinition> moduleLoader,
-            [NotNull] Func<IScript, ExpressionTree, ITestCollection> suiteLoader,
-            [NotNull] Func<IScript, Framework> frameworkLoader)
+            [NotNull] Func<IScript, ExpressionTree<SyntaxNode>> reloader,
+            [NotNull] Func<IScript, ExpressionTree<SyntaxNode>, ModuleDefinition> moduleLoader,
+            [NotNull] Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> suiteLoader,
+            [NotNull] Func<IProjectSource, Framework> frameworkLoader)
         {
             _publisher = publisher;
 
@@ -39,19 +40,19 @@ namespace ContinuousRunner.Impl
 
         private readonly IPublisher _publisher;
 
-        private readonly Func<IScript, ExpressionTree> _reloader;
+        private readonly Func<IScript, ExpressionTree<SyntaxNode>> _reloader;
 
-        private readonly Func<IScript, ExpressionTree, ModuleDefinition> _moduleLoader;
+        private readonly Func<IScript, ExpressionTree<SyntaxNode>, ModuleDefinition> _moduleLoader;
 
-        private readonly Func<IScript, ExpressionTree, ITestCollection> _suiteLoader;
+        private readonly Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> _suiteLoader;
+
+        private readonly Func<IProjectSource, Framework> _frameworkLoader;
 
         private Lazy<IEnumerable<TestSuite>> _suites;
 
         private Lazy<Framework> _frameworks;
 
-        private ExpressionTree _expressionTree;
-
-        private Func<IScript, Framework> _frameworkLoader;
+        private ExpressionTree<SyntaxNode> _expressionTree;
 
         #endregion
 
@@ -79,7 +80,7 @@ namespace ContinuousRunner.Impl
 
         public IList<Tuple<DateTime, Severity, string>> Logs { get; private set; }
 
-        public ExpressionTree ExpressionTree
+        public ExpressionTree<SyntaxNode> ExpressionTree
         {
             get
             {
@@ -106,7 +107,7 @@ namespace ContinuousRunner.Impl
                 _publisher.Publish(
                     new SourceChangedEvent
                     {
-                        Operation = ContinuousRunner.Operation.Change,
+                        Operation = Operation.Change,
                         Script = this
                     });
             }
@@ -126,7 +127,7 @@ namespace ContinuousRunner.Impl
 
         #region Implementation of IComparable<in IScript>
 
-        public int CompareTo(IScript other)
+        public int CompareTo(IProjectSource other)
         {
             return string.Compare(File.Name, other.File.Name, StringComparison.InvariantCultureIgnoreCase);
         }
@@ -134,9 +135,7 @@ namespace ContinuousRunner.Impl
         #endregion
 
         #region Overrides of System.Object
-
-        #region Overrides of Object
-
+        
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(Description))
@@ -158,9 +157,7 @@ namespace ContinuousRunner.Impl
         }
 
         #endregion
-
-        #endregion
-
+        
         #region Private methods
 
         private void Reset()

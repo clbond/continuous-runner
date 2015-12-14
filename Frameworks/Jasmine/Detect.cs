@@ -10,8 +10,15 @@ namespace ContinuousRunner.Frameworks.Jasmine
     {
         #region Implementation of IDetector<Framework>
 
-        public Framework Analyze(IScript script)
+        public Framework Analyze(IProjectSource source)
         {
+            if (source is IScript == false)
+            {
+                return Framework.None;
+            }
+
+            var script = (IScript) source;
+
             var matches = script.ExpressionTree.Search<CallExpression>(IsJasmineInvocation);
             if (matches.Any())
             {

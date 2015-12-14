@@ -9,9 +9,14 @@ namespace ContinuousRunner.Frameworks.Browser
 
         public Framework Framework => Framework.None;
 
-        public void Install(IScript script, V8ScriptEngine engine)
+        public void Install(IProjectSource source, V8ScriptEngine engine)
         {
-            var console = new BrowserConsole(script);
+            if (source is IScript == false)
+            {
+                return;
+            }
+
+            var console = new BrowserConsole((IScript) source);
 
             engine.AddHostObject(nameof(console), console);
         }

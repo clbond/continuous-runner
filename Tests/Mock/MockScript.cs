@@ -11,7 +11,7 @@ namespace ContinuousRunner.Tests.Mock
 
         public IScript Get(string content)
         {
-            var parser = new Parser();
+            var parser = new JavaScriptParser();
 
             var script = new Mock<IScript>();
             script.SetupGet(s => s.File).Returns(_mockFile.FromString("js", content));

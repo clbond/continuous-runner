@@ -1,15 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+
 using Autofac;
+
 using ContinuousRunner.Tests.Mock;
+
 using Magnum.Extensions;
+
 using Moq;
+
 using NLog;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+
 using Xunit.Abstractions;
 
 namespace ContinuousRunner.Tests
@@ -45,6 +50,7 @@ namespace ContinuousRunner.Tests
             ConfigureLogging();
 
             var instanceContext = new Mock<IInstanceContext>();
+            instanceContext.SetupGet(i => i.SolutionRoot).Returns(root);
             instanceContext.SetupGet(i => i.ScriptsRoot).Returns(root);
             instanceContext.SetupGet(i => i.ModuleNamespace).Returns(nameof(Tests));
 
@@ -76,18 +82,21 @@ namespace ContinuousRunner.Tests
                                 };
             }
 
-            if (LogManager.Configuration == null)
+            lock (typeof (LogManager))
             {
-                LogManager.Configuration = new LoggingConfiguration();
+                if (LogManager.Configuration == null)
+                {
+                    LogManager.Configuration = new LoggingConfiguration();
+                }
+
+                LogManager.Configuration.AddTarget(_memoryTarget.Name, _memoryTarget);
+
+                LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
+
+                LogManager.EnableLogging();
+
+                LogManager.ReconfigExistingLoggers();
             }
-
-            LogManager.Configuration.AddTarget(_memoryTarget.Name, _memoryTarget);
-
-            LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
-            
-            LogManager.EnableLogging();
-
-            LogManager.ReconfigExistingLoggers();
         }
 
         #region Implementation of IDisposable

@@ -1,6 +1,4 @@
-﻿using System;
-
-using Microsoft.ClearScript.V8;
+﻿using Microsoft.ClearScript.V8;
 
 namespace ContinuousRunner.Frameworks.Jasmine
 {
@@ -10,7 +8,7 @@ namespace ContinuousRunner.Frameworks.Jasmine
 
         public Framework Framework => Framework.Jasmine;
 
-        public void Install(IScript script, V8ScriptEngine engine)
+        public void Install(IProjectSource source, V8ScriptEngine engine)
         {
             // TODO(cbond): Find and run Jasmine framework code
         }

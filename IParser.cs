@@ -1,17 +1,16 @@
 ﻿using System.IO;
-
 namespace ContinuousRunner
 {
     using Data;
 
-    public interface IParser
+    public interface IParser<TNode> where TNode : class
     {
-        ExpressionTree Parse(FileInfo fileInfo);
+        ExpressionTree<TNode> Parse(FileInfo fileInfo);
 
-        ExpressionTree Parse(string script);
+        ExpressionTree<TNode> Parse(string script);
 
-        ExpressionTree TryParse(FileInfo fileInfo);
+        ExpressionTree<TNode> TryParse(FileInfo fileInfo);
 
-        ExpressionTree TryParse(string script);
+        ExpressionTree<TNode> TryParse(string script);
     }
 }

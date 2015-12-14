@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+
 using CommandLine;
 
 namespace ContinuousRunner.Console
@@ -8,16 +9,23 @@ namespace ContinuousRunner.Console
     {
         #region Command-line arguments and options
 
-        [Option('p', "path",
+        [Option('r', "solution-path",
+            Required = true,
+            HelpText = "The path to the solution or project root")]
+        public string SolutionPath { get; set; }
+
+        [Option('s', "scripts-path",
             Required = true,
             HelpText = "The path to search for JavaScript modules and tests")]
-        public string Path { get; set; }
+        public string ScriptsPath { get; set; }
 
         #endregion
         
         #region Implementation of IInstanceContext
 
-        public DirectoryInfo ScriptsRoot => new DirectoryInfo(Path);
+        public DirectoryInfo SolutionRoot => new DirectoryInfo(SolutionPath);
+
+        public DirectoryInfo ScriptsRoot => new DirectoryInfo(ScriptsPath);
 
         [Option('m', "module-namespace",
             DefaultValue = "R2CIQ",
@@ -33,14 +41,14 @@ namespace ContinuousRunner.Console
         {
             var options = new CommandLineOptions();
 
-            if (CommandLine.Parser.Default.ParseArgumentsStrict(args, options, () => Environment.Exit(1)) == false)
+            if (Parser.Default.ParseArgumentsStrict(args, options, () => Environment.Exit(1)) == false)
             {
                 throw new TestException("Cannot parse command-line arguments");
             }
 
-            if (!Directory.Exists(options.Path))
+            if (!Directory.Exists(options.ScriptsPath))
             {
-                throw new TestException($"Path does not exist: {options.Path}");
+                throw new TestException($"Path does not exist: {options.ScriptsPath}");
             }
 
             return options;
