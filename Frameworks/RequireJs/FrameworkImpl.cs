@@ -10,9 +10,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
     public class FrameworkImpl : IFramework
     {
         private readonly Dictionary<string, object> _defines = new Dictionary<string, object>();
-
-        [Import] private readonly IInstanceContext _instanceContext;
-
+        
         [Import] private readonly IReferenceResolver _referenceResolver;
         
         public Framework Framework => Framework.RequireJs;
@@ -47,6 +45,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
                       body = deps;
                       deps = name;
                       name = null;
+                  }
+
+                  if (typeof deps === 'function' && body == null) {
+                    body = deps;
+                    deps = [];
                   }
  
                   // 'resolve' the dependencies in place

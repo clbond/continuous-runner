@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Autofac;
 using ContinuousRunner.Tests.Mock;
 using FluentAssertions;
@@ -16,7 +17,7 @@ namespace ContinuousRunner.Tests.Loading
         { }
 
         [Fact]
-        public void LoadSimpleRequireJsAndJasmineScript()
+        public async Task LoadSimpleRequireJsAndJasmineScript()
         {
             using (var container = CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>()))
             {
@@ -24,7 +25,7 @@ namespace ContinuousRunner.Tests.Loading
                     @"define([], function () {
                         describe('Foo', function () {
                           it('Bar', function () {
-                            debugger;
+                            console.log('Test output');
                           });
                         });
                       });";
@@ -50,6 +51,20 @@ namespace ContinuousRunner.Tests.Loading
 
                 // There are no dependencies in the define() statement--
                 module.References.Count().Should().Be(0);
+
+                var tests = script.Suites.ToArray();
+
+                var testWriter = container.Resolve<ITestWriter>();
+
+                testWriter.Write(tests);
+
+                var runner = container.Resolve<IRunQueue>();
+
+                runner.Push(script);
+
+                var results = await runner.RunAllAsync().ConfigureAwait(false);
+
+                testWriter.Write(tests);
             }
         }
     }

@@ -70,6 +70,8 @@
   <ItemGroup>
     <Compile Include="Data\Assertion.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
+    <Compile Include="Frameworks\Browser\BrowserConsole.cs" />
+    <Compile Include="Frameworks\Browser\BrowserFramework.cs" />
     <Compile Include="Frameworks\Jasmine\IJasmineReflection.cs" />
     <Compile Include="Frameworks\Jasmine\JasmineReflection.cs" />
     <Compile Include="Frameworks\Language\Detect.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Operation.cs" />
     <Compile Include="PropertyInjector.cs" />
     <Compile Include="Publisher.cs" />
+    <Compile Include="Severity.cs" />
     <Compile Include="SourceChangedEvent.cs" />
     <Compile Include="TestException.cs" />
     <Compile Include="Impl\RunQueue.cs" />

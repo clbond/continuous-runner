@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
-
+using System.Linq;
+using Magnum.Extensions;
 using Magnum.Threading;
 
 using NLog;
@@ -11,7 +12,6 @@ using NLog;
 namespace ContinuousRunner.Impl
 {
     using Data;
-    using System.Linq;
 
     public class RunQueue : IRunQueue
     {
@@ -22,9 +22,7 @@ namespace ContinuousRunner.Impl
             new ReaderWriterLockedObject<HashSet<IScript>>(new HashSet<IScript>(), LockRecursionPolicy.SupportsRecursion);
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        private volatile bool _running;
-
+        
         #region Implementation of ITestQueue
 
         public void Push(IScript script)
@@ -38,59 +36,51 @@ namespace ContinuousRunner.Impl
                 return;
             }
 
-            _waiting.WriteLock(
-                set =>
-                {
-                    set.Add(script);
-
-                    if (_running == false)
-                    {
-                        ThreadPool.QueueUserWorkItem(state => Run());
-                    }
-                });
+            _waiting.WriteLock(set => set.Add(script));
         }
 
-        public IEnumerable<Task<TestResult>> Run()
+        public IEnumerable<Task<TestResult>> RunAsync()
         {
             IScript[] scripts = null;
 
-            _running = true;
-
             var tasks = new List<Task<TestResult>>();
 
+            // ReSharper disable once CatchAllClause
             try
             {
-                while (true)
+                _waiting.ReadLock(set => scripts = set.ToArray());
+
+                if (scripts.Length == 0)
                 {
-                    _waiting.ReadLock(set => scripts = set.ToArray());
-
-                    if (scripts.Length == 0)
-                    {
-                        break;
-                    }
-
-                    foreach (var script in scripts)
-                    {
-                        var scriptTasks = _runner.RunAsync(script).ToList();
-
-                        _logger.Info($"Running {script.TestCount} tests from {script.Description}");
-
-                        tasks.AddRange(scriptTasks);
-
-                        _waiting.WriteLock(set => set.Remove(script));
-                    }
+                    return Enumerable.Empty<Task<TestResult>>();
                 }
+
+                foreach (var script in scripts)
+                {
+                    var scriptTasks = _runner.RunAsync(script).ToList();
+
+                    _logger.Info($"Running {script.TestCount} tests from {script.Description}");
+
+                    tasks.AddRange(scriptTasks);
+                }
+
+                _waiting.WriteLock(set => scripts.Each(s => set.Remove(s)));
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, $"Uncaught exception while running tests: {ex.ToString()}");
-            }
-            finally
-            {
-                _running = false;
+
+                throw new TestException($"Failed to run tests: {ex.Message}", ex);
             }
 
             return tasks;
+        }
+
+        public async Task<IEnumerable<TestResult>> RunAllAsync()
+        {
+            var tasks = RunAsync();
+
+            return await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
         }
 
         #endregion

@@ -45,7 +45,7 @@ namespace ContinuousRunner.Console
 
                     while (input.Length == 0)
                     {
-                        var queued = queue.Run().ToArray();
+                        var queued = queue.RunAsync().ToArray();
                         if (queued.Any())
                         {
                             var results = Task.WhenAll(queued);

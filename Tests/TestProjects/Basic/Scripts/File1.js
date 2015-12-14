@@ -1,3 +1,3 @@
 ﻿define(['./File2'], function(File2) {
-    debugger;
+    console.log('File1 test output');
 });

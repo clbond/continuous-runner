@@ -13,6 +13,14 @@ namespace ContinuousRunner
     {
         void Push(IScript script);
 
-        IEnumerable<Task<TestResult>> Run();
+        /// <summary>
+        /// Run all tests and return an individual <see cref="Task" /> for each one
+        /// </summary>
+        IEnumerable<Task<TestResult>> RunAsync();
+
+        /// <summary>
+        /// Run all tests and return a single <see cref="Task"/> representing all tests
+        /// </summary>
+        Task<IEnumerable<TestResult>> RunAllAsync();
     }
 }

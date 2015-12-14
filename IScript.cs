@@ -50,6 +50,11 @@ namespace ContinuousRunner
         Framework Frameworks { get; }
 
         /// <summary>
+        /// Logs produced when running this script
+        /// </summary>
+        IList<Tuple<DateTime, Severity, string>> Logs { get; } 
+
+        /// <summary>
         /// Reload the contents of this script since it has changed on disk
         /// </summary>
         void Reload();

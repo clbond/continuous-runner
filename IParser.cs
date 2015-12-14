@@ -9,5 +9,9 @@ namespace ContinuousRunner
         ExpressionTree Parse(FileInfo fileInfo);
 
         ExpressionTree Parse(string script);
+
+        ExpressionTree TryParse(FileInfo fileInfo);
+
+        ExpressionTree TryParse(string script);
     }
 }

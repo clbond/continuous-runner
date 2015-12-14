@@ -1,4 +1,6 @@
-﻿using System;
+﻿// ReSharper disable CatchAllClause
+
+using System;
 using System.IO;
 using System.Linq;
 
@@ -30,9 +32,33 @@ namespace ContinuousRunner.Impl
             }
             catch (Exception ex)
             {
-                var first = script.Take(256);
+                var first = string.Join(string.Empty, script.Take(512).ToArray());
 
-                throw new TestException($"Failed to parse JavaScript content ({first}...)", ex);
+                throw new TestException($"Failed to parse JavaScript content ({first}...): {ex}", ex);
+            }
+        }
+
+        public ExpressionTree TryParse(FileInfo fileInfo)
+        {
+            try
+            {
+                return Parse(fileInfo);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        public ExpressionTree TryParse(string script)
+        {
+            try
+            {
+                return Parse(script);
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
 

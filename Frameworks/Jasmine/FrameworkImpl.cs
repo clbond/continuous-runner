@@ -10,7 +10,7 @@ namespace ContinuousRunner.Frameworks.Jasmine
 
         public Framework Framework => Framework.Jasmine;
 
-        public void Install(IScript script, V8ScriptEngine v8)
+        public void Install(IScript script, V8ScriptEngine engine)
         {
             // TODO(cbond): Find and run Jasmine framework code
         }

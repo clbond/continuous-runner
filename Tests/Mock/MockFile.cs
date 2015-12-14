@@ -19,7 +19,7 @@ namespace ContinuousRunner.Tests.Mock
         {
             _instanceContext = instanceContext;
 
-            _collection = new TempFileCollection(_instanceContext.ScriptsRoot.FullName, true);
+            _collection = new TempFileCollection(_instanceContext.ScriptsRoot.FullName);
         }
 
         public FileInfo FromString(string extension, string content)

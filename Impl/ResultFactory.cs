@@ -9,7 +9,7 @@ namespace ContinuousRunner.Impl
     {
         #region Implementation of ITestResultFactory
 
-        public TestResult InitialState()
+        public TestResult Indeterminate()
         {
             return new TestResult
                    {
@@ -21,7 +21,7 @@ namespace ContinuousRunner.Impl
         {
             return new TestResult
             {
-                Logs = SingleLog("Test has been deleted from the source"),
+                Logs = SingleLog(Severity.Error, "Test has been deleted from the source"),
                 Status = TestStatus.Deleted
             };
         }
@@ -30,7 +30,7 @@ namespace ContinuousRunner.Impl
         {
             return new TestResult
                    {
-                       Logs = SingleLog($"Failed to run: {exception}"),
+                       Logs = SingleLog(Severity.Error, $"Failed to run: {exception}"),
                        Status = TestStatus.Deleted
                    };
         }
@@ -49,9 +49,9 @@ namespace ContinuousRunner.Impl
 
         #region Private methods
 
-        private static IList<Tuple<DateTime, string>> SingleLog(string log)
+        private static IList<Tuple<DateTime, Severity, string>> SingleLog(Severity severity, string log)
         {
-            return new[] {Tuple.Create(DateTime.Now, log)};
+            return new[] {Tuple.Create(DateTime.Now, severity, log)};
         }
 
         #endregion

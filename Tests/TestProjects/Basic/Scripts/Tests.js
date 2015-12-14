@@ -8,7 +8,7 @@
     ) {
         describe('Test suite 1', function() {
             it('Test 1', function() {
-                debugger;
+                console.log('Test 1 output');
             });
         });
     });

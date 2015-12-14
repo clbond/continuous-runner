@@ -45,7 +45,7 @@ namespace ContinuousRunner.Impl
 
             var test = new Test
                        {
-                           Result = _resultFactory.InitialState(),
+                           Result = _resultFactory.Indeterminate(),
                            Name = description,
                            Id = deterministicId,
                            Suite = lastSuite,

@@ -77,6 +77,8 @@ namespace ContinuousRunner.Impl
 
         public Framework Frameworks => _frameworks.Value;
 
+        public IList<Tuple<DateTime, Severity, string>> Logs { get; private set; }
+
         public ExpressionTree ExpressionTree
         {
             get
@@ -166,6 +168,8 @@ namespace ContinuousRunner.Impl
             _suites = new Lazy<IEnumerable<TestSuite>>(GetSuites);
 
             _frameworks = new Lazy<Framework>(() => _frameworkLoader.Invoke(this));
+
+            Logs = new List<Tuple<DateTime, Severity, string>>();
         }
         
         private IEnumerable<TestSuite> GetSuites()

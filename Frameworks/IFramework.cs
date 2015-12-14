@@ -6,6 +6,6 @@ namespace ContinuousRunner.Frameworks
     {
         Framework Framework { get; }
 
-        void Install(IScript script, V8ScriptEngine v8);
+        void Install(IScript script, V8ScriptEngine engine);
     }
 }

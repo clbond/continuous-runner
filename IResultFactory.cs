@@ -10,7 +10,7 @@ namespace ContinuousRunner
         /// <summary>
         /// Create a state indicating that the test has never been run
         /// </summary>
-        TestResult InitialState();
+        TestResult Indeterminate();
 
         TestResult Deleted();
 
