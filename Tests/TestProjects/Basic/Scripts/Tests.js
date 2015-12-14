@@ -6,5 +6,9 @@
         File1,
         File2
     ) {
-        debugger;
+        describe('Test suite 1', function() {
+            it('Test 1', function() {
+                debugger;
+            });
+        });
     });

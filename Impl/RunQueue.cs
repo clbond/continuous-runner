@@ -45,7 +45,7 @@ namespace ContinuousRunner.Impl
 
                     if (_running == false)
                     {
-                        Task.Run(() => Run());
+                        ThreadPool.QueueUserWorkItem(state => Run());
                     }
                 });
         }

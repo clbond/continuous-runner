@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.ClearScript.V8;
@@ -43,8 +44,8 @@ namespace ContinuousRunner.Impl
 
             var completionSource = new TaskCompletionSource<TestResult>();
 
-            Task.Run(
-                () =>
+            ThreadPool.QueueUserWorkItem(
+                state =>
                 {
                     var engine = new V8ScriptEngine();
                     try
