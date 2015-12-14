@@ -169,8 +169,7 @@
     </MonoDevelop>
   </ProjectExtensions>
   <PropertyGroup>
-    <PostBuildEvent>
-if not exist "$(TargetDir)" md "$(TargetDir)"
+    <PostBuildEvent>if not exist "$(TargetDir)" md "$(TargetDir)"
 xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.3\tools\native\x86\*.*" "$(TargetDir)"
 if not exist "$(TargetDir)" md "$(TargetDir)"
 xcopy /s /y "$(SolutionDir)packages\ClearScript.V8.5.4.3\tools\native\amd64\*.*" "$(TargetDir)"</PostBuildEvent>

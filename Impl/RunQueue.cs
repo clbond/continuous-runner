@@ -76,11 +76,11 @@ namespace ContinuousRunner.Impl
             return tasks;
         }
 
-        public async Task<IEnumerable<TestResult>> RunAllAsync()
+        public Task<TestResult[]> RunAllAsync()
         {
             var tasks = RunAsync();
 
-            return await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+            return Task.WhenAll(tasks.ToArray());
         }
 
         #endregion

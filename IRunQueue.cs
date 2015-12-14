@@ -21,6 +21,6 @@ namespace ContinuousRunner
         /// <summary>
         /// Run all tests and return a single <see cref="Task"/> representing all tests
         /// </summary>
-        Task<IEnumerable<TestResult>> RunAllAsync();
+        Task<TestResult[]> RunAllAsync();
     }
 }

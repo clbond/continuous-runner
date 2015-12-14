@@ -23,27 +23,10 @@ namespace ContinuousRunner.Tests
         protected BaseTest(ITestOutputHelper helper)
         {
             _helper = helper;
-
-            _memoryTarget = new MemoryTarget
-                            {
-                                Name = "xUnit log",
-                                Layout = GetStandardLayout()
-                            };
-
-            if (LogManager.Configuration == null)
-            {
-                LogManager.Configuration = new LoggingConfiguration();
-            }
-
-            LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));            
-
-            LogManager.EnableLogging();
         }
 
-        private static IContainer CreateContainer(Action<ContainerBuilder> build = null)
+        private IContainer CreateContainer(Action<ContainerBuilder> build = null)
         {
-            ConfigureLogging();
-
             var builder = new ContainerBuilder();
 
             builder.RegisterModule<ContinuousRunnerModule>();
@@ -57,9 +40,10 @@ namespace ContinuousRunner.Tests
             return builder.Build();
         }
 
-        protected static IContainer CreateTypicalContainer(DirectoryInfo root,
-            Action<ContainerBuilder> additionalBuild = null)
+        protected IContainer CreateTypicalContainer(DirectoryInfo root, Action<ContainerBuilder> additionalBuild = null)
         {
+            ConfigureLogging();
+
             var instanceContext = new Mock<IInstanceContext>();
             instanceContext.SetupGet(i => i.ScriptsRoot).Returns(root);
             instanceContext.SetupGet(i => i.ModuleNamespace).Returns(nameof(Tests));
@@ -75,42 +59,33 @@ namespace ContinuousRunner.Tests
             return CreateContainer(build);
         }
 
-        protected static IContainer CreateTypicalContainer(Action<ContainerBuilder> additionalBuild = null)
+        protected IContainer CreateTypicalContainer(Action<ContainerBuilder> additionalBuild = null)
         {
             return CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>(), additionalBuild);
         }
 
         [SuppressMessage("Usage", "CC0022:Should dispose object", Justification = "NLog oddness")]
-        protected static void ConfigureLogging()
+        protected void ConfigureLogging()
         {
-            LogManager.EnableLogging();
-
-            var layout = GetStandardLayout();
-
-            var targets = new List<Target>
-                          {
-                              new OutputDebugStringTarget
-                              {
-                                  Layout = layout,
-                                  Name = "Debug Log"
-                              },
-                              new ConsoleTarget
-                              {
-                                  Layout = layout,
-                                  Name = "Console"
-                              }
-                          };
+            if (_memoryTarget == null)
+            {
+                _memoryTarget = new MemoryTarget
+                                {
+                                    Name = "Unit Test Log",
+                                    Layout = GetStandardLayout()
+                                };
+            }
 
             if (LogManager.Configuration == null)
             {
                 LogManager.Configuration = new LoggingConfiguration();
             }
 
-            foreach (var target in targets)
-            {
-                LogManager.Configuration.AddTarget(target.Name, target);
-                LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Trace, target));
-            }
+            LogManager.Configuration.AddTarget(_memoryTarget.Name, _memoryTarget);
+
+            LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
+            
+            LogManager.EnableLogging();
 
             LogManager.ReconfigExistingLoggers();
         }
