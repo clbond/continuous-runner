@@ -10,9 +10,12 @@ namespace ContinuousRunner.Impl
     public class Watcher : IWatcher
     {
         [Import] private readonly IInstanceContext _instanceContext;
+
         [Import] private readonly IPublisher _publisher;
+
         [Import] private readonly IScriptCollection _scriptCollection;
-        [Import] private readonly IScriptLoader _scriptLoader;
+
+        [Import] private readonly ILoader<IScript> _scriptLoader;
         
         #region Implementation of IBackgroundRunner
 

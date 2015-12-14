@@ -28,7 +28,7 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
             {
                 var collection = container.Resolve<IScriptCollection>();
 
-                var loader = container.Resolve<IScriptLoader>();
+                var loader = container.Resolve<ILoader<IScript>>();
                 
                 Func<FileInfo, IScript> load = fi => loader.Load(fi);
 

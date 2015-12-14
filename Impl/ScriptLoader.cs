@@ -2,15 +2,16 @@
 using System.ComponentModel.Composition;
 using System.IO;
 
-using ContinuousRunner.Frameworks;
 using Jint.Parser.Ast;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
 {
+    using Frameworks;
     using Data;
 
-    public class ScriptLoader : IScriptLoader
+    public class ScriptLoader : ILoader<IScript>
     {
         #region Private members
 

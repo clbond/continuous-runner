@@ -32,7 +32,7 @@ namespace ContinuousRunner.Tests.Loading
 
                 var fileInfo = container.Resolve<IMockFile>().FromString("js", content);
 
-                var loader = container.Resolve<IScriptLoader>();
+                var loader = container.Resolve<ILoader<IScript>>();
 
                 var script = loader.Load(fileInfo);
                 script.Should().NotBeNull();
