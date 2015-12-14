@@ -59,15 +59,6 @@ namespace ContinuousRunner.Frameworks
 
             Func<Framework[], bool> has = f => f.All(flag => resultClosure.HasFlag(flag));
 
-            // If we detected conflicting frameworks, then unset them both because our detector isn't working on this code
-            if (has(new[] {Framework.NodeJs, Framework.RequireJs}))
-            {
-                result &= ~Framework.NodeJs;
-                result &= ~Framework.RequireJs;
-
-                logger.Error("Detected conflicting frameworks (RequireJS and NodeJS); unsetting both");
-            }
-
             if (has(new[] {Framework.JavaScript, Framework.TypeScript}))
             {
                 result &= ~Framework.JavaScript;
