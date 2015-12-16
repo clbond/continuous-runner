@@ -4,7 +4,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 {
     public interface IRequireConfiguration
     {
-        string BaseUrl { get; }
+        ISet<string> BaseUrl { get; }
 
         IDictionary<string, string> Paths { get; }
 

@@ -132,12 +132,17 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return null;
         }
 
-        private IRequireConfiguration Merge(IEnumerable<IRequireConfiguration> candidates)
+        private static IRequireConfiguration Merge(IEnumerable<IRequireConfiguration> candidates)
         {
             var config = new RequireConfiguration();
 
             foreach (var candidate in candidates)
             {
+                foreach (var url in candidate.BaseUrl)
+                {
+                    config.BaseUrl.Add(url);
+                }
+
                 candidate.Maps.Each(kvp => config.Maps.Add(kvp));
                 candidate.Packages.Each(p => config.Packages.Add(p));
                 candidate.Paths.Each(p => config.Paths.Add(p));

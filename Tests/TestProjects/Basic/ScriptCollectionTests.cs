@@ -23,11 +23,8 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
         {
             var root = MockFile.TempFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
 
-            var logger = LogManager.GetCurrentClassLogger();
-
             using (var container = CreateTypicalContainer(root))
             {
-
                 var collection = container.Resolve<IScriptCollection>();
 
                 var loader = container.Resolve<ILoader<IScript>>();
@@ -36,10 +33,31 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
 
                 var all = collection.GetScripts(load).ToArray();
                 all.Count().Should().Be(5);
+            }
+        }
+
+        [Fact]
+        public void TestModuleReferences()
+        {
+            var root = MockFile.TempFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
+
+            using (var container = CreateTypicalContainer(root))
+            {
+                var logger = LogManager.GetCurrentClassLogger();
+
+                var loader = container.Resolve<ILoader<IScript>>();
+
+                Func<FileInfo, IScript> load = fi => loader.Load(fi);
+
+                var collection = container.Resolve<IScriptCollection>();
+
+                var all = collection.GetScripts(load).ToArray();
 
                 var configLoader = container.Resolve<IConfigurationLoader>();
 
                 var config = configLoader.Load(all.Select(s => s.File));
+                config.Should().NotBeNull();
+                config.BaseUrl.Count.Should().Be(1);
 
                 var f1 = all.SingleOrDefault(f => f.Module.ModuleName == "Tests/File1");
                 f1.Should().NotBeNull();
@@ -62,6 +80,7 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                 }
 
                 tests.Count().Should().Be(1);
+
             }
         }
     }

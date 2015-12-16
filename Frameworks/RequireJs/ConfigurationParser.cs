@@ -12,9 +12,14 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         public IRequireConfiguration Parse(SyntaxNode root, ObjectExpression expression)
         {
+            if (expression == null)
+            {
+                return null;
+            }
+
             return new RequireConfiguration
                    {
-                       BaseUrl = expression.GetProperty(RequireKey.BaseUrl).GetValue(root),
+                       BaseUrl = GetBaseUrl(expression.GetProperty(RequireKey.BaseUrl).GetValue(root)),
                        Packages = TransformPackages(root, expression.GetProperty(RequireKey.Packages)).ToList(),
                        Paths = TransformPaths(root, expression.GetProperty(RequireKey.Paths)),
                        Maps = TransformMaps(expression.GetProperty(RequireKey.Map))
@@ -49,22 +54,34 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         private static IEnumerable<RequirePackage> TransformPackages(SyntaxNode root, Property packages)
         {
-            if (packages.Value?.Type != SyntaxNodes.ArrayExpression)
+            if (packages?.Value?.Type != SyntaxNodes.ArrayExpression)
             {
-                yield break;
+                return Enumerable.Empty<RequirePackage>();
             }
 
             var array = packages.Value.As<ArrayExpression>();
 
-            foreach (var expr in from package in array.Elements where package.Type == SyntaxNodes.ObjectExpression select package.As<ObjectExpression>())
-            {
-                yield return new RequirePackage
-                             {
-                                 Location = expr.GetProperty("location")?.GetValue(root),
-                                 Name = expr.GetProperty("name")?.GetValue(root),
-                                 Main = expr.GetProperty("main")?.GetValue(root)
-                             };
-            }
+            return (from package in array.Elements
+                    where package.Type == SyntaxNodes.ObjectExpression
+                    select package.As<ObjectExpression>())
+                .Select(
+                    expr => new RequirePackage
+                            {
+                                Location = expr.GetProperty("location")?.GetValue(root),
+                                Name = expr.GetProperty("name")?.GetValue(root),
+                                Main = expr.GetProperty("main")?.GetValue(root)
+                            })
+                .Where(package =>
+                       !string.IsNullOrEmpty(package.Location) ||
+                       !string.IsNullOrEmpty(package.Name) ||
+                       !string.IsNullOrEmpty(package.Main));
+        }
+
+        private static ISet<string> GetBaseUrl(string baseUrl)
+        {
+            return string.IsNullOrEmpty(baseUrl)
+                       ? new SortedSet<string>()
+                       : new SortedSet<string> {baseUrl};
         }
 
         #endregion
