@@ -42,6 +42,19 @@ namespace ContinuousRunner.Impl
 
         #endregion
 
+        #region System.Object overrides
+
+        #region Overrides of Object
+
+        public override string ToString()
+        {
+            return $"{Name} ({Id.ToString()})";
+        }
+
+        #endregion
+
+        #endregion
+
         #region Private members
 
         private WeakReference<TestSuite> _parentSuite;

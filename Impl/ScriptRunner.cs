@@ -22,7 +22,7 @@ namespace ContinuousRunner.Impl
         [Import] private readonly IPublisher _publisher;
 
         #region Implementation of IScriptRunner
-
+ 
         public IEnumerable<Task<TestResult>> RunAsync(IScript script)
         {
             return script.Suites.SelectMany(s => s.Tests.Select(t => RunTestAsync(script, t)));

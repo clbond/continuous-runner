@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace ContinuousRunner
 {
-    public interface IReferenceTree : IDisposable
+    public interface IReferenceTree
     {
         /// <summary>
-        /// Get a collection of scripts that depend directly or indirectly on <paramref name="script"/>
+        /// Get a collection of scripts that depend directly or indirectly on <paramref name="origin"/>
         /// </summary>
-        IEnumerable<IScript> GetDependents(IScript script);
+        IEnumerable<IScript> GetDependents(IScript origin);
 
         /// <summary>
-        /// Get a collection of scripts that <paramref name="script"/> depends upon, directly or indirectly
+        /// Get a collection of scripts that <paramref name="origin"/> depends upon, directly or indirectly
         /// </summary>
-        IEnumerable<IScript> GetDependencies(IScript script);
+        IEnumerable<IScript> GetDependencies(IEnumerable<IScript> scripts, IScript origin);
     }
 }

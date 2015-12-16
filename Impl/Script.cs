@@ -52,6 +52,8 @@ namespace ContinuousRunner.Impl
 
         private Lazy<Framework> _frameworks;
 
+        private Lazy<ModuleDefinition> _module;
+
         private ExpressionTree<SyntaxNode> _expressionTree;
 
         #endregion
@@ -60,20 +62,17 @@ namespace ContinuousRunner.Impl
 
         public FileInfo File { get; set; }
 
-        public ModuleDefinition Module { get; private set; }
+        public ModuleDefinition Module => _module.Value;
 
         public IEnumerable<TestSuite> Suites => _suites.Value;
-        
+
         public string Content { get; set; }
 
         public string Description => File?.Name ?? @"anonymous script";
 
         public int TestCount
         {
-            get
-            {
-                return Suites.Sum(suite => suite.Tests.Count);
-            }
+            get { return Suites.Sum(suite => suite.Tests.Count); }
         }
 
         public Framework Frameworks => _frameworks.Value;
@@ -96,23 +95,9 @@ namespace ContinuousRunner.Impl
                 Reset();
 
                 _expressionTree = value;
-
-                // When our syntax tree changes -- i.e., when the file has been loaded, or it has been
-                // changed and the change detected by the file watcher -- then we need to search through
-                // the code again to extract the define() call and determine what the dependencies of
-                // this file are so that we can construct a dependency tree.
-                Module = _moduleLoader?.Invoke(this, value);
-
-                // Notify observers that the source file has chnaged
-                _publisher.Publish(
-                    new SourceChangedEvent
-                    {
-                        Operation = Operation.Change,
-                        Script = this
-                    });
             }
         }
-        
+
         public void Reload()
         {
             ExpressionTree = _reloader?.Invoke(this);
@@ -122,7 +107,7 @@ namespace ContinuousRunner.Impl
                 throw new TestException($"Reload failed: reloader delegate returned null");
             }
         }
-        
+
         #endregion
 
         #region Implementation of IComparable<in IScript>
@@ -135,7 +120,7 @@ namespace ContinuousRunner.Impl
         #endregion
 
         #region Overrides of System.Object
-        
+
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(Description))
@@ -143,12 +128,12 @@ namespace ContinuousRunner.Impl
                 return Description;
             }
 
-            if (File != null)
+            if (!string.IsNullOrEmpty(File?.Name))
             {
                 return File.Name;
             }
 
-            if (Module != null)
+            if (!string.IsNullOrEmpty(Module?.ModuleName))
             {
                 return Module.ModuleName;
             }
@@ -157,7 +142,7 @@ namespace ContinuousRunner.Impl
         }
 
         #endregion
-        
+
         #region Private methods
 
         private void Reset()
@@ -166,9 +151,11 @@ namespace ContinuousRunner.Impl
 
             _frameworks = new Lazy<Framework>(() => _frameworkLoader.Invoke(this));
 
+            _module = new Lazy<ModuleDefinition>(() => _moduleLoader?.Invoke(this, ExpressionTree));
+
             Logs = new List<Tuple<DateTime, Severity, string>>();
         }
-        
+
         private IEnumerable<TestSuite> GetSuites()
         {
             var definer = _suiteLoader?.Invoke(this, ExpressionTree);

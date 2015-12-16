@@ -134,6 +134,8 @@
   <ItemGroup>
     <Content Include="TestProjects\Basic\Scripts\File1.js" />
     <Content Include="TestProjects\Basic\Scripts\File2.js" />
+    <Content Include="TestProjects\Basic\Scripts\lib\foo.js" />
+    <Content Include="TestProjects\Basic\Scripts\require.config.js" />
     <Content Include="TestProjects\Basic\Scripts\Tests.js" />
   </ItemGroup>
   <Choose>

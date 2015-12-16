@@ -2,6 +2,7 @@
 using System.IO;
 
 using CommandLine;
+using ContinuousRunner.Frameworks.RequireJs;
 
 namespace ContinuousRunner.Console
 {
@@ -9,12 +10,12 @@ namespace ContinuousRunner.Console
     {
         #region Command-line arguments and options
 
-        [Option('r', "solution-path",
+        [Option('s', "solution-path",
             Required = true,
             HelpText = "The path to the solution or project root")]
         public string SolutionPath { get; set; }
 
-        [Option('s', "scripts-path",
+        [Option('j', "scripts-path",
             Required = true,
             HelpText = "The path to search for JavaScript modules and tests")]
         public string ScriptsPath { get; set; }
@@ -32,6 +33,8 @@ namespace ContinuousRunner.Console
             Required = false,
             HelpText = "The module namespace that our source files reside in")]
         public string ModuleNamespace { get; set; }
+
+        public IRequireConfiguration RequireConfig { get; set; }
 
         #endregion
 

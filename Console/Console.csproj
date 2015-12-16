@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="CommandLineOptions.cs" />
+    <Compile Include="ConsoleReader.cs" />
     <Compile Include="Container.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

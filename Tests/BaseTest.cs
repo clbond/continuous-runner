@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-
+using System.Linq;
 using Autofac;
-
+using ContinuousRunner.Frameworks.RequireJs;
+using ContinuousRunner.Impl;
 using ContinuousRunner.Tests.Mock;
 
 using Magnum.Extensions;
@@ -49,10 +51,15 @@ namespace ContinuousRunner.Tests
         {
             ConfigureLogging();
 
+            IContainer container = null;
+
             var instanceContext = new Mock<IInstanceContext>();
             instanceContext.SetupGet(i => i.SolutionRoot).Returns(root);
             instanceContext.SetupGet(i => i.ScriptsRoot).Returns(root);
             instanceContext.SetupGet(i => i.ModuleNamespace).Returns(nameof(Tests));
+
+            // ReSharper disable once AccessToModifiedClosure
+            instanceContext.SetupGet(i => i.RequireConfig).Returns(() => GetRequireConfig(container));
 
             Action<ContainerBuilder> build =
                 cb =>
@@ -62,7 +69,22 @@ namespace ContinuousRunner.Tests
                     additionalBuild?.Invoke(cb);
                 };
 
-            return CreateContainer(build);
+            container = CreateContainer(build);
+
+            return container;
+        }
+
+        protected static IRequireConfiguration GetRequireConfig(IComponentContext componentContext)
+        {
+            var loader = componentContext.Resolve<IConfigurationLoader>();
+
+            var scriptLoader = componentContext.Resolve<ILoader<IScript>>();
+
+            var collection = componentContext.Resolve<IScriptCollection>();
+
+            var config = loader.Load(collection.GetScripts(f => scriptLoader.Load(f)).Select(s => s.File));
+
+            return config;
         }
 
         protected IContainer CreateTypicalContainer(Action<ContainerBuilder> additionalBuild = null)
@@ -73,12 +95,14 @@ namespace ContinuousRunner.Tests
         [SuppressMessage("Usage", "CC0022:Should dispose object", Justification = "NLog oddness")]
         protected void ConfigureLogging()
         {
+            var layout = GetStandardLayout();
+
             if (_memoryTarget == null)
             {
                 _memoryTarget = new MemoryTarget
                                 {
                                     Name = "Unit Test Log",
-                                    Layout = GetStandardLayout()
+                                    Layout = layout
                                 };
             }
 
@@ -89,9 +113,18 @@ namespace ContinuousRunner.Tests
                     LogManager.Configuration = new LoggingConfiguration();
                 }
 
-                LogManager.Configuration.AddTarget(_memoryTarget.Name, _memoryTarget);
+                var targets = new List<Target>
+                              {
+                                  _memoryTarget,
+                                  new OutputDebugStringTarget {Name = "Debug", Layout = layout},
+                                  new TraceTarget {Name = "Trace", Layout = layout}
+                              };
 
-                LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, _memoryTarget));
+                foreach (var target in targets)
+                {
+                    LogManager.Configuration.AddTarget(target.Name, target);
+                    LogManager.Configuration.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, target));
+                }
 
                 LogManager.EnableLogging();
 

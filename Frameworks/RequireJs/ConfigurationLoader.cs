@@ -6,46 +6,78 @@ using System.Linq;
 
 using Jint.Parser.Ast;
 
+using Magnum.Extensions;
+
 namespace ContinuousRunner.Frameworks.RequireJs
 {
     using Extensions;
 
     public class ConfigurationLoader : IConfigurationLoader
     {
-        [Import] private readonly IParser<SyntaxNode> _parser;
+        [Import] private readonly ICachedScripts _cachedScripts;
 
         [Import] private readonly IConfigurationParser _configurationParser;
 
-        private IRequireConfiguration _cached;
-
+        [Import] private readonly ILoader<IScript> _loader;
+        
         #region Implementation of IConfigurationLoader
 
         public IRequireConfiguration Load(IEnumerable<FileInfo> search)
         {
-            if (_cached == null)
+            var candidates = search.SelectMany(Load).Where(config => config != null).ToArray();
+            if (candidates.Any())
             {
-                _cached = search.Select(Load).FirstOrDefault(config => config != null);
-            }
-
-            return _cached;
-        }
-
-        public IRequireConfiguration Load(FileInfo script)
-        {
-            var parsed = _parser.TryParse(script);
-
-            var match = parsed?.Root.Search<CallExpression>(IsRequireConfigCall).FirstOrDefault();
-            if (match != null)
-            {
-                return Parse(parsed.Root, match.Arguments.FirstOrDefault());
+                return Merge(candidates);
             }
 
             return null;
         }
 
+        public IEnumerable<IRequireConfiguration> Load(FileInfo fileInfo)
+        {
+            var script = _cachedScripts.Get(fileInfo, f => _loader.Load(f));
+            if (script?.ExpressionTree?.Root == null)
+            {
+                return Enumerable.Empty<IRequireConfiguration>();
+            }
+
+            var match = script.ExpressionTree.Root.Search<CallExpression>(IsRequireConfigCall).ToArray();
+            if (match.Any())
+            {
+                return match.Select(m => TryParse(script.ExpressionTree.Root, m.Arguments.FirstOrDefault()));
+            }
+
+            return Enumerable.Empty<IRequireConfiguration>();
+        }
+
+        public bool IsRequireConfigCall(CallExpression callExpression)
+        {
+            if (callExpression.Callee.Type != SyntaxNodes.MemberExpression)
+            {
+                return false;
+            }
+
+            var memberExpr = (MemberExpression)callExpression.Callee;
+
+            return MatchIdentifier(memberExpr.Object, new[] { @"require", @"requirejs" })
+                && MatchIdentifier(memberExpr.Property, new[] { @"config", @"configure" });
+        }
+
         #endregion
 
         #region Private methods
+
+        private IRequireConfiguration TryParse(SyntaxNode root, Expression expression)
+        {
+            try
+            {
+                return Parse(root, expression);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         private IRequireConfiguration Parse(SyntaxNode root, Expression expression)
         {
@@ -66,50 +98,52 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
                     if (declaration != null)
                     {
-                        return ExtractFromVariableDeclaration(declaration);
+                        return ExtractFromVariableDeclaration(root, declaration);
                     }
 
                     var declarator = root.Search<VariableDeclarator>(expr => expr.Id.Name == identifier.Name).SingleOrDefault();
                     if (declarator != null)
                     {
-                        return ExtractFromVariableDeclaration(declarator);
+                        return ExtractFromVariableDeclaration(root, declarator);
                     }
 
                     throw new ApplicationException($"Cannot find matching variable declarator: {identifier.Name}");
 
                 case SyntaxNodes.ObjectExpression:
-                    return ParseFromObjectExpression((ObjectExpression) expression);
+                    return ParseFromObjectExpression(root, (ObjectExpression) expression);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(expression.Type), "Cannot parse require.config() argument");
             }
         }
 
-        private IRequireConfiguration ParseFromObjectExpression(ObjectExpression expression)
+        private IRequireConfiguration ParseFromObjectExpression(SyntaxNode root, ObjectExpression expression)
         {
-            return _configurationParser.Parse(expression);
+            return _configurationParser.Parse(root, expression);
         }
 
-        private IRequireConfiguration ExtractFromVariableDeclaration(VariableDeclarator declarator)
+        private IRequireConfiguration ExtractFromVariableDeclaration(SyntaxNode root, VariableDeclarator declarator)
         {
             if (declarator.Init.Type == SyntaxNodes.ObjectExpression)
             {
-                return ParseFromObjectExpression((ObjectExpression) declarator.Init);
+                return ParseFromObjectExpression(root, (ObjectExpression) declarator.Init);
             }
 
             return null;
         }
 
-        private static bool IsRequireConfigCall(CallExpression callExpression)
+        private IRequireConfiguration Merge(IEnumerable<IRequireConfiguration> candidates)
         {
-            if (callExpression.Callee is MemberExpression == false)
+            var config = new RequireConfiguration();
+
+            foreach (var candidate in candidates)
             {
-                return false;
+                candidate.Maps.Each(kvp => config.Maps.Add(kvp));
+                candidate.Packages.Each(p => config.Packages.Add(p));
+                candidate.Paths.Each(p => config.Paths.Add(p));
             }
 
-            var memberExpr = (MemberExpression) callExpression.Callee;
-
-            return MatchIdentifier(memberExpr.Object, new[] {@"require", @"requirejs"}) && MatchIdentifier(memberExpr.Property, new[] {@"config", @"configure"});
+            return config;
         }
 
         private static bool MatchIdentifier(Expression expression, IEnumerable<string> matches)

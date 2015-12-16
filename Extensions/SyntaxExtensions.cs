@@ -229,6 +229,8 @@ namespace ContinuousRunner.Extensions
                     default:
                         throw new ArgumentOutOfRangeException(nameof(node.Type));
                 }
+
+                // NOTE(cbond): Anything that needed further inspection already used 'continue' instead of break
                 break;
             }
         }
@@ -282,6 +284,67 @@ namespace ContinuousRunner.Extensions
             }
 
             return result;
+        }
+
+        public static Property GetProperty(this ObjectExpression expr, string key)
+        {
+            return expr.Properties.FirstOrDefault(e => e.Key.GetKey() == key);
+        }
+
+        public static string GetValue(this SyntaxNode node, SyntaxNode root)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            switch (node.Type)
+            {
+                case SyntaxNodes.Identifier:
+                    var referencedNode = root.GetIdentifierNode(node.As<Identifier>().Name);
+                    if (referencedNode != null)
+                    {
+                        return referencedNode.GetValue(root);
+                    }
+                    break;
+                case SyntaxNodes.Literal:
+                    return ((Literal) node).Raw;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(node.Type));
+            }
+
+            return null;
+        }
+
+        public static string GetValue(this Property property, SyntaxNode root)
+        {
+            return property.Value?.GetValue(root);
+        }
+
+        public static SyntaxNode GetIdentifierNode(this SyntaxNode node, string identifier)
+        {
+            foreach (
+                var variable in
+                    from declaration in
+                        node.Search<VariableDeclaration>(v => v.Declarations.Any(d => d.Id?.Name == identifier))
+                    from variable in declaration.Declarations
+                    where variable.Id.Name == identifier
+                    select variable)
+            {
+                return variable.Init;
+            }
+
+            foreach (var declaration in node.Search<VariableDeclarator>(v => v.Id?.Name == identifier))
+            {
+                return declaration;
+            }
+
+            foreach (var func in node.Search<FunctionDeclaration>(f => f.Id?.Name == identifier))
+            {
+                return func;
+            }
+
+            return node.Search<FunctionExpression>(expr => expr.Id?.Name == identifier).FirstOrDefault();
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
-
 using Jint.Parser.Ast;
 
 using NLog;
@@ -14,7 +13,7 @@ namespace ContinuousRunner.Impl
     public class ScriptLoader : ILoader<IScript>
     {
         #region Private members
-
+        
         [Import] private readonly ICachedScripts _cachedScripts;
 
         [Import] private readonly IFrameworkDetector _frameworkDetector;
@@ -118,12 +117,12 @@ namespace ContinuousRunner.Impl
                              ExpressionTree = expressionTree
                          };
 
-            _publisher.Publish(
-                new SourceChangedEvent
-                {
-                    Operation = Operation.Add,
-                    Script = script
-                });
+            //_publisher.Publish(
+            //    new SourceChangedEvent
+            //    {
+            //        Operation = Operation.Add,
+            //        Script = script
+            //    });
 
             return script;
         }

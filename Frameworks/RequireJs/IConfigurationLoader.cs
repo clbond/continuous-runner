@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Frameworks.RequireJs
 {
@@ -18,6 +19,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
         /// Parse the contents of <paramref name="script"/> to determine if <code>requirejs.config()</code> is called, and if it is, parse
         /// that call into an <see cref="IRequireConfiguration"/> object.
         /// </summary>
-        IRequireConfiguration Load(FileInfo script);
+        IEnumerable<IRequireConfiguration> Load(FileInfo fileInfo);
+
+        /// <summary>
+        /// Is the specified function call a <code>requirejs.config()</code> invocation?
+        /// </summary>
+        bool IsRequireConfigCall(CallExpression callExpression);
     }
 }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Autofac;
+using ContinuousRunner.Frameworks.RequireJs;
 using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
@@ -26,6 +27,7 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
 
             using (var container = CreateTypicalContainer(root))
             {
+
                 var collection = container.Resolve<IScriptCollection>();
 
                 var loader = container.Resolve<ILoader<IScript>>();
@@ -33,7 +35,11 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                 Func<FileInfo, IScript> load = fi => loader.Load(fi);
 
                 var all = collection.GetScripts(load).ToArray();
-                all.Count().Should().Be(3);
+                all.Count().Should().Be(5);
+
+                var configLoader = container.Resolve<IConfigurationLoader>();
+
+                var config = configLoader.Load(all.Select(s => s.File));
 
                 var f1 = all.SingleOrDefault(f => f.Module.ModuleName == "Tests/File1");
                 f1.Should().NotBeNull();

@@ -18,7 +18,10 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         private readonly IScript _fromScript;
 
-        public ModuleDefinitions([NotNull] IReferenceResolver referenceResolver, [NotNull] ScriptEngine scriptEngine, IScript fromScript)
+        public ModuleDefinitions(
+            [NotNull] IReferenceResolver referenceResolver,
+            [NotNull] ScriptEngine scriptEngine,
+            [NotNull] IScript fromScript)
         {
             _referenceResolver = referenceResolver;
 
