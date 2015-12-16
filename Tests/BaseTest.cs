@@ -76,13 +76,11 @@ namespace ContinuousRunner.Tests
 
         protected static IRequireConfiguration GetRequireConfig(IComponentContext componentContext)
         {
-            var loader = componentContext.Resolve<IConfigurationLoader>();
-
-            var scriptLoader = componentContext.Resolve<ILoader<IScript>>();
-
+            var loader = componentContext.Resolve<IRequireConfigurationLoader>();
+            
             var collection = componentContext.Resolve<IScriptCollection>();
 
-            var config = loader.Load(collection.GetScripts(f => scriptLoader.Load(f)).Select(s => s.File));
+            var config = loader.Load(collection.GetScriptFiles());
 
             return config;
         }

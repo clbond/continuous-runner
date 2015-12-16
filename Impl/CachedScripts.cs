@@ -18,6 +18,37 @@ namespace ContinuousRunner.Impl
 
         #region Implementation of ICachedScripts
 
+        private CachedScriptItem? GetCached(FileInfo fileInfo, out Guid hash)
+        {
+            hash = Guid.Empty;
+
+            if (_cache.ContainsKey(fileInfo.FullName) == false)
+            {
+                return null;
+            }
+
+            var scriptItem = _cache[fileInfo.FullName];
+            
+            if (scriptItem.Updated >= fileInfo.LastWriteTime)
+            {
+                hash = scriptItem.Hash;
+
+                return scriptItem;
+            }
+
+            // If the file has been modified since we loaded it, then compare the hashes
+            hash = _hasher.GetHash(fileInfo);
+
+            if (scriptItem.Hash == hash)
+            {
+                return scriptItem;
+            }
+
+            _logger.Debug($"Script {fileInfo.Name} is stale (hash: {scriptItem.Hash.ToString()} vs {hash.ToString()}); removing");
+
+            return null;
+        }
+
         public IScript Get(FileInfo fileInfo, Func<FileInfo, IScript> load)
         {
             if (load == null)
@@ -27,36 +58,35 @@ namespace ContinuousRunner.Impl
 
             try
             {
-                var hash = _hasher.GetHash(fileInfo);
-
-                if (_cache.ContainsKey(fileInfo.FullName))
+                Guid hash;
+                var existingItem = GetCached(fileInfo, out hash);
+                if (existingItem.HasValue)
                 {
-                    var scriptItem = _cache[fileInfo.FullName];
-                    if (scriptItem.Hash == hash)
-                    {
-                        scriptItem.Accessed = DateTime.Now;
+                    var item = existingItem.Value;
 
-                        return scriptItem.Script;
-                    }
-                    else
-                    {
-                        _logger.Debug(
-                            $"Script {fileInfo.Name} is stale (hash: {scriptItem.Hash} vs {hash}); removing");
-                    }
+                    item.Accessed = DateTime.Now;
+
+                    return item.Script;
+                }
+
+                if (hash == Guid.Empty)
+                {
+                    hash = _hasher.GetHash(fileInfo);
                 }
 
                 var loaded = load(fileInfo);
 
                 var cachedItem = new CachedScriptItem
                                  {
-                                     Script = loaded,
                                      Accessed = DateTime.Now,
+                                     Updated = DateTime.Now,
+                                     Script = loaded,
                                      Hash = hash
                                  };
 
                 _cache[fileInfo.FullName] = cachedItem;
 
-                _logger.Debug($"Inserted script into cache: {fileInfo.Name}: hash {hash}");
+                _logger.Debug($"Inserted script into cache: {fileInfo.Name}: hash {hash.ToString()}");
 
                 return loaded;
             }
@@ -77,7 +107,7 @@ namespace ContinuousRunner.Impl
             // The goal is to keep the cache at a maximum size, with the most recently-used scripts always
             // being retained, and the ones that have not been referenced in a while get removed.
             var matching =
-                _cache.Select(kvp => Tuple.Create(kvp.Key, kvp.Value.Accessed))
+                _cache.Select(kvp => Tuple.Create(kvp.Key, kvp.Value.Updated))
                       .OrderByDescending(t => t.Item2)
                       .Skip(Constants.ScriptCacheSize)
                       .Select(kvp => kvp.Item1)

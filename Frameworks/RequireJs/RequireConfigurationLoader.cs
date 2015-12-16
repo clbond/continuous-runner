@@ -12,11 +12,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
 {
     using Extensions;
 
-    public class ConfigurationLoader : IConfigurationLoader
+    public class RequireConfigurationLoader : IRequireConfigurationLoader
     {
         [Import] private readonly ICachedScripts _cachedScripts;
 
-        [Import] private readonly IConfigurationParser _configurationParser;
+        [Import] private readonly IRequireConfigurationParser _configurationParser;
 
         [Import] private readonly ILoader<IScript> _loader;
         
@@ -119,7 +119,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         private IRequireConfiguration ParseFromObjectExpression(SyntaxNode root, ObjectExpression expression)
         {
-            return _configurationParser.Parse(root, expression);
+            return _configurationParser.Parse(expression, root);
         }
 
         private IRequireConfiguration ExtractFromVariableDeclaration(SyntaxNode root, VariableDeclarator declarator)

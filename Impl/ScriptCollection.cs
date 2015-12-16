@@ -10,36 +10,50 @@ namespace ContinuousRunner.Impl
     public class ScriptCollection : IScriptCollection
     {
         [Import] private readonly IInstanceContext _instanceContext;
+
+        [Import] private readonly ILoader<IScript> _loader;
         
         private readonly ISet<IScript> _collection = new HashSet<IScript>(new ScriptComparer()); 
 
         #region Implementation of IScriptCollection
-        
-        public IEnumerable<IScript> GetScripts(Func<FileInfo, IScript> loader)
+
+        public IEnumerable<FileInfo> GetScriptFiles()
         {
+            Func<string[], string, bool> match =
+                (extensions, fileExtension) =>
+                extensions.Any(e => string.Equals(e, fileExtension, StringComparison.InvariantCultureIgnoreCase));
+
             Func<string, bool> isScript =
-                ext => Constants.FileExtensions.TypeScript.Any(
-                           t => string.Equals(ext, t, StringComparison.InvariantCultureIgnoreCase)) ||
-                       Constants.FileExtensions.JavaScript.Any(
-                           j => string.Equals(ext, j, StringComparison.InvariantCultureIgnoreCase));
+                ext => match(Constants.FileExtensions.TypeScript, ext) ||
+                       match(Constants.FileExtensions.JavaScript, ext);
 
-            var files = _instanceContext.ScriptsRoot.GetFiles("*", SearchOption.AllDirectories).Where(f => isScript(f.Extension));
+            var root = _instanceContext.ScriptsRoot;
 
-            return files.Select(loader).Where(script => script != null);
+            if (root == null || root.Exists == false)
+            {
+                throw new InvalidOperationException($"Sripts root is not set or does not exist: {root}");
+            }
+
+            return root.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => isScript(f.Extension));
         }
 
-        public IEnumerable<IScript> GetTestScripts(Func<FileInfo, IScript> loader)
+        public IEnumerable<IScript> GetScripts()
+        {
+            return GetScriptFiles().Select(_loader.Load).Where(script => script != null);
+        }
+
+        public IEnumerable<IScript> GetTestScripts()
         {
             var testExpr = new Regex("(spec|tests|test).js$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-            var files = _instanceContext.ScriptsRoot.GetFiles("*", SearchOption.AllDirectories).Where(f => testExpr.IsMatch(f.Name));
+            var files = GetScriptFiles().Where(f => testExpr.IsMatch(f.Name));
             
-            return files.Select(loader).Where(script => script != null);
+            return files.Select(_loader.Load).Where(script => script != null);
         }
 
-        public IEnumerable<IScript> GetProductScripts(Func<FileInfo, IScript> loader)
+        public IEnumerable<IScript> GetProductScripts()
         {
-            return GetScripts(loader).Except(GetTestScripts(loader));
+            return GetScripts().Except(GetTestScripts());
         }
 
         public void Add(IScript script)

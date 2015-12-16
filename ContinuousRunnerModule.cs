@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using Autofac.Core;
-
+using ContinuousRunner.Frameworks.RequireJs;
 using ContinuousRunner.Impl;
 
 namespace ContinuousRunner
@@ -28,12 +28,18 @@ namespace ContinuousRunner
                    .AsImplementedInterfaces()
                    .SingleInstance()
                    .OnActivated(ActivateInject);
-                
+
+            builder.Register(
+                c => c.Resolve<IRequireConfigurationLoader>().Load(c.Resolve<IScriptCollection>().GetScriptFiles()))
+                   .As<IRequireConfiguration>()
+                   .SingleInstance();
+
             builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
                    .Except<TestCollection>()
                    .Except<Publisher>()
                    .Except<CachedScripts>()
                    .Except<RunQueue>()
+                   .Except<RequireConfiguration>()
                    .AsImplementedInterfaces()
                    .OnActivated(ActivateInject);
         }

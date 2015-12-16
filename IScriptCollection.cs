@@ -7,19 +7,24 @@ namespace ContinuousRunner
     public interface IScriptCollection
     {
         /// <summary>
+        /// Get a collection of all script files in this solution
+        /// </summary>
+        IEnumerable<FileInfo> GetScriptFiles();
+
+        /// <summary>
         /// Get a collection of all known scripts
         /// </summary>
-        IEnumerable<IScript> GetScripts(Func<FileInfo, IScript> loader);
+        IEnumerable<IScript> GetScripts();
 
         /// <summary>
         /// Get a collection of all known test scripts
         /// </summary>
-        IEnumerable<IScript> GetTestScripts(Func<FileInfo, IScript> loader);
+        IEnumerable<IScript> GetTestScripts();
 
         /// <summary>
         /// Get the complete set of product scripts, minus the collection returned by <see cref="GetTestScripts"/>
         /// </summary>
-        IEnumerable<IScript> GetProductScripts(Func<FileInfo, IScript> loader);
+        IEnumerable<IScript> GetProductScripts();
 
         /// <summary>
         /// Add a new script to the collection

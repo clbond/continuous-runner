@@ -10,16 +10,18 @@ using Xunit.Abstractions;
 using ContinuousRunner.Tests.Mock;
 using NLog;
 
+// ReSharper disable PossibleNullReferenceException
+
 namespace ContinuousRunner.Tests.TestProjects.Basic
 {
     public class ScriptCollectionTests : BaseTest
     {
         public ScriptCollectionTests(ITestOutputHelper helper)
             : base(helper)
-        {}
+        {
+        }
 
-        [Fact]
-        public void TestLoadScripts()
+        private void RunInContext(Action<IComponentContext, IScriptCollection> f)
         {
             var root = MockFile.TempFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
 
@@ -27,61 +29,79 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
             {
                 var collection = container.Resolve<IScriptCollection>();
 
-                var loader = container.Resolve<ILoader<IScript>>();
-                
-                Func<FileInfo, IScript> load = fi => loader.Load(fi);
-
-                var all = collection.GetScripts(load).ToArray();
-                all.Count().Should().Be(5);
+                f(container, collection);
             }
+        }
+
+        private void RunInContextAndLoad(Action<IComponentContext, IScript[]> f)
+        {
+            RunInContext(
+                (container, collection) =>
+                {
+                    var scripts = container.Resolve<IScriptCollection>().GetScripts().ToArray();
+
+                    f(container, scripts);
+                });
+        }
+
+        [Fact]
+        public void TestLoadScripts()
+        {
+            RunInContextAndLoad(
+                (container, scripts) =>
+                {
+                    scripts.Length.Should().Be(5);
+                });
         }
 
         [Fact]
         public void TestModuleReferences()
         {
-            var root = MockFile.TempFile<DirectoryInfo>(nameof(TestProjects), nameof(Basic), "Scripts");
+            var logger = LogManager.GetCurrentClassLogger();
 
-            using (var container = CreateTypicalContainer(root))
-            {
-                var logger = LogManager.GetCurrentClassLogger();
-
-                var loader = container.Resolve<ILoader<IScript>>();
-
-                Func<FileInfo, IScript> load = fi => loader.Load(fi);
-
-                var collection = container.Resolve<IScriptCollection>();
-
-                var all = collection.GetScripts(load).ToArray();
-
-                var configLoader = container.Resolve<IConfigurationLoader>();
-
-                var config = configLoader.Load(all.Select(s => s.File));
-                config.Should().NotBeNull();
-                config.BaseUrl.Count.Should().Be(1);
-
-                var f1 = all.SingleOrDefault(f => f.Module.ModuleName == "Tests/File1");
-                f1.Should().NotBeNull();
-
-                var f1refs = f1.Module.References.ToArray();
-                f1refs.Length.Should().Be(1);
-
-                var refToF2 = f1refs[0];
-                refToF2.Module.ModuleName.Should().Be("Tests/File2");
-
-                var tests = collection.GetTestScripts(load).ToArray();
-
-                var testWriter = container.Resolve<ITestWriter>();
-
-                foreach (var t in tests)
+            RunInContextAndLoad(
+                (container, scripts) =>
                 {
-                    logger.Info($"Suites and tests in {t}:");
+                    var script = scripts.SingleOrDefault(f => f.Module.ModuleName == "Tests/File1");
+                    script.Should().NotBeNull();
 
-                    testWriter.Write(t.Suites);
-                }
+                    var scriptRefs = script.Module.References.ToArray();
+                    scriptRefs.Length.Should().Be(1);
 
-                tests.Count().Should().Be(1);
+                    var file2Ref = scriptRefs[0];
+                    file2Ref.Module.ModuleName.Should().Be("Tests/File2");
 
-            }
+                    var scriptCollection = container.Resolve<IScriptCollection>();
+
+                    var tests = scriptCollection.GetTestScripts().ToArray();
+
+                    var testWriter = container.Resolve<ITestWriter>();
+
+                    foreach (var t in tests)
+                    {
+                        logger.Info($"Suites and tests in {t}:");
+
+                        testWriter.Write(t.Suites);
+                    }
+
+                    tests.Count().Should().Be(1);
+                });
+        }
+
+        [Fact]
+        public void TestRequireConfiguration()
+        {
+            RunInContextAndLoad(
+                (container, scripts) =>
+                {
+                    var configLoader = container.Resolve<IRequireConfigurationLoader>();
+
+                    var config = configLoader.Load(scripts.Select(s => s.File));
+
+                    config.Should().NotBeNull();
+
+                    config.BaseUrl.Count.Should().Be(1);
+                });
         }
     }
 }

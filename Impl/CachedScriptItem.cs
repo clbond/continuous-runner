@@ -7,8 +7,10 @@ namespace ContinuousRunner.Impl
     public struct CachedScriptItem
     {
         /// <summary>
-        /// The time that this script was last loaded or run (impacts its eventual removal from the cache)
+        /// The time that this script was loaded and parsed
         /// </summary>
+        public DateTime Updated;
+
         public DateTime Accessed;
 
         /// <summary>

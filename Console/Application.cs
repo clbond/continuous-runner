@@ -106,10 +106,8 @@ namespace ContinuousRunner.Console
             var queue = componentContext.Resolve<IRunQueue>();
 
             logger.Info("Loading scripts");
-
-            var loader = componentContext.Resolve<ILoader<IScript>>();
-
-            foreach (var script in collection.GetScripts(fi => loader.Load(fi)))
+            
+            foreach (var script in collection.GetScripts())
             {
                 logger.Info("Loaded: {0}", script.File.Name);
 

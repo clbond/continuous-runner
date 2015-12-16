@@ -6,23 +6,31 @@ namespace ContinuousRunner.Frameworks.RequireJs
 {
     using Extensions;
 
-    public class ConfigurationParser : IConfigurationParser
+    public class RequireConfigurationParser : IRequireConfigurationParser
     {
         #region Implementation of IConfigurationParser
 
-        public IRequireConfiguration Parse(SyntaxNode root, ObjectExpression expression)
+        public IRequireConfiguration Parse(ObjectExpression expression, SyntaxNode root)
         {
             if (expression == null)
             {
                 return null;
             }
 
+            var baseUrl = GetBaseUrl(expression.GetProperty(RequireKey.BaseUrl).GetValue(root));
+
+            var packages = TransformPackages(root, expression.GetProperty(RequireKey.Packages)).ToList();
+
+            var paths = TransformPaths(root, expression.GetProperty(RequireKey.Paths));
+
+            var maps = TransformMaps(expression.GetProperty(RequireKey.Map));
+
             return new RequireConfiguration
                    {
-                       BaseUrl = GetBaseUrl(expression.GetProperty(RequireKey.BaseUrl).GetValue(root)),
-                       Packages = TransformPackages(root, expression.GetProperty(RequireKey.Packages)).ToList(),
-                       Paths = TransformPaths(root, expression.GetProperty(RequireKey.Paths)),
-                       Maps = TransformMaps(expression.GetProperty(RequireKey.Map))
+                       BaseUrl = baseUrl,
+                       Packages = packages,
+                       Paths = paths,
+                       Maps = maps
                    };
         }
 
