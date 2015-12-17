@@ -33,9 +33,7 @@ namespace ContinuousRunner.Console
             Required = false,
             HelpText = "The module namespace that our source files reside in")]
         public string ModuleNamespace { get; set; }
-
-        public IRequireConfiguration RequireConfig { get; set; }
-
+        
         #endregion
 
         #region Factory methods

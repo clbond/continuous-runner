@@ -94,7 +94,7 @@
     <Compile Include="Frameworks\RequireJs\IRequireConfigurationLoader.cs" />
     <Compile Include="Frameworks\RequireJs\IRequireConfigurationParser.cs" />
     <Compile Include="Frameworks\RequireJs\IRequireConfiguration.cs" />
-    <Compile Include="Frameworks\RequireJs\ModuleDefinitions.cs" />
+    <Compile Include="Frameworks\RequireJs\RequireDefine.cs" />
     <Compile Include="Frameworks\RequireJs\RequireConfiguration.cs" />
     <Compile Include="Frameworks\RequireJs\RequireKey.cs" />
     <Compile Include="Frameworks\RequireJs\RequirePackage.cs" />

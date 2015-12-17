@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.Composition;
-
+using Autofac;
 using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Frameworks.RequireJs
 {
     public class FrameworkImpl : IFramework
     {
-        [Import] private readonly IReferenceResolver _referenceResolver;
+        [Import] private readonly IComponentContext _componentContext;
 
         public Framework Framework => Framework.RequireJs;
 
@@ -19,13 +19,15 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             var script = (IScript) source;
 
-            var shimImpl = new ModuleDefinitions(_referenceResolver, engine, script);
+            var requireImpl = _componentContext.Resolve<RequireDefine>(
+                new TypedParameter(typeof (ScriptEngine), engine),
+                new TypedParameter(typeof (IScript), script));
 
-            engine.AddHostObject(nameof(shimImpl), shimImpl);
+            engine.AddHostObject(nameof(requireImpl), requireImpl);
 
             engine.Execute(
                 @"var require = function (names, callback) {
-                    var loaded = shimImpl.require(names);
+                    var loaded = requireImpl.require(names);
   
                     if (typeof callback === 'function') {
                       callback.apply(null, loaded);
@@ -33,27 +35,32 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
                     return loaded;
                   };");
-
+            
             engine.Execute(
               @"var define = function (name, deps, body) {
-                  // Shift to handle anonymous definitions
                   if (typeof name !== 'string') {
                       body = deps;
                       deps = name;
                       name = null;
                   }
 
-                  if (typeof deps === 'function' && body == null) {
+                  if (deps instanceof Array === false) {
+                    if (body != null) {
+                      throw new Error('define() was called with incomprehensible arguments');
+                    }
+
                     body = deps;
+
                     deps = [];
                   }
  
                   // 'resolve' the dependencies in place
                   deps = deps || [];
-                  for (var i = 0; i < deps.length; i++)
-                      deps[i] = require(deps[i]);
+                  for (var i = 0; i < deps.length; i++) {
+                    deps[i] = require(deps[i]);
+                  }
 
-                  shimImpl.define(name, deps, body && body.toString());
+                  requireImpl.define(name, deps, body);
 
                   if (typeof body === 'function') {
                     body.apply(null, deps);

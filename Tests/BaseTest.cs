@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using Autofac;
 using ContinuousRunner.Frameworks.RequireJs;
-using ContinuousRunner.Impl;
 using ContinuousRunner.Tests.Mock;
 
 using Magnum.Extensions;
@@ -32,7 +30,7 @@ namespace ContinuousRunner.Tests
             _helper = helper;
         }
 
-        private IContainer CreateContainer(Action<ContainerBuilder> build = null)
+        private static IContainer CreateContainer(Action<ContainerBuilder> build = null)
         {
             var builder = new ContainerBuilder();
 
@@ -57,10 +55,7 @@ namespace ContinuousRunner.Tests
             instanceContext.SetupGet(i => i.SolutionRoot).Returns(root);
             instanceContext.SetupGet(i => i.ScriptsRoot).Returns(root);
             instanceContext.SetupGet(i => i.ModuleNamespace).Returns(nameof(Tests));
-
-            // ReSharper disable once AccessToModifiedClosure
-            instanceContext.SetupGet(i => i.RequireConfig).Returns(() => GetRequireConfig(container));
-
+            
             Action<ContainerBuilder> build =
                 cb =>
                 {
@@ -73,18 +68,7 @@ namespace ContinuousRunner.Tests
 
             return container;
         }
-
-        protected static IRequireConfiguration GetRequireConfig(IComponentContext componentContext)
-        {
-            var loader = componentContext.Resolve<IRequireConfigurationLoader>();
-            
-            var collection = componentContext.Resolve<IScriptCollection>();
-
-            var config = loader.Load(collection.GetScriptFiles());
-
-            return config;
-        }
-
+        
         protected IContainer CreateTypicalContainer(Action<ContainerBuilder> additionalBuild = null)
         {
             return CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>(), additionalBuild);

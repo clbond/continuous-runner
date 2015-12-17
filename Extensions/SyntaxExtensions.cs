@@ -308,7 +308,7 @@ namespace ContinuousRunner.Extensions
                     }
                     break;
                 case SyntaxNodes.Literal:
-                    return ((Literal) node).Raw;
+                    return ((Literal) node).Value as string;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(node.Type));
             }

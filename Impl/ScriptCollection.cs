@@ -18,7 +18,7 @@ namespace ContinuousRunner.Impl
         #region Implementation of IScriptCollection
 
         public IEnumerable<FileInfo> GetScriptFiles()
-        {
+        { 
             Func<string[], string, bool> match =
                 (extensions, fileExtension) =>
                 extensions.Any(e => string.Equals(e, fileExtension, StringComparison.InvariantCultureIgnoreCase));
@@ -34,7 +34,9 @@ namespace ContinuousRunner.Impl
                 throw new InvalidOperationException($"Sripts root is not set or does not exist: {root}");
             }
 
-            return root.GetFiles(string.Empty, SearchOption.AllDirectories).Where(f => isScript(f.Extension));
+            var files = root.GetFiles(@"*", SearchOption.AllDirectories);
+            
+            return files.Where(f => isScript(f.Extension));
         }
 
         public IEnumerable<IScript> GetScripts()

@@ -22,11 +22,6 @@ namespace ContinuousRunner
         /// <summary>
         /// The primary namespace that the TypeScript code in this project is organized under
         /// </summary>
-        string ModuleNamespace { get; }
-
-        /// <summary>
-        /// RequireJS configuration (parsed from requirejs.config() call)
-        /// </summary>
-        IRequireConfiguration RequireConfig { get; set; }
+        string ModuleNamespace { get; }        
     }
 }

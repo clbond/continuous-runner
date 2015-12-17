@@ -20,7 +20,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         [Import] private readonly ILoader<IScript> _loader;
         
-        #region Implementation of IConfigurationLoader
+        #region Implementation of IConfigurtationLoader
 
         public IRequireConfiguration Load(IEnumerable<FileInfo> search)
         {
@@ -30,7 +30,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 return Merge(candidates);
             }
 
-            return null;
+            return new RequireConfiguration(); // empty, not null, on failure
         }
 
         public IEnumerable<IRequireConfiguration> Load(FileInfo fileInfo)

@@ -119,7 +119,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Mock\MockScript.cs" />
     <Compile Include="Loading\ScriptLoaderTests.cs" />
-    <Compile Include="TestProjects\Basic\ScriptCollectionTests.cs" />
+    <Compile Include="TestProjects\Basic\BasicProjectTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContinuousRunner.csproj">

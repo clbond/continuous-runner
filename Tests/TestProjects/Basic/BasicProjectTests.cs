@@ -14,9 +14,9 @@ using NLog;
 
 namespace ContinuousRunner.Tests.TestProjects.Basic
 {
-    public class ScriptCollectionTests : BaseTest
+    public class BasicProjectTests : BaseTest
     {
-        public ScriptCollectionTests(ITestOutputHelper helper)
+        public BasicProjectTests(ITestOutputHelper helper)
             : base(helper)
         {
         }
@@ -101,6 +101,21 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                     config.Should().NotBeNull();
 
                     config.BaseUrl.Count.Should().Be(1);
+                });
+        }
+
+        [Fact]
+        public void TestResolvedRequireConfiguration()
+        {
+            RunInContextAndLoad(
+                (container, scripts) =>
+                {
+                    var configuration = container.Resolve<IRequireConfiguration>();
+
+                    configuration.Should().NotBeNull();
+
+                    configuration.BaseUrl.Count.Should().Be(1);
+                    configuration.BaseUrl.First().Should().Be(".");
                 });
         }
     }
