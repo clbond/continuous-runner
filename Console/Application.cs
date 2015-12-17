@@ -60,39 +60,13 @@ namespace ContinuousRunner.Console
                             case '\n':
                                 stopping = true;
                                 break;
-                            case 'R':
-                            case 'r':
-                                RunTests(container);
-                                break;
+                            //case 'R':
+                            //case 'r':
+                            //    RunTests(container);
+                            //    break;
                         }
                     }
                 }
-            }
-        }
-
-        private static void RunTests(IComponentContext componentContext)
-        {
-            var logger = LogManager.GetCurrentClassLogger();
-
-            logger.Debug("Running tests");
-
-            var queue = componentContext.Resolve<IConcurrentExecutor>();
-
-            var queued = queue.RunAsync().ToArray();
-            if (queued.Any())
-            {
-                var results = Task.WhenAll(queued);
-
-                results.Wait();
-
-                foreach (var tr in results.Result)
-                {
-                    logger.Info(tr.ToString());
-                }
-            }
-            else
-            {
-                logger.Info("No tests in queue");
             }
         }
 

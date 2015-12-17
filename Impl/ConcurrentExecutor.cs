@@ -1,54 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Threading;
 
 using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
+    using Work;
 
     public class ConcurrentExecutor : IConcurrentExecutor
     {
         private readonly ISet<IPriorityWork> _priorityQueue = new SortedSet<IPriorityWork>();
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        
+
+        private readonly object _lock = new object();
+
         #region Implementation of IContinuousExecutor
 
         public void Push(IPriorityWork work)
         {
-            _priorityQueue.Add(work);
-        }
+            lock (_lock)
+            {
+                _priorityQueue.Add(work);
+            }
 
-        public IEnumerable<IPriorityWork> GetExecutingWork()
-        {
-            throw new NotImplementedException();
-        }
+            _logger.Debug($"Pushed work onto queue: {work.Description}");
 
-        public IEnumerable<IPriorityWork> GetWaitingWork()
-        {
-            throw new NotImplementedException();
-        }
+            ThreadPool.QueueUserWorkItem(
+                state =>
+                {
+                    lock (_lock)
+                    {
+                        _priorityQueue.Remove(work);
 
-        public IEnumerable<Task<TestResult>> RunAsync()
-        {
-            throw new NotImplementedException();
-        }
+                        _logger.Debug($"{_priorityQueue.Count} queued work items remain");
 
-        public Task<TestResult[]> RunAllAsync()
-        {
-            throw new NotImplementedException();
+                    }
+                    try
+                    {
+                        if (work.ExecuteAsync().Wait(TimeSpan.FromMinutes(1d)) == false)
+                        {
+                            _logger.Error($"Work execution timed out: {work.Description}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, $"Error while executing work: {work.Description}: {ex.Message}");
+                    }
+                });
         }
-
+        
         #endregion
 
         #region Implementation of IDisposable
 
         public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
+        {}
 
         #endregion
     }

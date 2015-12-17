@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+
 using ContinuousRunner.Frameworks;
-using Microsoft.ClearScript.V8;
+
+using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Impl
 {
@@ -10,6 +12,8 @@ namespace ContinuousRunner.Impl
 
     public class TestCollectionReader : ITestCollectionReader
     {
+        [Import] private readonly IRuntimeFactory<ScriptEngine> _runtimeFactory;
+
         [Import] private readonly IJasmineReflection _reflector;
 
         [Import] private readonly IEnumerable<IFramework> _frameworks;
@@ -18,7 +22,7 @@ namespace ContinuousRunner.Impl
 
         public ITestCollection DefineTests(IScript script)
         {
-            using (var engine = new V8ScriptEngine())
+            using (var engine = _runtimeFactory.GetRuntime())
             {
                 var collection = _reflector.Reflect(script, engine);
 

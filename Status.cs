@@ -2,7 +2,7 @@
 {
     public enum Status
     {
-        Passed,
+        Success,
         Failed,
         Indeterminate,
         InProgress,

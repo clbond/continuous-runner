@@ -75,7 +75,7 @@ namespace ContinuousRunner.Impl
                         new SourceChangedEvent
                         {
                             Operation = Operation.Remove,
-                            Script = existingScript
+                            SourceFile = existingScript
                         });
                 }
 
@@ -86,7 +86,7 @@ namespace ContinuousRunner.Impl
                         new SourceChangedEvent
                         {
                             Operation = Operation.Add,
-                            Script = newScript
+                            SourceFile = newScript
                         });
                 }
                 else
@@ -119,7 +119,7 @@ namespace ContinuousRunner.Impl
                         new SourceChangedEvent
                         {
                             Operation = Operation.Remove,
-                            Script = existingScript
+                            SourceFile = existingScript
                         });
                 }
             }
@@ -145,7 +145,7 @@ namespace ContinuousRunner.Impl
                         new SourceChangedEvent
                         {
                             Operation = Operation.Add,
-                            Script = script
+                            SourceFile = script
                         });
                 }
             }

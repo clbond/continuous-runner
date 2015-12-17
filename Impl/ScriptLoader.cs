@@ -119,7 +119,7 @@ namespace ContinuousRunner.Impl
             //    new SourceChangedEvent
             //    {
             //        Operation = Operation.Add,
-            //        Script = script
+            //        SourceFile = script
             //    });
 
             return script;

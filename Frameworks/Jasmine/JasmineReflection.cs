@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using Autofac;
+using Microsoft.ClearScript;
 using Microsoft.ClearScript.V8;
 
 namespace ContinuousRunner.Frameworks.Jasmine
@@ -8,7 +9,7 @@ namespace ContinuousRunner.Frameworks.Jasmine
     {
         [Import] private readonly IComponentContext _componentContext;
 
-        public ITestCollection Reflect(IScript script, V8ScriptEngine engine)
+        public ITestCollection Reflect(IScript script, ScriptEngine engine)
         {
             var testCollection = _componentContext.Resolve<ITestCollection>(new TypedParameter(typeof(IScript), script));
 

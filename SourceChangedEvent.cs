@@ -4,6 +4,6 @@
     {
         public Operation Operation { get; set; }
 
-        public IScript Script { get; set; }
+        public IProjectSource SourceFile { get; set; }
     }
 }

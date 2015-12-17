@@ -1,4 +1,4 @@
-﻿using Microsoft.ClearScript.V8;
+﻿using Microsoft.ClearScript;
 
 namespace ContinuousRunner.Frameworks.Jasmine
 {
@@ -13,6 +13,6 @@ namespace ContinuousRunner.Frameworks.Jasmine
         /// <param name="script">The script containing the test definitions</param>
         /// <param name="engine">The V8 script engine context to apply the mock library definition to</param>
         /// <returns></returns>
-        ITestCollection Reflect(IScript script, V8ScriptEngine engine);
+        ITestCollection Reflect(IScript script, ScriptEngine engine);
     }
 }

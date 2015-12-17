@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Text;
+using NLog;
 
 namespace ContinuousRunner.Tests.Mock
 {
@@ -71,5 +72,26 @@ namespace ContinuousRunner.Tests.Mock
 
             return (T) Activator.CreateInstance(typeof (T), Path.Combine(path.ToArray()));
         }
+
+        #region Implementation of IDisposable
+
+        public void Dispose()
+        {
+            if (_collection != null)
+            {
+                try
+                {
+                    _collection.Delete();
+                }
+                catch (IOException ex)
+                {
+                    var logger = LogManager.GetCurrentClassLogger();
+
+                    logger.Error(ex, $"Failed to delete temporary files produced by tests: {ex.Message}");
+                }
+            }
+        }
+
+        #endregion
     }
 }

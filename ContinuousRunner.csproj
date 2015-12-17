@@ -60,6 +60,7 @@
       <HintPath>packages\Microsoft.CodeAnalysis.CSharp.1.1.1\lib\net45\Microsoft.CodeAnalysis.CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.JScript" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -116,9 +117,11 @@
     <Compile Include="Impl\DeterministicIdentifier.cs" />
     <Compile Include="Impl\Disposable.cs" />
     <Compile Include="Impl\Hasher.cs" />
+    <Compile Include="Impl\ClearScriptRuntimeFactory.cs" />
     <Compile Include="Impl\TestSubscriptions.cs" />
     <Compile Include="IPriorityWork.cs" />
     <Compile Include="IProjectSource.cs" />
+    <Compile Include="IRuntimeFactory.cs" />
     <Compile Include="ITestCollection.cs" />
     <Compile Include="Impl\ReferenceTree.cs" />
     <Compile Include="Impl\ResultObserver.cs" />

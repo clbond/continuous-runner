@@ -28,8 +28,15 @@ namespace ContinuousRunner.Frameworks.RequireJs
             engine.Execute(
                 @"var require = function (names, callback) {
                     console.log('loading: ' + names + ' ' + names[0] + ' ' + names[1]);
+
+                    var list = new mscorlib.System.Collections.ArrayList();
+
+                    for (var i = 0; i < names.length; ++i) {
+                      list.Add(names[i]);
+                    }
+
                     var loaded = names.length > 0
-                        ? requireImpl.RequireMultiple(names)
+                        ? requireImpl.RequireMultiple(list)
                         : requireImpl.RequireSingle(names);
   
                     if (typeof callback === 'function') {
@@ -57,11 +64,28 @@ namespace ContinuousRunner.Frameworks.RequireJs
                     deps = [];
                   }
  
-                  if (typeof body === 'function') {
-                    body = body.apply(null, require(deps));
-                  }
+                  var CallbackType = mscorlib.System.Func(mscorlib.System.Collections.ArrayList, mscorlib.System.Object);
 
-                  requireImpl.DefineModule(name, deps || [], body);
+                  var cb = new CallbackType(function(deps) {
+                    if (typeof body === 'function') {
+                      var transformed = [];
+                      for (var i = 0; i < deps.Count; ++i) {
+                        transformed.push(deps[i]);
+                      }
+
+                      return body.apply(window, deps);
+                    }
+
+                    return body;
+                  });
+
+                  var list = new mscorlib.System.Collections.ArrayList();
+
+                  for (var i = 0; i < deps.length; ++i) {
+                    list.Add(deps[i]);
+                  }
+    
+                  requireImpl.DefineModule(name, list, cb);
                 };
 
                 define['amd'] = true;");

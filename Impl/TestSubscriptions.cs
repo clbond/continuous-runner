@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.Composition;
+﻿using System;
+using System.ComponentModel.Composition;
 
 using NLog;
 
@@ -20,7 +21,18 @@ namespace ContinuousRunner.Impl
         {
             _logger.Debug($"Source file changed: {@event}; queueing run");
 
-            _runqueue.Push(new ExecuteScriptWork(@event.Script));
+            if (@event.SourceFile is IScript)
+            {
+                _runqueue.Push(new ExecuteScriptWork((IScript) @event.SourceFile));
+            }
+            else if (@event.SourceFile is IClass)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion

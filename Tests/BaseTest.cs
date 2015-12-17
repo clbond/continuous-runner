@@ -122,7 +122,10 @@ namespace ContinuousRunner.Tests
             {
                 LogManager.Flush();
 
-                _memoryTarget.Logs.Each(l => _helper.WriteLine(l));
+                var logs = new List<string>(_memoryTarget.Logs); // must clone otherwise the statement below this one will throw a 'collection modified' exception
+
+                logs.Each(l => _helper.WriteLine(l));
+
                 _memoryTarget = null;
             }
         }

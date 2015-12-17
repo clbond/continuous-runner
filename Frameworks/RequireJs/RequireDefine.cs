@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-
+using System.Linq;
 using Microsoft.ClearScript;
+using Microsoft.JScript;
 
 namespace ContinuousRunner.Frameworks.RequireJs
 {
@@ -25,12 +27,12 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             _fromScript = fromScript;
         }
-        
+
         #region Methods exposed to the JavaScript runtime
 
-        public object[] RequireMultiple(string[] modules)
+        public object RequireMultiple(ArrayList modules)
         {
-                return Require(_fromScript.Module.ModuleName, modules);
+            return Require(_fromScript.Module.ModuleName, modules.Cast<string>());
         }
 
         public object RequireSingle(string modules)
@@ -38,10 +40,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return Require(_fromScript.Module.ModuleName, modules);
         }
 
-        public void DefineModule(string name, string[] dependencies, dynamic body)
+        public void DefineModule(string name, ArrayList dependencies, Func<ArrayList, object> body)
         {
+            var deps = dependencies.Cast<string>().ToArray();
 
-            // Define(_fromScript.Module.ModuleName, name, dependencies, body);
+            Define(_fromScript.Module.ModuleName, name, deps, body);
         }
 
         #endregion
@@ -68,23 +71,23 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return _referenceResolver.Resolve(modulePath, moduleName);
         }
 
-        private void Define(string fromModule, string moduleName, string[] dependencies, object definition)
+        private void Define(string fromModule, string moduleName, string[] dependencies, Func<ArrayList, object> definition)
         {
+            if (dependencies == null)
+            {
+                throw new ArgumentNullException(nameof(dependencies));
+            }
+
             if (string.IsNullOrEmpty(moduleName))
             {
                 moduleName = fromModule;
-            }
-
-            if (dependencies == null)
-            {
-                dependencies = new string[0];
             }
 
             Require(moduleName, dependencies);
 
             Register(fromModule, moduleName, () => EvaluateDefine(LoadRequires(moduleName, dependencies), definition));
         }
-
+        
         private object EvaluateDefine(object[] dependencies, object definition)
         {
             throw new NotImplementedException();
@@ -95,9 +98,9 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return Require(moduleName, dependencies) as object[];
         }
 
-        private object Require(string fromModule, string dependencies)
+        private object Require(string fromModule, string dependency)
         {
-            var p = ToAbsolutePath(fromModule, dependencies);
+            var p = ToAbsolutePath(fromModule, dependency);
 
             if (_defines.ContainsKey(p) == false)
             {
@@ -108,36 +111,17 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 }
             }
 
+            if (_defines.ContainsKey(p) == false)
+            {
+                return null;
+            }
+
             return _defines[p]();
         }
 
-        private object[] Require(string fromModule, string[] dependencies)
+        private object[] Require(string fromModule, IEnumerable<string> dependencies)
         {
-            var results = new List<object>();
-
-            foreach (var dependency in (string[])dependencies)
-            {
-                Func<object> definition;
-                if (_defines.TryGetValue(dependency, out definition))
-                {
-                    results.Add(definition);
-                }
-                else
-                {
-                    var local = _referenceResolver.ModuleReferenceToFile(ToAbsolutePath(fromModule, dependency));
-                    if (local != null)
-                    {
-                        Register(fromModule, dependency, () => LoadScript(local));
-                        results.Add(local);
-                    }
-                    else
-                    {
-                        results.Add(null);
-                    }
-                }
-            }
-
-            return results.ToArray();
+            return (from dependency in (string[]) dependencies select Require(fromModule, dependency)).ToArray();
         }
 
         private object LoadScript(FileInfo fileInfo)

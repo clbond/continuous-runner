@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.ClearScript;
-using Microsoft.ClearScript.V8;
 
 using NLog;
 
@@ -17,6 +16,8 @@ namespace ContinuousRunner.Impl
 
     public class ScriptRunner : IRunner<IScript>
     {
+        [Import] private readonly IRuntimeFactory<ScriptEngine> _runtimeFactory;
+
         [Import] private readonly IFrameworkDetector _frameworkDetector;
 
         [Import] private readonly IPublisher _publisher;
@@ -55,31 +56,32 @@ namespace ContinuousRunner.Impl
         {
             var logger = LogManager.GetCurrentClassLogger();
 
-            var engine = GetEngine();
+            var engine = _runtimeFactory.GetRuntime();
             try
             {
                 logger.Debug("Installing frameworks into V8 execution context");
-
+                
                 _frameworkDetector.InstallFrameworks(source, source.Frameworks, engine);
 
                 logger.Info($"Executing script: {test.Name}");
 
                 var code = $"{{{WrapInCallExpression(test.RawCode)}}}";
 
-                Func<Status, TestResult> transform = status => new TestResult
-                                                                   {
+                Func<Status, TestResult> transform =
+                    status => new TestResult
+                              {
 
-                                                                       Test = test,
-                                                                       Status = status,
-                                                                       Logs = source.Logs
-                                                                   };
+                                  Test = test,
+                                  Status = status,
+                                  Logs = source.Logs
+                              };
 
                 TestResult testResult;
                 try
                 {
                     engine.Evaluate(code);
 
-                    testResult = transform(Status.Passed);
+                    testResult = transform(Status.Success);
                 }
                 catch (Exception ex)
                 {
@@ -107,19 +109,6 @@ namespace ContinuousRunner.Impl
         private static string WrapInCallExpression(string code)
         {
             return $"({code})();";
-        }
-
-        private static ScriptEngine GetEngine()
-        {
-            return new V8ScriptEngine
-                   {
-                       AllowReflection = true,
-                       DisableTypeRestriction = false,
-                       EnableAutoHostVariables = true,
-                       EnableNullResultWrapping = true,
-                       FormatCode = false,
-                       UseReflectionBindFallback = true
-                   };
         }
     }
 

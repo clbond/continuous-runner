@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ContinuousRunner.Tests.Mock
 {
-    public interface IMockFile
+    public interface IMockFile : IDisposable
     {
         FileInfo FromString(string extension, string content);
 
