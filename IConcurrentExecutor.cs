@@ -9,9 +9,22 @@ namespace ContinuousRunner
     /// <summary>
     /// Represents a queue of tests that need to be run
     /// </summary>
-    public interface IRunQueue : IDisposable
+    public interface IConcurrentExecutor : IDisposable
     {
-        void Push(IScript script);
+        /// <summary>
+        /// Add an element to the queue of runnable items
+        /// </summary>
+        void Push(IPriorityWork work);
+
+        /// <summary>
+        /// Return a collection representing concurrently executing tasks
+        /// </summary>
+        IEnumerable<IPriorityWork> GetExecutingWork();
+
+        /// <summary>
+        /// Get a collection representing the tasks waiting to be run (in the queue)
+        /// </summary>
+        IEnumerable<IPriorityWork> GetWaitingWork();
 
         /// <summary>
         /// Run all tests and return an individual <see cref="Task" /> for each one

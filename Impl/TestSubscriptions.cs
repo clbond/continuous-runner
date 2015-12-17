@@ -1,13 +1,16 @@
 ﻿using System.ComponentModel.Composition;
-using ContinuousRunner.Data;
+
 using NLog;
 
 namespace ContinuousRunner.Impl
 {
+    using Data;
+    using Work;
+
     public class TestSubscriptions : ISubscription<SourceChangedEvent>,
                                      ISubscription<TestResult>
     {
-        [Import] private readonly IRunQueue _runqueue;
+        [Import] private readonly IConcurrentExecutor _runqueue;
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -17,7 +20,7 @@ namespace ContinuousRunner.Impl
         {
             _logger.Debug($"Source file changed: {@event}; queueing run");
 
-            _runqueue.Push(@event.Script);
+            _runqueue.Push(new ExecuteScriptWork(@event.Script));
         }
 
         #endregion

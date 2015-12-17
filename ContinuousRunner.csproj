@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Assertion.cs" />
+    <Compile Include="IExecutionResult.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
     <Compile Include="Frameworks\Browser\BrowserConsole.cs" />
     <Compile Include="Frameworks\Browser\BrowserFramework.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Impl\Disposable.cs" />
     <Compile Include="Impl\Hasher.cs" />
     <Compile Include="Impl\TestSubscriptions.cs" />
+    <Compile Include="IPriorityWork.cs" />
     <Compile Include="IProjectSource.cs" />
     <Compile Include="ITestCollection.cs" />
     <Compile Include="Impl\ReferenceTree.cs" />
@@ -128,9 +130,9 @@
     <Compile Include="IReferenceResolver.cs" />
     <Compile Include="ITestWriter.cs" />
     <Compile Include="IParser.cs" />
-    <Compile Include="IRunQueue.cs" />
+    <Compile Include="IConcurrentExecutor.cs" />
     <Compile Include="IScriptCollection.cs" />
-    <Compile Include="IScriptRunner.cs" />
+    <Compile Include="IRunner.cs" />
     <Compile Include="IResultFactory.cs" />
     <Compile Include="Data\ModuleDefinition.cs" />
     <Compile Include="Impl\ModuleReader.cs" />
@@ -143,12 +145,13 @@
     <Compile Include="Impl\TestCollectionReader.cs" />
     <Compile Include="Impl\TestCollection.cs" />
     <Compile Include="Operation.cs" />
+    <Compile Include="Priority.cs" />
     <Compile Include="PropertyInjector.cs" />
     <Compile Include="Publisher.cs" />
     <Compile Include="Severity.cs" />
     <Compile Include="SourceChangedEvent.cs" />
     <Compile Include="TestException.cs" />
-    <Compile Include="Impl\RunQueue.cs" />
+    <Compile Include="Impl\ConcurrentExecutor.cs" />
     <Compile Include="Impl\ResultFactory.cs" />
     <Compile Include="Impl\Watcher.cs" />
     <Compile Include="Constants.cs" />
@@ -161,10 +164,11 @@
     <Compile Include="IScript.cs" />
     <Compile Include="Data\ExpressionTree.cs" />
     <Compile Include="Data\TestResult.cs" />
-    <Compile Include="Data\TestStatus.cs" />
+    <Compile Include="Status.cs" />
     <Compile Include="ITest.cs" />
     <Compile Include="Data\TestSuite.cs" />
     <Compile Include="Impl\Script.cs" />
+    <Compile Include="Work\ExecuteScriptWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Licenses\ClearScript.main.license" />

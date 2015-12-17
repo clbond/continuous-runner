@@ -14,8 +14,6 @@ namespace ContinuousRunner.Impl
     {
         #region Private members
         
-        [Import] private readonly ICachedScripts _cachedScripts;
-
         [Import] private readonly IFrameworkDetector _frameworkDetector;
 
         [Import] private readonly IModuleReader _moduleReader;
@@ -32,11 +30,11 @@ namespace ContinuousRunner.Impl
 
         #endregion
 
-        #region Implementation of IScriptLoader
+        #region Implementation of ILoader<IScript>
 
         public IScript Load(FileInfo script)
         {
-            return _cachedScripts.Get(script, LoadFile);
+            return LoadFile(script);
         }
 
         public IScript TryLoad(FileInfo fileInfo)

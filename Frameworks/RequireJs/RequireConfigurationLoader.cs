@@ -18,7 +18,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         [Import] private readonly IRequireConfigurationParser _configurationParser;
 
-        [Import] private readonly ILoader<IScript> _loader;
+        [Import] private readonly ICachedScripts _loader;
         
         #region Implementation of IConfigurtationLoader
 
@@ -35,7 +35,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         public IEnumerable<IRequireConfiguration> Load(FileInfo fileInfo)
         {
-            var script = _cachedScripts.Get(fileInfo, f => _loader.Load(f));
+            var script = _cachedScripts.Load(fileInfo);
             if (script?.ExpressionTree?.Root == null)
             {
                 return Enumerable.Empty<IRequireConfiguration>();

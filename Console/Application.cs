@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Autofac;
-
+using ContinuousRunner.Work;
 using NLog;
 
 namespace ContinuousRunner.Console
@@ -40,34 +40,33 @@ namespace ContinuousRunner.Console
 
                 var watcher = container.Resolve<IWatcher>();
 
-                var watchHandle = watcher.Watch();
-
-                logger.Info("Entering run loop; press enter to stop; press R to force complete re-run");
-
-                var stopping = false;
-
-                while (!stopping)
+                using (var watchHandle = watcher.Watch())
                 {
-                    var key = consoleReader.Read(TimeSpan.FromSeconds(.5d));
-                    if (key.HasValue == false)
-                    {
-                        continue;
-                    }
+                    logger.Info("Entering run loop; press enter to stop; press R to force complete re-run");
 
-                    switch (key.Value)
+                    var stopping = false;
+
+                    while (!stopping)
                     {
-                        case '\r':
-                        case '\n':
-                            stopping = true;
-                            break;
-                        case 'R':
-                        case 'r':
-                            RunTests(container);
-                            break;
+                        var key = consoleReader.Read(TimeSpan.FromSeconds(.5d));
+                        if (key.HasValue == false)
+                        {
+                            continue;
+                        }
+
+                        switch (key.Value)
+                        {
+                            case '\r':
+                            case '\n':
+                                stopping = true;
+                                break;
+                            case 'R':
+                            case 'r':
+                                RunTests(container);
+                                break;
+                        }
                     }
                 }
-
-                watchHandle.Cancel();
             }
         }
 
@@ -77,7 +76,7 @@ namespace ContinuousRunner.Console
 
             logger.Debug("Running tests");
 
-            var queue = componentContext.Resolve<IRunQueue>();
+            var queue = componentContext.Resolve<IConcurrentExecutor>();
 
             var queued = queue.RunAsync().ToArray();
             if (queued.Any())
@@ -103,7 +102,7 @@ namespace ContinuousRunner.Console
 
             var collection = componentContext.Resolve<IScriptCollection>();
 
-            var queue = componentContext.Resolve<IRunQueue>();
+            var queue = componentContext.Resolve<IConcurrentExecutor>();
 
             logger.Info("Loading scripts");
             
@@ -111,7 +110,7 @@ namespace ContinuousRunner.Console
             {
                 logger.Info("Loaded: {0}", script.File.Name);
 
-                queue.Push(script);
+                queue.Push(new ExecuteScriptWork(script));
             }
         }
     }

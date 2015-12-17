@@ -27,13 +27,16 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             engine.Execute(
                 @"var require = function (names, callback) {
-                    var loaded = requireImpl.require(names);
+                    console.log('loading: ' + names + ' ' + names[0] + ' ' + names[1]);
+                    var loaded = names.length > 0
+                        ? requireImpl.RequireMultiple(names)
+                        : requireImpl.RequireSingle(names);
   
                     if (typeof callback === 'function') {
-                      callback.apply(null, loaded);
+                      return callback.apply(null, loaded);
                     }
 
-                    return loaded;
+                    return callack;
                   };");
             
             engine.Execute(
@@ -54,17 +57,11 @@ namespace ContinuousRunner.Frameworks.RequireJs
                     deps = [];
                   }
  
-                  // 'resolve' the dependencies in place
-                  deps = deps || [];
-                  for (var i = 0; i < deps.length; i++) {
-                    deps[i] = require(deps[i]);
-                  }
-
-                  requireImpl.define(name, deps, body);
-
                   if (typeof body === 'function') {
-                    body.apply(null, deps);
+                    body = body.apply(null, require(deps));
                   }
+
+                  requireImpl.DefineModule(name, deps || [], body);
                 };
 
                 define['amd'] = true;");

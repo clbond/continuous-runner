@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace ContinuousRunner.Data
+﻿namespace ContinuousRunner
 {
-    public enum TestStatus
+    public enum Status
     {
         Passed,
         Failed,

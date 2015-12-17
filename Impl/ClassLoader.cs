@@ -6,7 +6,7 @@ namespace ContinuousRunner.Impl
     {
         #region Implementation of ILoader<IClass>
 
-        public IClass Load(FileInfo script)
+        public IClass Load(FileInfo fileInfo)
         {
             throw new System.NotImplementedException();
         }

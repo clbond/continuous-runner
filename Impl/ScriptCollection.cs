@@ -11,7 +11,7 @@ namespace ContinuousRunner.Impl
     {
         [Import] private readonly IInstanceContext _instanceContext;
 
-        [Import] private readonly ILoader<IScript> _loader;
+        [Import] private readonly ICachedScripts _loader;
         
         private readonly ISet<IScript> _collection = new HashSet<IScript>(new ScriptComparer()); 
 

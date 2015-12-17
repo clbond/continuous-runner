@@ -15,7 +15,7 @@ namespace ContinuousRunner.Impl
     using Data;
     using Frameworks;
 
-    public class ScriptRunner : IScriptRunner
+    public class ScriptRunner : IRunner<IScript>
     {
         [Import] private readonly IFrameworkDetector _frameworkDetector;
 
@@ -66,7 +66,7 @@ namespace ContinuousRunner.Impl
 
                 var code = $"{{{WrapInCallExpression(test.RawCode)}}}";
 
-                Func<TestStatus, TestResult> transform = status => new TestResult
+                Func<Status, TestResult> transform = status => new TestResult
                                                                    {
 
                                                                        Test = test,
@@ -79,13 +79,13 @@ namespace ContinuousRunner.Impl
                 {
                     engine.Evaluate(code);
 
-                    testResult = transform(TestStatus.Passed);
+                    testResult = transform(Status.Passed);
                 }
                 catch (Exception ex)
                 {
                     source.Logs.Add(Tuple.Create(DateTime.Now, Severity.Error, $"Uncaught exception: {ex}"));
 
-                    testResult = transform(TestStatus.Failed);
+                    testResult = transform(Status.Failed);
                 }
 
                 test.Result = testResult;

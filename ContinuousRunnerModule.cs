@@ -1,28 +1,24 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
+﻿using System.Linq;
+
 using Autofac;
 using Autofac.Builder;
 using Autofac.Core;
 using Autofac.Features.Scanning;
-using ContinuousRunner.Frameworks.RequireJs;
-using ContinuousRunner.Impl;
+
 using Microsoft.ClearScript;
 
 namespace ContinuousRunner
 {
+    using Frameworks.RequireJs;
+    using Impl;
+
     public class ContinuousRunnerModule : Autofac.Module
     {
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
 
-            var singleInstanceRegisters = new[]
-                                          {
-                                              typeof (CachedScripts),
-                                              typeof (ScriptCollection),
-                                              typeof (RunQueue)
-                                          };
+            var singleInstanceRegisters = new[] {typeof (CachedScripts), typeof (ScriptCollection)};
 
             foreach (var r in singleInstanceRegisters)
             {
@@ -39,11 +35,7 @@ namespace ContinuousRunner
             var completeRegister = builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
                    .AsImplementedInterfaces()
                    .OnActivating(ActivateInject);
-
-            builder.RegisterType<RequireConfigurationLoader>()
-                   .AsImplementedInterfaces()
-                   .OnActivating(ActivateInject);
-
+            
             var except = typeof(Autofac.RegistrationExtensions).GetMethod("Except",
                 new[] {typeof(IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>) });
 

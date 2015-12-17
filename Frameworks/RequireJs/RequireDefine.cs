@@ -28,14 +28,20 @@ namespace ContinuousRunner.Frameworks.RequireJs
         
         #region Methods exposed to the JavaScript runtime
 
-        public object require(object modules, Action callback = null)
+        public object[] RequireMultiple(string[] modules)
+        {
+                return Require(_fromScript.Module.ModuleName, modules);
+        }
+
+        public object RequireSingle(string modules)
         {
             return Require(_fromScript.Module.ModuleName, modules);
         }
 
-        public void define(string name, string[] dependencies = null, object body = null)
+        public void DefineModule(string name, string[] dependencies, dynamic body)
         {
-            Define(_fromScript.Module.ModuleName, name, dependencies, body);
+
+            // Define(_fromScript.Module.ModuleName, name, dependencies, body);
         }
 
         #endregion
@@ -89,27 +95,25 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return Require(moduleName, dependencies) as object[];
         }
 
-        private object Require(string fromModule, object dependencies)
+        private object Require(string fromModule, string dependencies)
+        {
+            var p = ToAbsolutePath(fromModule, dependencies);
+
+            if (_defines.ContainsKey(p) == false)
+            {
+                var local = _referenceResolver.ModuleReferenceToFile(p);
+                if (local != null)
+                {
+                    Register(fromModule, p, () => LoadScript(local));
+                }
+            }
+
+            return _defines[p]();
+        }
+
+        private object[] Require(string fromModule, string[] dependencies)
         {
             var results = new List<object>();
-
-            var s = dependencies as string;
-            if (s != null)
-            {
-                var p = ToAbsolutePath(fromModule, s);
-
-                if (_defines.ContainsKey(p) == false)
-                {
-                    var local = _referenceResolver.ModuleReferenceToFile(p);
-                    if (local != null)
-                    {
-                        Register(fromModule, p, () => LoadScript(local));
-                    }
-                }
-
-
-                return _defines[p]();
-            }
 
             foreach (var dependency in (string[])dependencies)
             {

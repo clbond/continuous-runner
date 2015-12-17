@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using ContinuousRunner.Tests.Mock;
+using ContinuousRunner.Work;
 using FluentAssertions;
 using Jint.Parser.Ast;
 using Xunit;
@@ -58,9 +59,9 @@ namespace ContinuousRunner.Tests.Loading
 
                 testWriter.Write(tests);
 
-                var runner = container.Resolve<IRunQueue>();
+                var runner = container.Resolve<IConcurrentExecutor>();
 
-                runner.Push(script);
+                runner.Push(new ExecuteScriptWork(script));
 
                 var results = await runner.RunAllAsync().ConfigureAwait(false);
 

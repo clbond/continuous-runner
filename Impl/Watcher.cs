@@ -15,11 +15,12 @@ namespace ContinuousRunner.Impl
 
         [Import] private readonly IScriptCollection _scriptCollection;
 
-        [Import] private readonly ILoader<IScript> _scriptLoader;
-        
+        [Import] private readonly ICachedScripts _scriptLoader;
+
         #region Implementation of IBackgroundRunner
 
-        public ICancellable Watch(DirectoryInfo scriptPath)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CC0022:Should dispose object", Justification = "Disose is called by consumer")]
+        public IDisposable Watch(DirectoryInfo scriptPath)
         {
             var watcher = new FileSystemWatcher(scriptPath.FullName);
 
@@ -36,10 +37,10 @@ namespace ContinuousRunner.Impl
 
             watcher.EndInit();
 
-            return new Cancellable(() => watcher.Dispose());
+            return new Disposable(() => watcher.Dispose());
         }
 
-        public ICancellable Watch()
+        public IDisposable Watch()
         {
             return Watch(_instanceContext.ScriptsRoot);
         }

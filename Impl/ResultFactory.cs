@@ -13,7 +13,7 @@ namespace ContinuousRunner.Impl
         {
             return new TestResult
                    {
-                       Status = TestStatus.Indeterminate
+                       Status = Status.Indeterminate
                    };
         }
 
@@ -22,7 +22,7 @@ namespace ContinuousRunner.Impl
             return new TestResult
             {
                 Logs = SingleLog(Severity.Error, "Test has been deleted from the source"),
-                Status = TestStatus.Deleted
+                Status = Status.Deleted
             };
         }
 
@@ -31,7 +31,7 @@ namespace ContinuousRunner.Impl
             return new TestResult
                    {
                        Logs = SingleLog(Severity.Error, $"Failed to run: {exception}"),
-                       Status = TestStatus.Deleted
+                       Status = Status.Deleted
                    };
         }
 

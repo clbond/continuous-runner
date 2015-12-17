@@ -12,6 +12,8 @@ namespace ContinuousRunner.Impl
     {
         [Import] private readonly IHasher _hasher;
 
+        [Import] private readonly ILoader<IScript> _loader;
+
         private readonly Logger _logger = LogManager.GetCurrentClassLogger(); 
 
         private readonly IDictionary<string, CachedScriptItem> _cache = new Dictionary<string, CachedScriptItem>();
@@ -49,13 +51,8 @@ namespace ContinuousRunner.Impl
             return null;
         }
 
-        public IScript Get(FileInfo fileInfo, Func<FileInfo, IScript> load)
+        public IScript Load(FileInfo fileInfo)
         {
-            if (load == null)
-            {
-                throw new ArgumentNullException(nameof(load));
-            }
-
             try
             {
                 Guid hash;
@@ -74,7 +71,7 @@ namespace ContinuousRunner.Impl
                     hash = _hasher.GetHash(fileInfo);
                 }
 
-                var loaded = load(fileInfo);
+                var loaded = _loader.Load(fileInfo);
 
                 var cachedItem = new CachedScriptItem
                                  {
