@@ -11,12 +11,15 @@ namespace ContinuousRunner
 {
     using Frameworks.RequireJs;
     using Impl;
+    using Work;
 
     public class ContinuousRunnerModule : Autofac.Module
     {
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
+
+            var except = new[] {typeof (ExecuteScriptWork)};
 
             var singleInstanceRegisters = new[] {typeof (CachedScripts), typeof (ScriptCollection)};
 
@@ -35,13 +38,16 @@ namespace ContinuousRunner
             var completeRegister = builder.RegisterAssemblyTypes(typeof(ContinuousRunnerModule).Assembly)
                    .AsImplementedInterfaces()
                    .OnActivating(ActivateInject);
-            
-            var except = typeof(Autofac.RegistrationExtensions).GetMethod("Except",
-                new[] {typeof(IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>) });
 
-            foreach (var r in singleInstanceRegisters)
+            builder.Register((c, p) => new ExecuteScriptWork(c.Resolve<IRunner<IScript>>(), p.TypedAs<IScript>()))
+                   .As<ExecuteScriptWork>();
+            
+            var declareExcept = typeof(Autofac.RegistrationExtensions).GetMethod("Except",
+                new[] {typeof(IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>)});
+
+            foreach (var r in singleInstanceRegisters.Concat(except))
             {
-                var method = except.MakeGenericMethod(r);
+                var method = declareExcept.MakeGenericMethod(r);
 
                 completeRegister =
                     method.Invoke(completeRegister, new object[] {completeRegister}) as

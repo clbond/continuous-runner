@@ -22,10 +22,5 @@ namespace ContinuousRunner.Frameworks.RequireJs
         /// <code>require.config</code>.
         /// </summary>
         IEnumerable<IRequireConfiguration> Load(FileInfo fileInfo);
-
-        /// <summary>
-        /// Is the specified function call a <code>requirejs.config()</code> invocation?
-        /// </summary>
-        bool IsRequireConfigCall(CallExpression callExpression);
     }
 }

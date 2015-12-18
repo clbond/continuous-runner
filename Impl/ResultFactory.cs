@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ContinuousRunner.Impl
 {
@@ -31,13 +32,17 @@ namespace ContinuousRunner.Impl
             return new TestResult
                    {
                        Logs = SingleLog(Severity.Error, $"Failed to run: {exception}"),
-                       Status = Status.Deleted
+                       Status = Status.Failed
                    };
         }
 
         public TestResult Success(IEnumerable<string> logs)
         {
-            throw new NotImplementedException();
+            return new TestResult
+                   {
+                       Logs = logs.Select(l => Tuple.Create(DateTime.Now, Severity.Info, l)).ToList(),
+                       Status = Status.Success
+                   };
         }
 
         public TestResult AssertFailure(Assertion assertion, IEnumerable<string> logs)

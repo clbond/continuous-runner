@@ -75,6 +75,7 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\AggregateResult.cs" />
     <Compile Include="Data\Assertion.cs" />
     <Compile Include="IExecutionResult.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />

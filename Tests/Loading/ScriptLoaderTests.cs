@@ -51,8 +51,6 @@ namespace ContinuousRunner.Tests.Loading
         [Fact]
         public void RunJavaScriptTestAndVerifyResult()
         {
-            var resultEvent = new AutoResetEvent(false);
-
             RunWithSimpleTest(
                 (container, script) =>
                 {
@@ -64,16 +62,14 @@ namespace ContinuousRunner.Tests.Loading
 
                     var runner = container.Resolve<IConcurrentExecutor>();
 
-                    runner.Push(new ExecuteScriptWork(script));
+                    var t = runner.ExecuteAsync(container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof(IScript), script)));
 
-                    Thread.Sleep(TimeSpan.FromSeconds(20d));
+                    if (t.Wait(TimeSpan.FromSeconds(10d)) == false)
+                    {
+                        throw new TestException("Timed out waiting for test to run");
+                    }
 
                     testWriter.Write(tests);
-
-                    if (resultEvent.WaitOne(TimeSpan.FromSeconds(30d)) == false)
-                    {
-                        throw new TestException("No test result was ever received!");
-                    }
                 },
                 result =>
                 {
@@ -81,8 +77,6 @@ namespace ContinuousRunner.Tests.Loading
 
                     // the test calls console.log, make sure we can see that output
                     result.Logs.Count.Should().Be(1);
-
-                    resultEvent.Set();
                 });
         }
 

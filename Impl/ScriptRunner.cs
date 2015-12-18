@@ -26,7 +26,12 @@ namespace ContinuousRunner.Impl
  
         public IEnumerable<Task<TestResult>> RunAsync(IScript script)
         {
-            return script.Suites.SelectMany(s => s.Tests.Select(t => RunTestAsync(script, t)));
+            if (script == null || script.Suites == null)
+            {
+                return Enumerable.Empty<Task<TestResult>>();
+            }
+
+            return script.Suites.SelectMany(s => s?.Tests.Select(t => RunTestAsync(script, t))).Where(s => s != null);
         }
 
         public IEnumerable<Task<TestResult>> RunAsync(IScript script, TestSuite suite)

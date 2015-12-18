@@ -90,10 +90,7 @@ namespace ContinuousRunner.Tests
 
             lock (typeof (LogManager))
             {
-                if (LogManager.Configuration == null)
-                {
-                    LogManager.Configuration = new LoggingConfiguration();
-                }
+                LogManager.Configuration = new LoggingConfiguration();
 
                 var targets = new List<Target>
                               {
@@ -109,8 +106,6 @@ namespace ContinuousRunner.Tests
                 }
 
                 LogManager.EnableLogging();
-
-                LogManager.ReconfigExistingLoggers();
             }
         }
 

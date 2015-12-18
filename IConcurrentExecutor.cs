@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace ContinuousRunner
 {
@@ -7,9 +8,11 @@ namespace ContinuousRunner
     /// </summary>
     public interface IConcurrentExecutor : IDisposable
     {
+        bool PendingWork { get; }
+
         /// <summary>
         /// Add an element to the queue of runnable items
         /// </summary>
-        void Push(IPriorityWork work);        
+        Task<IExecutionResult> ExecuteAsync(IPriorityWork work);        
     }
 }

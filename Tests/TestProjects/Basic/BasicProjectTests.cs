@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Autofac;
 using ContinuousRunner.Frameworks.RequireJs;
 using FluentAssertions;
@@ -8,7 +9,6 @@ using Xunit;
 using Xunit.Abstractions;
 
 using ContinuousRunner.Tests.Mock;
-using NLog;
 
 // ReSharper disable PossibleNullReferenceException
 
@@ -41,6 +41,20 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                     var scripts = container.Resolve<IScriptCollection>().GetScripts().ToArray();
 
                     f(container, scripts);
+
+                    var executor = container.Resolve<IConcurrentExecutor>();
+
+                    var iteration = 0;
+
+                    while (executor.PendingWork)
+                    {
+                        if (iteration++ > 30)
+                        {
+                            throw new TestException("Timed out waiting for test runs to complete");
+                        }
+
+                        Thread.Sleep(TimeSpan.FromMilliseconds(150d));
+                    }
                 });
         }
 
@@ -57,8 +71,6 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
         [Fact]
         public void TestModuleReferences()
         {
-            var logger = LogManager.GetCurrentClassLogger();
-
             RunInContextAndLoad(
                 (container, scripts) =>
                 {
@@ -74,16 +86,6 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                     var scriptCollection = container.Resolve<IScriptCollection>();
 
                     var tests = scriptCollection.GetTestScripts().ToArray();
-
-                    var testWriter = container.Resolve<ITestWriter>();
-
-                    foreach (var t in tests)
-                    {
-                        logger.Info($"Suites and tests in {t}:");
-
-                        testWriter.Write(t.Suites);
-                    }
-
                     tests.Count().Should().Be(1);
                 });
         }

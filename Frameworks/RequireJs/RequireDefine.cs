@@ -88,14 +88,16 @@ namespace ContinuousRunner.Frameworks.RequireJs
             Register(fromModule, moduleName, () => EvaluateDefine(LoadRequires(moduleName, dependencies), definition));
         }
         
-        private object EvaluateDefine(object[] dependencies, object definition)
+        private static object EvaluateDefine(ICollection<object> dependencies, Func<ArrayList, dynamic> definition)
         {
-            throw new NotImplementedException();
+            var list = new ArrayList((ICollection) dependencies);
+            
+            return definition?.Invoke(list);
         }
 
         private object[] LoadRequires(string moduleName, string[] dependencies)
         {
-            return Require(moduleName, dependencies) as object[];
+            return Require(moduleName, dependencies);
         }
 
         private object Require(string fromModule, string dependency)

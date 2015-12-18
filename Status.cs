@@ -2,10 +2,10 @@
 {
     public enum Status
     {
-        Success,
-        Failed,
         Indeterminate,
         InProgress,
+        Success,
+        Failed,
         Deleted
     }
 }

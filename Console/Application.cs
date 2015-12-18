@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace ContinuousRunner.Console
             {
                 consoleReader.Start();
 
-                LoadScripts(container);
+                LoadScriptsAsync(container);
 
                 var watcher = container.Resolve<IWatcher>();
 
@@ -60,17 +61,34 @@ namespace ContinuousRunner.Console
                             case '\n':
                                 stopping = true;
                                 break;
-                            //case 'R':
-                            //case 'r':
-                            //    RunTests(container);
-                            //    break;
+                            case 'R':
+                            case 'r':
+                                RunTests(container);
+                                break;
                         }
                     }
                 }
             }
         }
 
-        private static void LoadScripts(IComponentContext componentContext)
+        private static async void RunTests(IComponentContext componentContext)
+        {
+            var collection = componentContext.Resolve<IScriptCollection>();
+
+            var executor = componentContext.Resolve<IConcurrentExecutor>();
+
+            var tasks =
+                collection.GetTestScripts()
+                          .Select(
+                              ts =>
+                              executor.ExecuteAsync(
+                                  componentContext.Resolve<ExecuteScriptWork>(new TypedParameter(typeof (IScript), ts))))
+                          .ToList();
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        private static async void LoadScriptsAsync(IComponentContext componentContext)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
@@ -79,13 +97,19 @@ namespace ContinuousRunner.Console
             var queue = componentContext.Resolve<IConcurrentExecutor>();
 
             logger.Info("Loading scripts");
-            
+
+            var tasks = new List<Task<IExecutionResult>>();
+
             foreach (var script in collection.GetScripts())
             {
                 logger.Info("Loaded: {0}", script.File.Name);
 
-                queue.Push(new ExecuteScriptWork(script));
+                var t = queue.ExecuteAsync(new ExecuteScriptWork(componentContext.Resolve<IRunner<IScript>>(), script));
+
+                tasks.Add(t);
             }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
     }
 }

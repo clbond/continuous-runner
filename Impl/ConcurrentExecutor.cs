@@ -1,62 +1,101 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Linq;
+using System.Threading.Tasks;
+
+using Magnum.Threading;
 
 using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    using Work;
-
     public class ConcurrentExecutor : IConcurrentExecutor
     {
-        private readonly ISet<IPriorityWork> _priorityQueue = new SortedSet<IPriorityWork>();
-
-        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-        private readonly object _lock = new object();
+        private readonly ILockedObject<IList<Task<IExecutionResult>>> _active =
+            new ReaderWriterLockedObject<IList<Task<IExecutionResult>>>(new List<Task<IExecutionResult>>());
 
         #region Implementation of IContinuousExecutor
 
-        public void Push(IPriorityWork work)
+        public bool PendingWork
         {
-            lock (_lock)
+            get
             {
-                _priorityQueue.Add(work);
+                var pending = false;
+                _active.ReadLock(active => pending = active.Count > 0);
+
+                return pending;
             }
+        }
 
-            _logger.Debug($"Pushed work onto queue: {work.Description}");
+        public Task<IExecutionResult> ExecuteAsync(IPriorityWork work)
+        {
+            var logger = LogManager.GetCurrentClassLogger();
 
-            ThreadPool.QueueUserWorkItem(
-                state =>
+            logger.Debug($"Pushed work onto queue: {work.Description}");
+
+            var completionSource = new TaskCompletionSource<IExecutionResult>();
+
+            _active.WriteLock(active => active.Add(completionSource.Task));
+
+            Action executor =
+                () =>
                 {
-                    lock (_lock)
-                    {
-                        _priorityQueue.Remove(work);
-
-                        _logger.Debug($"{_priorityQueue.Count} queued work items remain");
-
-                    }
                     try
                     {
-                        if (work.ExecuteAsync().Wait(TimeSpan.FromMinutes(1d)) == false)
+                        _active.WriteLock(active => active.Remove(completionSource.Task));
+
+                        var task = work.ExecuteAsync();
+
+                        if (task.Wait(TimeSpan.FromSeconds(10d)) == false)
                         {
-                            _logger.Error($"Work execution timed out: {work.Description}");
+                            logger.Error($"Work execution timed out: {work.Description}");
+
+                            completionSource.SetException(
+                                new TestException(
+                                    $"Timed out waiting for script execution to complete: {work.Description}"));
+                        }
+                        else
+                        {
+                            completionSource.SetResult(task.Result);
                         }
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error(ex, $"Error while executing work: {work.Description}: {ex.Message}");
+                        logger.Error(ex, $"Error while executing work: {work.Description}: {ex.Message}");
+
+                        completionSource.SetException(
+                            new TestException(
+                                $"Uncaught exception while executing job: {work.Description}: {ex.Message}",
+                                ex));
                     }
-                });
+                };
+
+            Task.Run(executor);
+
+            return completionSource.Task;
         }
-        
+
         #endregion
 
         #region Implementation of IDisposable
 
         public void Dispose()
-        {}
+        {
+            _active.WriteLock(
+                active =>
+                {
+                    if (active.Any() == false)
+                    {
+                        return;
+                    }
+
+                    var task = Task.WhenAll(active);
+
+                    task.Wait(TimeSpan.FromSeconds(1d));
+                });
+
+            _active.Dispose();
+        }
 
         #endregion
     }

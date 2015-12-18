@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-
+using System.Threading.Tasks;
+using Autofac;
 using NLog;
 
 namespace ContinuousRunner.Impl
@@ -11,7 +12,9 @@ namespace ContinuousRunner.Impl
     public class TestSubscriptions : ISubscription<SourceChangedEvent>,
                                      ISubscription<TestResult>
     {
-        [Import] private readonly IConcurrentExecutor _runqueue;
+        [Import] private readonly IComponentContext _componentContext;
+
+        [Import] private readonly IConcurrentExecutor _executor;
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -23,7 +26,16 @@ namespace ContinuousRunner.Impl
 
             if (@event.SourceFile is IScript)
             {
-                _runqueue.Push(new ExecuteScriptWork((IScript) @event.SourceFile));
+                var script = (IScript) @event.SourceFile;
+
+                Task.Run(() =>
+                         {
+                             var work = _componentContext.Resolve<ExecuteScriptWork>(new TypedParameter(typeof(IScript), script));
+
+                             var t = _executor.ExecuteAsync(work);
+
+                             t.Wait();
+                         });
             }
             else if (@event.SourceFile is IClass)
             {
