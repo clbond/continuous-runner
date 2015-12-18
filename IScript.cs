@@ -2,8 +2,6 @@
 
 namespace ContinuousRunner
 {
-    using Data;
-
     public interface IScript : IProjectSource
     {
         /// <summary>

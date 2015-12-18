@@ -11,17 +11,13 @@ using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
-
     public class ModuleReader : IModuleReader
     {
         #region Private members
 
-        [Import]
-        private readonly IInstanceContext _context;
+        [Import] private readonly IInstanceContext _context;
         
-        [Import]
-        private readonly IReferenceResolver _referenceResolver;
+        [Import] private readonly IReferenceResolver _referenceResolver;
 
         [Import]
         private readonly Regex _fileExpression = new Regex(".(js|ts)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -34,21 +30,35 @@ namespace ContinuousRunner.Impl
         {
             var define = GetDefinitionExpression(script);
 
-            var references = GetDirectReferences(script, define, referenceLoader);
+            var moduleName = GetModuleNameFromScript(script.File);
+
+            var references = GetDirectReferences(moduleName, define, referenceLoader);
 
             return new ModuleDefinition
                    {
                        References = references,
                        Expression = GetDefinitionReturnExpression(define),
-                       ModuleName = GetModuleNameFromScript(script)
+                       ModuleName = moduleName
                    };
         }
 
-        private IList<IScript> GetDirectReferences(IScript script, CallExpression callExpression, Func<string, IScript> referenceLoader)
+        private IList<IScript> GetDirectReferences(string fromModule, CallExpression callExpression, Func<string, IScript> referenceLoader)
         {
-            var dependencies = GetDependencies(script, callExpression);
+            var dependencies = GetDependencies(fromModule, callExpression);
 
             return dependencies.Select(referenceLoader).ToList();
+        }
+
+        public string GetModuleNameFromScript(FileInfo fileInfo)
+        {
+            var path = _context.ScriptsRoot.FullName;
+
+            if (fileInfo.FullName.StartsWith(path))
+            {
+                return PathToModule(fileInfo.FullName.Substring(path.Length + 1));
+            }
+
+            throw new TestException($"Cannot determine module name from {fileInfo.FullName}");
         }
 
         #endregion
@@ -83,14 +93,14 @@ namespace ContinuousRunner.Impl
             return null;
         }
 
-        private IEnumerable<string> GetDependencies(IScript script, CallExpression define)
+        private IEnumerable<string> GetDependencies(string fromModule, CallExpression define)
         {
             var referencesExpr = define?.Arguments.FirstOrDefault(a => a.Type == SyntaxNodes.ArrayExpression);
 
-            return ExtractReferencesFromArgument(script, referencesExpr);
+            return ExtractReferencesFromArgument(fromModule, referencesExpr);
         }
 
-        private IEnumerable<string> ExtractReferencesFromArgument(IScript script, SyntaxNode expression)
+        private IEnumerable<string> ExtractReferencesFromArgument(string fromModule, SyntaxNode expression)
         {
             if (expression == null)
             {
@@ -101,30 +111,13 @@ namespace ContinuousRunner.Impl
 
             return array.Elements
                         .Where(element => element.Type == SyntaxNodes.Literal)
-                        .Select(element => GetAbsoluteReference(script, element))
+                        .Select(element => GetAbsoluteReference(fromModule, element))
                         .Where(referencedScript => referencedScript != null);
         }
 
-        private string GetAbsoluteReference(IScript sourceReference, SyntaxNode required)
+        private string GetAbsoluteReference(string sourceReference, SyntaxNode required)
         {
-            return _referenceResolver.Resolve(sourceReference, required.As<Literal>().Value as string);
-        }
-
-        private string GetModuleNameFromScript(IScript script)
-        {
-            if (script?.File == null)
-            {
-                return null;
-            }
-
-            var path = _context.ScriptsRoot.FullName;
-
-            if (script.File.FullName.StartsWith(path))
-            {
-                return PathToModule(script.File.FullName.Substring(path.Length + 1));
-            }
-
-            throw new TestException($"Cannot determine module name from {script.File.FullName}");
+            return _referenceResolver.ResolveToModule(sourceReference, required.As<Literal>().Value as string);
         }
 
         private string PathToModule(string path)

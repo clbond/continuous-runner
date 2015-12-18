@@ -1,45 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
+using Autofac;
 
 namespace ContinuousRunner.Impl
 {
     public class ReferenceResolver : IReferenceResolver
     {
-        [Import]
-        private readonly IInstanceContext _instanceContext;
+        [Import] private readonly IComponentContext _componentContext;
+
+        [Import] private readonly IInstanceContext _instanceContext;
         
         #region Implementation of IReferenceResolver
-
-        public string Resolve(IScript script, string module)
+        
+        public string ResolveToModule(string fromModule, string @ref)
         {
-            if (script.File == null)
+            var systems = _componentContext.Resolve<IEnumerable<IPackageSystem>>();
+
+            var resolved =
+                systems.SelectMany(system => system.Resolve(@ref, fromModule))
+                       .FirstOrDefault(r => FallbackModuleResolve(r).Exists);
+
+            return resolved ?? @ref;
+        }
+        
+        public FileInfo Resolve(string @ref, string fromModule)
+        {
+            var systems = _componentContext.Resolve<IEnumerable<IPackageSystem>>();
+
+            var resolved = systems.SelectMany(system => system.Resolve(@ref, fromModule)).FirstOrDefault(File.Exists);
+            if (resolved == null)
             {
-                throw new InvalidOperationException(
-                    $"Cannot parse module reference from script: {script} -- no associated file");
+                resolved = FallbackModuleResolve(@ref)?.FullName;
             }
 
-            return ResolveModule(script.File.Directory, module);
-        }
-
-        public string Resolve(string sourceModule, string module)
-        {
-            var path = Path.GetDirectoryName(Path.Combine(_instanceContext.ScriptsRoot.FullName, RemoveRoot(sourceModule)));
-
-            if (string.IsNullOrEmpty(path))
+            if (resolved != null)
             {
-                return null;
+                return new FileInfo(resolved);
             }
 
-            var root = new DirectoryInfo(path);
-
-            return ResolveModule(root, module);
+            return null;
         }
 
-        public FileInfo ModuleReferenceToFile(string @ref)
+        public FileInfo FallbackModuleResolve(string @ref)
         {
             var combined = new List<string>
                            {

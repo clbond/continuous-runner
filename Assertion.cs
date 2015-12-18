@@ -1,4 +1,4 @@
-﻿namespace ContinuousRunner.Data
+﻿namespace ContinuousRunner
 {
     public class Assertion
     {

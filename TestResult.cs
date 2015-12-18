@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ContinuousRunner.Data
+namespace ContinuousRunner
 {
     public class TestResult : IExecutionResult
     {

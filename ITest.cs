@@ -2,8 +2,6 @@
 
 namespace ContinuousRunner
 {
-    using Data;
-
     public interface ITest
     {
         Guid Id { get; }

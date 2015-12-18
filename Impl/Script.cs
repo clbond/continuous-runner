@@ -8,8 +8,6 @@ using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
-
     public class Script : IScript
     {
         #region Constructors

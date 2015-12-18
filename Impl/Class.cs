@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
     using Frameworks;
 
     public class Class : IClass

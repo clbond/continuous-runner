@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ContinuousRunner.Data
+namespace ContinuousRunner
 {
     public class TestSuite
     {

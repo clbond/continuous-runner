@@ -2,7 +2,7 @@
 
 using Jint.Parser.Ast;
 
-namespace ContinuousRunner.Data
+namespace ContinuousRunner
 {
     public class ModuleDefinition
     {

@@ -98,7 +98,9 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                 {
                     var configLoader = container.Resolve<IRequireConfigurationLoader>();
 
-                    var config = configLoader.Load(scripts.Select(s => s.File));
+                    var scriptLoader = container.Resolve<ICachedScripts>();
+
+                    var config = configLoader.Load(scripts.Select(s => s.File), f => scriptLoader.Load(f));
 
                     config.Should().NotBeNull();
 

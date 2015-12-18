@@ -26,7 +26,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         #region Implementation of IConfigurtationLoader
 
-        public IRequireConfiguration Load(IEnumerable<FileInfo> search)
+        public IRequireConfiguration Load(IEnumerable<FileInfo> search, Func<FileInfo, IScript> loader)
         {
             var config = new RequireConfiguration();
 

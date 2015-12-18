@@ -3,8 +3,6 @@ using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
-
     public class TestWriter : ITestWriter
     {
         #region Implementation of IResultWriter

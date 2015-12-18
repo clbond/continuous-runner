@@ -1,4 +1,4 @@
-﻿namespace ContinuousRunner.Data
+﻿namespace ContinuousRunner
 {
     public class ExpressionTree<TNode> where TNode : class
     {

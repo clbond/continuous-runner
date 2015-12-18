@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 
 namespace ContinuousRunner
 {
-    using Data;
-
     public interface IRunner<in T>
     {
         IEnumerable<Task<TestResult>> RunAsync(T program);

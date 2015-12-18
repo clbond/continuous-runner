@@ -4,7 +4,6 @@ using System.IO;
 
 namespace ContinuousRunner
 {
-    using Data;
     using Frameworks;
 
     public interface IProjectSource : IComparable<IProjectSource>

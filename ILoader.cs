@@ -20,17 +20,11 @@ namespace ContinuousRunner
         /// </summary>
         /// <param name="content">Javafile or Typefile content</param>
         TSource Load(string content);
-
-        /// <summary>
-        /// Load a file based on a module reference string ('Namespace/Foo/Bar'). The reference,
-        /// <paramref name="relativeReference"/>, can be relative to the file <paramref name="fromfile"/>.
-        /// </summary>
-        TSource LoadModule(TSource fromfile, string relativeReference);
-
+        
         /// <summary>
         /// Load a file based on an absolute (not relative) module reference string
         /// </summary>
-        TSource LoadModule(string absoluteReference);
+        TSource LoadModule(string absoluteReference, string fromModule);
     }
 }
 

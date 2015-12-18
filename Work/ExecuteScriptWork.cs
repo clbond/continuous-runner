@@ -3,8 +3,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 
-using ContinuousRunner.Data;
-
 namespace ContinuousRunner.Work
 {
     public class ExecuteScriptWork : IPriorityWork

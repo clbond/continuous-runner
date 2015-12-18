@@ -75,8 +75,10 @@
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\AggregateResult.cs" />
-    <Compile Include="Data\Assertion.cs" />
+    <Compile Include="AggregateResult.cs" />
+    <Compile Include="Assertion.cs" />
+    <Compile Include="ExpressionTree.cs" />
+    <Compile Include="Frameworks\RequireJs\RequirePackageSystem.cs" />
     <Compile Include="IExecutionResult.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
     <Compile Include="Frameworks\Browser\BrowserConsole.cs" />
@@ -120,12 +122,12 @@
     <Compile Include="Impl\Hasher.cs" />
     <Compile Include="Impl\ClearScriptRuntimeFactory.cs" />
     <Compile Include="Impl\TestSubscriptions.cs" />
+    <Compile Include="IPackageSystem.cs" />
     <Compile Include="IPriorityWork.cs" />
     <Compile Include="IProjectSource.cs" />
     <Compile Include="IRuntimeFactory.cs" />
     <Compile Include="ITestCollection.cs" />
     <Compile Include="Impl\ReferenceTree.cs" />
-    <Compile Include="Impl\ResultObserver.cs" />
     <Compile Include="Impl\ScriptCollection.cs" />
     <Compile Include="Impl\ScriptComparer.cs" />
     <Compile Include="Impl\ScriptRunner.cs" />
@@ -138,7 +140,6 @@
     <Compile Include="IScriptCollection.cs" />
     <Compile Include="IRunner.cs" />
     <Compile Include="IResultFactory.cs" />
-    <Compile Include="Data\ModuleDefinition.cs" />
     <Compile Include="Impl\ModuleReader.cs" />
     <Compile Include="Impl\ReferenceResolver.cs" />
     <Compile Include="Impl\TestWriter.cs" />
@@ -148,6 +149,7 @@
     <Compile Include="ITestCollectionReader.cs" />
     <Compile Include="Impl\TestCollectionReader.cs" />
     <Compile Include="Impl\TestCollection.cs" />
+    <Compile Include="ModuleDefinition.cs" />
     <Compile Include="Operation.cs" />
     <Compile Include="Priority.cs" />
     <Compile Include="PropertyInjector.cs" />
@@ -166,12 +168,11 @@
     <Compile Include="Impl\ScriptLoader.cs" />
     <Compile Include="ILoader.cs" />
     <Compile Include="IScript.cs" />
-    <Compile Include="Data\ExpressionTree.cs" />
-    <Compile Include="Data\TestResult.cs" />
     <Compile Include="Status.cs" />
     <Compile Include="ITest.cs" />
-    <Compile Include="Data\TestSuite.cs" />
     <Compile Include="Impl\Script.cs" />
+    <Compile Include="TestResult.cs" />
+    <Compile Include="TestSuite.cs" />
     <Compile Include="Work\ExecuteScriptWork.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -26,7 +26,7 @@ namespace ContinuousRunner.Impl
             throw new System.NotImplementedException();
         }
 
-        public IClass LoadModule(string absoluteReference)
+        public IClass LoadModule(string absoluteReference, string fromModule)
         {
             throw new System.NotImplementedException();
         }

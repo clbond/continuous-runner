@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContinuousRunner.Data;
+
 using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Extensions

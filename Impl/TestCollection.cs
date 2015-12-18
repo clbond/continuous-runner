@@ -2,8 +2,6 @@
 using System.ComponentModel.Composition;
 using System.Linq;
 
-using ContinuousRunner.Data;
-
 namespace ContinuousRunner.Impl
 {
     public class TestCollection : ITestCollection

@@ -11,7 +11,6 @@ using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
     using Frameworks;
 
     public class ScriptRunner : IRunner<IScript>

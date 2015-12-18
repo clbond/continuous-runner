@@ -4,17 +4,15 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+
 using Microsoft.ClearScript;
-using Microsoft.JScript;
 
 namespace ContinuousRunner.Frameworks.RequireJs
 {
     public class RequireDefine
     {
         [Import] private readonly IReferenceResolver _referenceResolver;
-
-        [Import] private readonly IRequireConfiguration _requireConfiguration;
-
+        
         private readonly Dictionary<string, Func<object>> _defines = new Dictionary<string, Func<object>>();
 
         private readonly ScriptEngine _scriptEngine;
@@ -68,7 +66,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
         private string ToAbsolutePath(string modulePath, string moduleName)
         {
-            return _referenceResolver.Resolve(modulePath, moduleName);
+            return _referenceResolver.ResolveToModule(modulePath, moduleName);
         }
 
         private void Define(string fromModule, string moduleName, string[] dependencies, Func<ArrayList, object> definition)
@@ -106,7 +104,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             if (_defines.ContainsKey(p) == false)
             {
-                var local = _referenceResolver.ModuleReferenceToFile(p);
+                var local = _referenceResolver.Resolve(fromModule, p);
                 if (local != null)
                 {
                     Register(fromModule, p, () => LoadScript(local));

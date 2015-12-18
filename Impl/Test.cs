@@ -1,7 +1,5 @@
 ﻿ using System;
 
-using ContinuousRunner.Data;
-
 namespace ContinuousRunner.Impl
 {
     public class Test : ITest

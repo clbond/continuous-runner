@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 using Jint.Parser.Ast;
@@ -15,7 +16,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
         /// conduct this search. Again, it's a very expensive call so be wary. But it does use <see cref="ICachedScripts" />, so if the
         /// script files have already been loaded then they will not be re-parsed (unless they have changed).
         /// </summary>
-        IRequireConfiguration Load(IEnumerable<FileInfo> search);
+        IRequireConfiguration Load(IEnumerable<FileInfo> search, Func<FileInfo, IScript> loader);
 
         /// <summary>
         /// Parse the contents of <paramref name="fileInfo"/> and extract all <see cref="CallExpression" /> expressions that invoke

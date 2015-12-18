@@ -8,8 +8,7 @@ using NLog;
 namespace ContinuousRunner.Impl
 {
     using Frameworks;
-    using Data;
-
+    
     public class ScriptLoader : ILoader<IScript>
     {
         #region Private members
@@ -59,26 +58,12 @@ namespace ContinuousRunner.Impl
 
             return LoadScript(content, null);
         }
-
-        public IScript LoadModule(IScript fromScript, string relativeReference)
+        
+        public IScript LoadModule(string absoluteReference, string fromModule)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
-            var absoluteReference = _referenceResolver.Resolve(fromScript, relativeReference);
-            if (absoluteReference == null)
-            {
-                logger.Error($"Unable to resolve reference: {fromScript} -> {relativeReference}");
-                return null;
-            }
-
-            return LoadModule(absoluteReference);
-        }
-
-        public IScript LoadModule(string absoluteReference)
-        {
-            var logger = LogManager.GetCurrentClassLogger();
-
-            var fileInfo = _referenceResolver.ModuleReferenceToFile(absoluteReference);
+            var fileInfo = _referenceResolver.Resolve(fromModule, absoluteReference);
             if (fileInfo.Exists == false)
             {
                 logger.Error($"Referenced file does not exist: {absoluteReference} -> {fileInfo}");
@@ -97,8 +82,10 @@ namespace ContinuousRunner.Impl
         {
             Func<IScript, ExpressionTree<SyntaxNode>> loader = s => _parser.Parse(content);
 
+            var moduleName = _moduleReader.GetModuleNameFromScript(fileInfo);
+
             Func<IScript, ExpressionTree<SyntaxNode>, ModuleDefinition> moduleLoader =
-                (s, tree) => _moduleReader.Get(s, m => LoadModule(s, m));
+                (s, tree) => _moduleReader.Get(s, m => LoadModule(moduleName, m));
 
             Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
 
@@ -108,21 +95,12 @@ namespace ContinuousRunner.Impl
                                      ? _parser.Parse(fileInfo)
                                      : _parser.Parse(content);
 
-            var script = new Script(_publisher, loader, moduleLoader, suiteLoader, frameworkLoader)
-                         {
-                             File = fileInfo,
-                             Content = content,
-                             ExpressionTree = expressionTree
-                         };
-
-            //_publisher.Publish(
-            //    new SourceChangedEvent
-            //    {
-            //        Operation = Operation.Add,
-            //        SourceFile = script
-            //    });
-
-            return script;
+            return new Script(_publisher, loader, moduleLoader, suiteLoader, frameworkLoader)
+                   {
+                       File = fileInfo,
+                       Content = content,
+                       ExpressionTree = expressionTree
+                   };
         }
 
         private IScript LoadFile(FileInfo fileInfo)

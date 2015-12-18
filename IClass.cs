@@ -1,6 +1,4 @@
-﻿using ContinuousRunner.Data;
-
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 
 namespace ContinuousRunner
 {

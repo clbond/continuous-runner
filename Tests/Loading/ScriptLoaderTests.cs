@@ -1,23 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
+
 using Autofac;
-using ContinuousRunner.Data;
-using ContinuousRunner.Tests.Mock;
-using ContinuousRunner.Work;
 
 using FluentAssertions;
 
 using Jint.Parser.Ast;
-
-using Magnum.Extensions;
 
 using Xunit;
 using Xunit.Abstractions;
 
 namespace ContinuousRunner.Tests.Loading
 {
+    using Mock;
+    using Work;
+
     public class ScriptLoaderTests : BaseTest
     {
         public ScriptLoaderTests(ITestOutputHelper helper)

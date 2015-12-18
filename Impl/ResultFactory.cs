@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
-
     public class ResultFactory : IResultFactory
     {
         #region Implementation of ITestResultFactory

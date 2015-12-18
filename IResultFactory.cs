@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace ContinuousRunner
 {
-    using Data;
-
     public interface IResultFactory
     {
         /// <summary>

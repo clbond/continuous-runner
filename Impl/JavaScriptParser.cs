@@ -6,8 +6,6 @@ using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
-
     public class JavaScriptParser : IParser<SyntaxNode>
     {
         #region Implementation of IScriptParser

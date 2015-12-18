@@ -55,7 +55,12 @@ namespace ContinuousRunner
             }
 
             builder.Register(
-                c => c.Resolve<IRequireConfigurationLoader>().Load(c.Resolve<IScriptCollection>().GetScriptFiles()))
+                c =>
+                {
+                    var scriptLoader = c.Resolve<ICachedScripts>();
+
+                    return c.Resolve<IRequireConfigurationLoader>().Load(c.Resolve<IScriptCollection>().GetScriptFiles(), f => scriptLoader.Load(f));
+                })
                    .As<IRequireConfiguration>()
                    .SingleInstance()
                    .OnActivating(ActivateInject);

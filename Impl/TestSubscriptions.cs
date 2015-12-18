@@ -6,7 +6,6 @@ using NLog;
 
 namespace ContinuousRunner.Impl
 {
-    using Data;
     using Work;
 
     public class TestSubscriptions : ISubscription<SourceChangedEvent>,
