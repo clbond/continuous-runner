@@ -106,12 +106,14 @@ namespace ContinuousRunner.Tests
                 }
 
                 LogManager.EnableLogging();
+
+                LogManager.ReconfigExistingLoggers();
             }
         }
 
         #region Implementation of IDisposable
 
-        void IDisposable.Dispose()
+        public virtual void Dispose()
         {
             if (_memoryTarget != null)
             {

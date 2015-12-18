@@ -26,20 +26,19 @@ namespace ContinuousRunner.Impl
 
             return resolved ?? @ref;
         }
-        
-        public FileInfo Resolve(string @ref, string fromModule)
+
+        public FileInfo Resolve(string fromModule, string @ref)
         {
             var systems = _componentContext.Resolve<IEnumerable<IPackageSystem>>();
 
-            var resolved = systems.SelectMany(system => system.Resolve(@ref, fromModule)).FirstOrDefault(File.Exists);
-            if (resolved == null)
-            {
-                resolved = FallbackModuleResolve(@ref)?.FullName;
-            }
+            var resolved =
+                systems.SelectMany(system => system.Resolve(@ref, fromModule))
+                       .FirstOrDefault(f => FallbackModuleResolve(f).Exists);
 
-            if (resolved != null)
+            var fi = FallbackModuleResolve(resolved ?? @ref);
+            if (fi.Exists)
             {
-                return new FileInfo(resolved);
+                return fi;
             }
 
             return null;

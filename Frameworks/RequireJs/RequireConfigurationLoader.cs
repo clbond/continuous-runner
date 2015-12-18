@@ -177,9 +177,9 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 }
             }
 
-            existing.Maps.Each(kvp => candidate.Maps.Add(kvp));
-            existing.Packages.Each(p => candidate.Packages.Add(p));
-            existing.Paths.Each(p => candidate.Paths.Add(p));
+            candidate.Maps.Each(kvp => existing.Maps.Add(kvp));
+            candidate.Packages.Each(p => existing.Packages.Add(p));
+            candidate.Paths.Each(p => existing.Paths.Add(p));
         }
 
         #endregion

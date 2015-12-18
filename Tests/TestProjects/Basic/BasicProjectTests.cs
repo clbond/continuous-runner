@@ -122,5 +122,30 @@ namespace ContinuousRunner.Tests.TestProjects.Basic
                     configuration.BaseUrl.First().Should().Be(".");
                 });
         }
+
+        [Fact]
+        public void TestRequireConfigPaths()
+        {
+            RunInContext(
+                (container, collection) =>
+                {
+                    var resolver = container.Resolve<IReferenceResolver>();
+
+                    var f2 = resolver.Resolve("Tests/File1", "./File2");
+                    f2.Should().NotBeNull();
+
+                    var loader = container.Resolve<ICachedScripts>();
+
+                    var loaded = loader.Load(f2);
+                    loaded.Should().NotBeNull();
+
+                    loaded.File.Name.Should().Be("File2.js");
+
+                    var thirdPartyLib = resolver.Resolve("Tests/File1", "foo");
+                    thirdPartyLib.Should().NotBeNull();
+                    thirdPartyLib.Name.Should().Be("foo.js");
+                    thirdPartyLib.Exists.Should().BeTrue();
+                });
+        }
     }
 }
