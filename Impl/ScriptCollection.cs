@@ -24,7 +24,7 @@ namespace ContinuousRunner.Impl
                 extensions.Any(e => string.Equals(e, fileExtension, StringComparison.InvariantCultureIgnoreCase));
 
             Func<string, bool> isScript =
-                ext => match(Constants.FileExtensions.TypeScript, ext) ||
+                ext => /*match(Constants.FileExtensions.TypeScript, ext) ||*/
                        match(Constants.FileExtensions.JavaScript, ext);
 
             var root = _instanceContext.ScriptsRoot;

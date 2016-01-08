@@ -13,9 +13,9 @@ namespace ContinuousRunner.Impl
         [Import] private readonly IComponentContext _componentContext;
 
         [Import] private readonly IInstanceContext _instanceContext;
-        
+
         #region Implementation of IReferenceResolver
-        
+
         public string ResolveToModule(string fromModule, string @ref)
         {
             var systems = _componentContext.Resolve<IEnumerable<IPackageSystem>>();
@@ -63,7 +63,7 @@ namespace ContinuousRunner.Impl
 
         private string RemoveRoot(string @ref)
         {
-            var components = @ref.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            var components = @ref.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
             if (components.Length == 0)
             {
                 return @ref;
@@ -95,9 +95,11 @@ namespace ContinuousRunner.Impl
                 return module;
             }
 
-            var segments = module.Split(new[] { '.', '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            var chars = new[] {'.', '/', '\\'};
 
-            var qualifiers = new List<string> { _instanceContext.ModuleNamespace };
+            var segments = module.Split(chars, StringSplitOptions.RemoveEmptyEntries);
+
+            var qualifiers = new List<string> {_instanceContext.ModuleNamespace};
 
             while (path != null && path.FullName != _instanceContext.ScriptsRoot.FullName)
             {

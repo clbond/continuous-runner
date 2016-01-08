@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>-s ..\..\..\Tests\TestProjects\Basic -j ..\..\..\Tests\TestProjects\Basic\Scripts -m Tests</StartArguments>
+    <StartArguments>-s C:\repo\cdo3\PortfolioRiskWeb\src -j C:\repo\cdo3\PortfolioRiskWeb\src\R2CIQ.Web\Scripts -m R2CIQ</StartArguments>
   </PropertyGroup>
 </Project>

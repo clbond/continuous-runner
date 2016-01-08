@@ -40,6 +40,11 @@ namespace ContinuousRunner.Frameworks
         /// <summary>
         /// Is this code CSharp?
         /// </summary>
-        CSharp = 0x64
+        CSharp = 0x64,
+
+        /// <summary>
+        /// Does this script use jQuery?
+        /// </summary>
+        jQuery = 0x128
     }
 }

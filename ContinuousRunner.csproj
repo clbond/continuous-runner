@@ -78,6 +78,8 @@
     <Compile Include="AggregateResult.cs" />
     <Compile Include="Assertion.cs" />
     <Compile Include="ExpressionTree.cs" />
+    <Compile Include="Frameworks\jQuery\Detect.cs" />
+    <Compile Include="Frameworks\jQuery\FrameworkImpl.cs" />
     <Compile Include="Frameworks\RequireJs\RequirePackageSystem.cs" />
     <Compile Include="IExecutionResult.cs" />
     <Compile Include="Extensions\DelegateExtensions.cs" />
