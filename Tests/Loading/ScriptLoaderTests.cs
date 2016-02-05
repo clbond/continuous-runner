@@ -14,6 +14,7 @@ using Xunit.Abstractions;
 namespace ContinuousRunner.Tests.Loading
 {
     using Mock;
+    using System.Threading.Tasks;
     using Work;
 
     public class ScriptLoaderTests : BaseTest
@@ -51,24 +52,23 @@ namespace ContinuousRunner.Tests.Loading
         {
             RunWithSimpleTest(
                 (container, script) =>
-                {
-                    var tests = script.Suites.ToArray();
+                      {
+                          var tests = script.Suites.ToArray();
 
-                    var testWriter = container.Resolve<ITestWriter>();
+                          var testWriter = container.Resolve<ITestWriter>();
 
-                    testWriter.Write(tests);
+                          testWriter.Write(tests);
 
-                    var runner = container.Resolve<IConcurrentExecutor>();
+                          var runner = container.Resolve<IConcurrentExecutor>();
 
-                    var t = runner.ExecuteAsync(container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof(IScript), script)));
+                          var t =
+                              runner.ExecuteAsync(
+                                  container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof (IScript), script)));
 
-                    if (t.Wait(TimeSpan.FromSeconds(10d)) == false)
-                    {
-                        throw new TestException("Timed out waiting for test to run");
-                    }
+                          t.Wait();
 
-                    testWriter.Write(tests);
-                },
+                          testWriter.Write(tests);
+                      },
                 result =>
                 {
                     result.Status.Should().Be(Status.Success);
@@ -89,13 +89,11 @@ namespace ContinuousRunner.Tests.Loading
 
             #region Implementation of ISubscription<in TestResult>
 
-            public void Handle(TestResult @event)
-            {
-                _handler(@event);
-            }
+            public void Handle(TestResult @event) => _handler(@event);
 
             #endregion
         }
+
         private void RunWithSimpleTest(Action<IComponentContext, IScript> f, Action<TestResult> resultHandler = null)
         {
             var handler = new ResultHandler(resultHandler);
@@ -105,7 +103,7 @@ namespace ContinuousRunner.Tests.Loading
             using (var container = CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>(), build))
             {
                 const string content =
-                    @"define('Foo', [], function () {
+                    @"define([], function () {
                         describe('Foo', function () {
                           it('Bar', function () {
                             console.log('Test output');
@@ -119,7 +117,7 @@ namespace ContinuousRunner.Tests.Loading
 
                 var script = loader.Load(fileInfo);
                 script.Should().NotBeNull();
-
+                
                 f(container, script);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+
 using Jint.Parser.Ast;
 
 namespace ContinuousRunner.Frameworks.RequireJs
@@ -37,6 +38,33 @@ namespace ContinuousRunner.Frameworks.RequireJs
         private static IDictionary<string, IDictionary<string, string>> TransformMaps(Property maps)
         {
             var result = new Dictionary<string, IDictionary<string, string>>();
+
+            if (maps?.Value?.Type != SyntaxNodes.ObjectExpression)
+            {
+                return result;
+            }
+
+            var objexpr = maps.Value as ObjectExpression;
+
+            foreach (var p in objexpr.Properties)
+            {
+                var key = p.Key.GetKey();
+
+                var literal = p.Value.As<ObjectExpression>();
+                if (literal == null)
+                {
+                    continue;
+                }
+
+                var dict = new Dictionary<string, string>();
+
+                foreach (var m in literal.Properties)
+                {
+                    dict[m.Key.GetKey()] = m.Value.GetValue(literal);
+                }
+
+                result[p.Key.GetKey()] = dict;
+            }
 
             return result;
         }

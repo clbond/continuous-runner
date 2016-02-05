@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.Composition;
 using Autofac;
 using Microsoft.ClearScript;
-using Microsoft.ClearScript.V8;
 
 namespace ContinuousRunner.Frameworks.Jasmine
 {

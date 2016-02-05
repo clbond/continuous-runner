@@ -15,12 +15,12 @@ namespace ContinuousRunner.Impl
         [Import] private readonly IRuntimeFactory<ScriptEngine> _runtimeFactory;
 
         [Import] private readonly IJasmineReflection _reflector;
-
+        
         [Import] private readonly IEnumerable<IFramework> _frameworks;
 
         #region Implementation of ISuiteReader
 
-        public ITestCollection DefineTests(IScript script)
+        public ITestCollection DefineTests(IPackageSystem packageSystem, IScript script)
         {
             using (var engine = _runtimeFactory.GetRuntime())
             {
@@ -32,6 +32,10 @@ namespace ContinuousRunner.Impl
                 }
 
                 engine.Execute(script.Content);
+
+                // Execute the primary define() from the file, if it exists
+                var package = packageSystem.GetDefinition(null, script.Module.ModuleName);
+                package?.Invoke();
 
                 return collection;
             }

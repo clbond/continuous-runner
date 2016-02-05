@@ -27,7 +27,7 @@ namespace ContinuousRunner.Impl
             engine.AddHostType("Action", typeof(Action<>));
 
             engine.AddHostType("Func", typeof (Func<>));
-
+            
             engine.AddHostObject("mscorlib", new HostTypeCollection("mscorlib", "System.Core"));
         }
 

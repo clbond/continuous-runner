@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
+using Autofac;
 using Jint.Parser.Ast;
 
 using NLog;
@@ -24,6 +25,8 @@ namespace ContinuousRunner.Impl
         [Import] private readonly ITestCollectionReader _suiteReader;
 
         [Import] private readonly IReferenceResolver _referenceResolver;
+
+        [Import] private readonly IComponentContext _componentContext;
 
         private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -87,7 +90,8 @@ namespace ContinuousRunner.Impl
             Func<IScript, ExpressionTree<SyntaxNode>, ModuleDefinition> moduleLoader =
                 (s, tree) => _moduleReader.Get(s, m => LoadModule(moduleName, m));
 
-            Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> suiteLoader = (s, tree) => _suiteReader.DefineTests(s);
+            Func<IScript, ExpressionTree<SyntaxNode>, ITestCollection> suiteLoader =
+                (s, tree) => _suiteReader.DefineTests(_componentContext.Resolve<IPackageSystem>(), s);
 
             Func<IProjectSource, Framework> frameworkLoader = s => _frameworkDetector.DetectFrameworks(s);
 

@@ -2,10 +2,10 @@
 
 namespace ContinuousRunner
 {
-    public interface ILoader<TSource> where TSource : IProjectSource
+    public interface ILoader<out TSource> where TSource : IProjectSource
     {
         /// <summary>
-        /// Load the specified file, <paramref name="file"/>, and return a <see cref="Ifile"/> object
+        /// Load the specified file, <paramref name="file"/>, and return a <see cref="TSource"/> object
         /// </summary>
         TSource Load(FileInfo file);
 

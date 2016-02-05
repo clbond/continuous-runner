@@ -6,7 +6,7 @@
 
         public Framework Analyze(IProjectSource source)
         {
-            throw new System.NotImplementedException();
+            return Framework.jQuery; // FIXME(cbond): Detect usage of jQuery
         }
 
         #endregion

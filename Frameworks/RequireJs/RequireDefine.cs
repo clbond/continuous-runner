@@ -12,8 +12,8 @@ namespace ContinuousRunner.Frameworks.RequireJs
     public class RequireDefine
     {
         [Import] private readonly IReferenceResolver _referenceResolver;
-        
-        private readonly Dictionary<string, Func<object>> _defines = new Dictionary<string, Func<object>>();
+
+        [Import] private readonly IPackageSystem _packageSystem;
 
         private readonly ScriptEngine _scriptEngine;
 
@@ -61,12 +61,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
                 throw new ArgumentNullException(nameof(load));
             }
 
-            _defines[ToAbsolutePath(modulePath, moduleName)] = load;
-        }
-
-        private string ToAbsolutePath(string modulePath, string moduleName)
-        {
-            return _referenceResolver.ResolveToModule(modulePath, moduleName);
+            _packageSystem.Define(modulePath, moduleName, load);
         }
 
         private void Define(string fromModule, string moduleName, string[] dependencies, Func<ArrayList, object> definition)
@@ -93,39 +88,41 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return definition?.Invoke(list);
         }
 
-        private object[] LoadRequires(string moduleName, string[] dependencies)
+        private dynamic[] LoadRequires(string moduleName, string[] dependencies)
         {
             return Require(moduleName, dependencies);
         }
 
-        private object Require(string fromModule, string dependency)
+        private dynamic Require(string fromModule, string moduleName)
         {
-            var p = ToAbsolutePath(fromModule, dependency);
-
-            if (_defines.ContainsKey(p) == false)
+            var definition = _packageSystem.GetDefinition(fromModule, moduleName);
+            if (definition == null)
             {
-                var local = _referenceResolver.Resolve(fromModule, p);
-                if (local != null)
-                {
-                    Register(fromModule, p, () => LoadScript(local));
-                }
+                LoadScript(_referenceResolver.Resolve(fromModule, moduleName));
+
+                definition = _packageSystem.GetDefinition(fromModule, moduleName);
             }
 
-            if (_defines.ContainsKey(p) == false)
+            if (definition != null)
             {
-                return null;
+                return definition();
             }
 
-            return _defines[p]();
+            return null;
         }
 
-        private object[] Require(string fromModule, IEnumerable<string> dependencies)
+        private dynamic[] Require(string fromModule, IEnumerable<string> dependencies)
         {
-            return (from dependency in (string[]) dependencies select Require(fromModule, dependency)).ToArray();
+            return (from dependency in dependencies select Require(fromModule, dependency)).ToArray();
         }
 
         private object LoadScript(FileInfo fileInfo)
         {
+            if (fileInfo == null)
+            {
+                return null;
+            }
+
             using (var stream = fileInfo.OpenRead())
             {
                 using (var sr = new StreamReader(stream))

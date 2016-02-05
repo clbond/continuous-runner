@@ -20,7 +20,7 @@ namespace ContinuousRunner.Console
             {
                 var options = CommandLineOptions.FromArgs(args);
 
-                Run(options);
+                RunAsync(options).Wait();
             }
             catch (Exception ex)
             {
@@ -28,7 +28,7 @@ namespace ContinuousRunner.Console
             }
         }
 
-        private static void Run(IInstanceContext options)
+        private static async Task RunAsync(IInstanceContext options)
         {
             var logger = LogManager.GetCurrentClassLogger();
 
@@ -63,7 +63,7 @@ namespace ContinuousRunner.Console
                                 break;
                             case 'R':
                             case 'r':
-                                RunTests(container);
+                                await RunTestsAsync(container).ConfigureAwait(false);
                                 break;
                         }
                     }
@@ -71,7 +71,7 @@ namespace ContinuousRunner.Console
             }
         }
 
-        private static async void RunTests(IComponentContext componentContext)
+        private static async Task RunTestsAsync(IComponentContext componentContext)
         {
             var collection = componentContext.Resolve<IScriptCollection>();
 

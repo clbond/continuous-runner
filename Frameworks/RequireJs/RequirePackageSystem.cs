@@ -11,6 +11,12 @@ namespace ContinuousRunner.Frameworks.RequireJs
     {
         [Import] private readonly IComponentContext _componentContext;
 
+        [Import] private readonly IReferenceResolver _referenceResolver;
+
+        [Import] private readonly IRequireConfiguration _requireConfiguration;
+
+        private readonly IDictionary<string, Func<dynamic>> _defines = new Dictionary<string, Func<dynamic>>();
+
         #region Implementation of IPackageSystem
 
         public IEnumerable<string> Resolve(string moduleName, string fromModule)
@@ -26,9 +32,40 @@ namespace ContinuousRunner.Frameworks.RequireJs
             return candidates.Select(c => ApplyMaps(configuration, fromModule, c));
         }
 
+        public void Define(string modulePath, string moduleName, Func<dynamic> load)
+        {
+            if (string.IsNullOrEmpty(moduleName))
+            {
+                throw new InvalidOperationException("Cannot register a module with no name");
+            }
+
+            if (load == null)
+            {
+                throw new ArgumentNullException(nameof(load));
+            }
+
+            _defines[ToAbsolutePath(modulePath, moduleName)] = load;
+        }
+
+        public Func<dynamic> GetDefinition(string fromModule, string moduleName)
+        {
+            var absoluteModule = ToAbsolutePath(fromModule, moduleName);
+
+            var candidates = ResolveCandidates(_requireConfiguration, moduleName).ToList();
+
+            candidates.Insert(0, absoluteModule);
+
+            return candidates.Where(candidate => _defines.ContainsKey(candidate)).Select(candidate => _defines[candidate]).FirstOrDefault();
+        }
+
         #endregion
 
         #region Private methods
+
+        private string ToAbsolutePath(string modulePath, string moduleName)
+        {
+            return _referenceResolver.ResolveToModule(modulePath, moduleName);
+        }
 
         private static string ApplyMaps(IRequireConfiguration configuration, string fromModule, string @ref)
         {

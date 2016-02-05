@@ -22,8 +22,10 @@ namespace ContinuousRunner.Tests.Loading
 
                 const string jasmineScript =
                     @"describe('Test description', function () {
-                    it('Test item', function () {});
-                  });";
+                        it('Test item', function () {
+                          console.log('Executed test');
+                        });
+                      });";
 
                 var script = container.Resolve<IMockScript>().Get(jasmineScript);
 

@@ -21,7 +21,12 @@ namespace ContinuousRunner
 
             var except = new[] {typeof (ExecuteScriptWork)};
 
-            var singleInstanceRegisters = new[] {typeof (CachedScripts), typeof (ScriptCollection)};
+            var singleInstanceRegisters = new[]
+                                          {
+                                              typeof (CachedScripts),
+                                              typeof (ScriptCollection),
+                                              typeof (RequirePackageSystem)
+                                          };
 
             foreach (var r in singleInstanceRegisters)
             {

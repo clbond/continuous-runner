@@ -27,15 +27,15 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
             engine.Execute(
                 @"var require = function (names, callback) {
-                    console.log('loading: ' + names + ' ' + names[0] + ' ' + names[1]);
-
                     var list = new mscorlib.System.Collections.ArrayList();
 
-                    for (var i = 0; i < names.length; ++i) {
-                      list.Add(names[i]);
+                    if (names && typeof names !== 'string') {
+                        for (var i = 0; i < names.length; ++i) {
+                          list.Add(names[i]);
+                        }
                     }
 
-                    var loaded = names.length > 0
+                    var loaded = typeof name !== 'string'
                         ? requireImpl.RequireMultiple(list)
                         : requireImpl.RequireSingle(names);
   
@@ -43,7 +43,7 @@ namespace ContinuousRunner.Frameworks.RequireJs
                       return callback.apply(null, loaded);
                     }
 
-                    return callack;
+                    return loaded;
                   };");
             
             engine.Execute(
@@ -55,8 +55,9 @@ namespace ContinuousRunner.Frameworks.RequireJs
                   }
 
                   if (deps instanceof Array === false) {
-                    if (body != null) {
-                      throw new Error('define() was called with incomprehensible arguments');
+                    if (body == null && deps != null) {
+                      body = deps;
+                      deps = [];
                     }
 
                     body = deps;
@@ -69,11 +70,12 @@ namespace ContinuousRunner.Frameworks.RequireJs
                   var cb = new CallbackType(function(deps) {
                     if (typeof body === 'function') {
                       var transformed = [];
+
                       for (var i = 0; i < deps.Count; ++i) {
                         transformed.push(deps[i]);
                       }
 
-                      return body.apply(window, deps);
+                      return body.apply(null, deps);
                     }
 
                     return body;
@@ -81,11 +83,15 @@ namespace ContinuousRunner.Frameworks.RequireJs
 
                   var list = new mscorlib.System.Collections.ArrayList();
 
-                  for (var i = 0; i < deps.length; ++i) {
-                    list.Add(deps[i]);
+                  if (deps) {
+                    for (var i = 0; i < deps.length; ++i) {
+                      list.Add(deps[i]);
+                    }
                   }
     
                   requireImpl.DefineModule(name, list, cb);
+
+                  return require(name);
                 };
 
                 define['amd'] = true;");
