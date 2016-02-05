@@ -21,7 +21,9 @@ namespace ContinuousRunner.Impl
 
         public void Handle(SourceChangedEvent @event)
         {
-            _logger.Debug($"Source file changed: {@event}; queueing run");
+            var description = $"Source file changed: {@event}; queueing run";
+
+            _logger.Debug(description);
 
             if (@event.SourceFile is IScript)
             {
@@ -29,7 +31,10 @@ namespace ContinuousRunner.Impl
 
                 Task.Run(() =>
                          {
-                             var work = _componentContext.Resolve<ExecuteScriptWork>(new TypedParameter(typeof(IScript), script));
+                             var work =
+                                 _componentContext.Resolve<ExecuteScriptWork>(
+                                     new TypedParameter(typeof (IScript), script),
+                                     new TypedParameter(typeof (string), description));
 
                              var t = _executor.ExecuteAsync(work);
 

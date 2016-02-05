@@ -11,7 +11,7 @@ namespace ContinuousRunner.Work
 
         private readonly IScript _script;
 
-        public ExecuteScriptWork(IRunner<IScript> runner, IScript script)
+        public ExecuteScriptWork(IRunner<IScript> runner, IScript script, string description)
         {
             if (runner == null)
             {
@@ -26,6 +26,8 @@ namespace ContinuousRunner.Work
             _runner = runner;
 
             _script = script;
+
+            Description = description;
         }
 
         #region Implementation of IPriorityWork

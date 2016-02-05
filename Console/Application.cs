@@ -102,9 +102,11 @@ namespace ContinuousRunner.Console
 
             foreach (var script in collection.GetScripts())
             {
-                logger.Info("Loaded: {0}", script.File.Name);
+                var description = $"Loaded: {script.File.Name}";
 
-                var t = queue.ExecuteAsync(new ExecuteScriptWork(componentContext.Resolve<IRunner<IScript>>(), script));
+                logger.Info(description);
+
+                var t = queue.ExecuteAsync(new ExecuteScriptWork(componentContext.Resolve<IRunner<IScript>>(), script, description));
 
                 tasks.Add(t);
             }

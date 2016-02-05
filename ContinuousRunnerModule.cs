@@ -44,20 +44,20 @@ namespace ContinuousRunner
                    .AsImplementedInterfaces()
                    .OnActivating(ActivateInject);
 
-            builder.Register((c, p) => new ExecuteScriptWork(c.Resolve<IRunner<IScript>>(), p.TypedAs<IScript>()))
+            builder.Register((c, p) => new ExecuteScriptWork(c.Resolve<IRunner<IScript>>(), p.TypedAs<IScript>(), p.TypedAs<string>()))
                    .As<ExecuteScriptWork>();
             
             var declareExcept = typeof(Autofac.RegistrationExtensions).GetMethod("Except",
                 new[] {typeof(IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>)});
 
-            foreach (var r in singleInstanceRegisters.Concat(except))
-            {
-                var method = declareExcept.MakeGenericMethod(r);
-
-                completeRegister =
-                    method.Invoke(completeRegister, new object[] {completeRegister}) as
-                    IRegistrationBuilder<object, ScanningActivatorData, DynamicRegistrationStyle>;
-            }
+            completeRegister =
+                singleInstanceRegisters.Concat(except)
+                                       .Select(r => declareExcept.MakeGenericMethod(r))
+                                       .Aggregate(completeRegister,
+                                                  (current, method) =>
+                                                  method.Invoke(current, new object[] {current}) as
+                                                  IRegistrationBuilder
+                                                      <object, ScanningActivatorData, DynamicRegistrationStyle>);
 
             builder.Register(
                 c =>

@@ -19,6 +19,16 @@ namespace ContinuousRunner.Tests.Loading
 
     public class ScriptLoaderTests : BaseTest
     {
+        const string BasicTest =
+            @"define([], function () {
+                        describe('Foo', function () {
+                          it('Bar', function () {
+                            console.log('Test output 1');
+                            console.log('Test output 2');
+                          });
+                        })
+                      });";
+
         public ScriptLoaderTests(ITestOutputHelper helper)
             : base(helper)
         {}
@@ -44,7 +54,8 @@ namespace ContinuousRunner.Tests.Loading
 
                     // There are no dependencies in the define() statement--
                     module.References.Count().Should().Be(0);
-                });
+                },
+                BasicTest);
         }
 
         [Fact]
@@ -52,29 +63,68 @@ namespace ContinuousRunner.Tests.Loading
         {
             RunWithSimpleTest(
                 (container, script) =>
-                      {
-                          var tests = script.Suites.ToArray();
+                {
+                    var tests = script.Suites.ToArray();
 
-                          var testWriter = container.Resolve<ITestWriter>();
+                    var testWriter = container.Resolve<ITestWriter>();
 
-                          testWriter.Write(tests);
+                    testWriter.Write(tests);
 
-                          var runner = container.Resolve<IConcurrentExecutor>();
+                    var runner = container.Resolve<IConcurrentExecutor>();
 
-                          var t =
-                              runner.ExecuteAsync(
-                                  container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof (IScript), script)));
+                    var t =
+                        runner.ExecuteAsync(
+                            container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof (IScript), script),
+                                                                 new TypedParameter(typeof (string), "Test execution")));
 
-                          t.Wait();
+                    t.Wait();
 
-                          testWriter.Write(tests);
-                      },
+                    testWriter.Write(tests);
+                },
+                BasicTest,
                 result =>
                 {
                     result.Status.Should().Be(Status.Success);
 
                     // the test calls console.log, make sure we can see that output
-                    result.Logs.Count.Should().Be(1);
+                    result.Logs.Count.Should().Be(2);
+                });
+        }
+
+        [Fact]
+        public void RunJavaScriptTestThatThrowsException()
+        {
+            const string testContent =
+                @"describe('Failing test suite', function () {
+                    it('Failing test', function () {
+                      throw new Error('Failure');
+                    });
+                  });";
+
+            RunWithSimpleTest(
+                (container, script) =>
+                {
+                    var tests = script.Suites.ToArray();
+
+                    var testWriter = container.Resolve<ITestWriter>();
+
+                    testWriter.Write(tests);
+
+                    var runner = container.Resolve<IConcurrentExecutor>();
+
+                    var t =
+                        runner.ExecuteAsync(
+                            container.Resolve<ExecuteScriptWork>(new TypedParameter(typeof (IScript), script),
+                                                                 new TypedParameter(typeof (string), "Test execution")));
+
+                    t.Wait();
+
+                    testWriter.Write(tests);
+                },
+                testContent,
+                result =>
+                {
+                    result.Status.Should().Be(Status.Failed);
                 });
         }
 
@@ -94,7 +144,7 @@ namespace ContinuousRunner.Tests.Loading
             #endregion
         }
 
-        private void RunWithSimpleTest(Action<IComponentContext, IScript> f, Action<TestResult> resultHandler = null)
+        private void RunWithSimpleTest(Action<IComponentContext, IScript> f, string testScript, Action<TestResult> resultHandler = null)
         {
             var handler = new ResultHandler(resultHandler);
 
@@ -102,16 +152,7 @@ namespace ContinuousRunner.Tests.Loading
 
             using (var container = CreateTypicalContainer(MockFile.TempFile<DirectoryInfo>(), build))
             {
-                const string content =
-                    @"define([], function () {
-                        describe('Foo', function () {
-                          it('Bar', function () {
-                            console.log('Test output');
-                          });
-                        });
-                      });";
-
-                var fileInfo = container.Resolve<IMockFile>().FromString("js", content);
+                var fileInfo = container.Resolve<IMockFile>().FromString("js", testScript);
 
                 var loader = container.Resolve<ILoader<IScript>>();
 
